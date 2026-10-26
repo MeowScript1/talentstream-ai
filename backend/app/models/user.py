@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Text, Boolean, DateTime, func
-from sqlalchemy.dialects.postgresql import UUID, ENUM
+
+from sqlalchemy import Boolean, DateTime, String, Text, func
+from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import Mapped, mapped_column
+
 from app.models.base import Base
 
 role_enum = ENUM('employer', 'candidate', name='user_role_enum', create_type=False)

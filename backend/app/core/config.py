@@ -14,13 +14,12 @@ variable is missing.
 import os
 import sys
 import warnings
-from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 from pathlib import Path
 from typing import Literal
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from pydantic import computed_field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()

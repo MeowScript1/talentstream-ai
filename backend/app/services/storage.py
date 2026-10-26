@@ -1,7 +1,7 @@
-import uuid
-import os
 import asyncio
 import logging
+import uuid
+
 from fastapi import UploadFile
 
 from app.core.config import settings

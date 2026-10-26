@@ -1,13 +1,14 @@
 import uuid
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
-from app.models.interview import Interview
-from app.models.application import Application
 from app.core.dependencies import get_current_user
+from app.models.application import Application
+from app.models.interview import Interview
 from app.models.user import User
 
 router = APIRouter(prefix="/interviews", tags=["interviews"])

@@ -1,17 +1,18 @@
 import json
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
 import uuid
 from datetime import datetime
 
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from google.genai import types
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+
+from app.ai_engine.client import get_client
 from app.core.database import get_db
 from app.core.dependencies import get_user_from_token
-from app.models.interview import Interview
 from app.models.application import Application
-from google.genai import types
-from app.ai_engine.client import get_client
+from app.models.interview import Interview
 
 router = APIRouter(prefix="/ws", tags=["websockets"])
 

@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Text, Integer, ForeignKey, func, JSON, DateTime
-from sqlalchemy.dialects.postgresql import UUID, ENUM
+
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 interview_status_enum = ENUM('pending', 'in_progress', 'completed', name='interview_status_enum', create_type=False)

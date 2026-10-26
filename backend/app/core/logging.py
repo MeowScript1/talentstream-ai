@@ -7,7 +7,6 @@ log-aggregation tools (Render Log Streams, Datadog, etc.).
 import json
 import logging
 import sys
-import traceback
 from datetime import datetime, timezone
 
 

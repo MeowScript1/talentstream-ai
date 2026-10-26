@@ -1,18 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, BackgroundTasks
+import uuid
+
+import fitz  # PyMuPDF
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-import uuid
-import fitz  # PyMuPDF
 
-from app.core.database import get_db, AsyncSessionLocal
+from app.ai_engine.ats import score_resume
+from app.core.database import AsyncSessionLocal, get_db
+from app.core.dependencies import get_current_user, require_role
 from app.models.application import Application
 from app.models.job import Job
 from app.models.user import User
 from app.schemas.application import ApplicationResponse
-from app.core.dependencies import get_current_user, require_role
 from app.services.storage import upload_resume
-from app.ai_engine.ats import score_resume
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 

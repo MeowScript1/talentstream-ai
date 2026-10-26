@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Text, Integer, ForeignKey, func, DateTime
-from sqlalchemy.dialects.postgresql import UUID, ENUM, JSONB
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy.dialects.postgresql import ENUM, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 job_type_enum = ENUM('full_time', 'part_time', 'contract', 'remote', name='job_type_enum', create_type=False)

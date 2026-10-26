@@ -1,5 +1,7 @@
 import json
+
 from google.genai import types
+
 from app.ai_engine.client import get_client
 from app.core.config import settings
 

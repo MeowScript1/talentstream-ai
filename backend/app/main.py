@@ -24,7 +24,11 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.core.middleware import RateLimitMiddleware, RequestIDMiddleware, SecurityHeadersMiddleware
+from app.core.middleware import (
+    RateLimitMiddleware,
+    RequestIDMiddleware,
+    SecurityHeadersMiddleware,
+)
 from app.core.redis import close_redis, init_redis
 
 # ── Configure JSON logging before anything else ─────────────────────────────
@@ -125,9 +129,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-from app.api.routes import auth, jobs, applications, interviews, users  # noqa: E402
-from app.api.routes.health import router as health_router               # noqa: E402
-from app.api.websockets import interview                                  # noqa: E402
+from app.api.routes import applications, auth, interviews, jobs, users  # noqa: E402
+from app.api.routes.health import router as health_router  # noqa: E402
+from app.api.websockets import interview  # noqa: E402
 
 # Health endpoints at root (no /api/v1 prefix — Render probe hits /health)
 app.include_router(health_router)

@@ -1,19 +1,20 @@
 import json
+import uuid
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy import func, or_
-import uuid
 
 from app.core.database import get_db
+from app.core.dependencies import require_role
+from app.core.redis import get_redis, report_redis_failure
+from app.models.application import Application
 from app.models.job import Job
 from app.models.user import User
-from app.models.application import Application
-from app.schemas.job import JobCreate, JobUpdate, JobResponse
-from app.core.dependencies import get_current_user, require_role
-from app.core.redis import get_redis, report_redis_failure
+from app.schemas.job import JobCreate, JobResponse, JobUpdate
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 

@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class JobBase(BaseModel):
     title: str = Field(min_length=3, max_length=255)

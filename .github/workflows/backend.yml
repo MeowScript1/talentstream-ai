@@ -37,7 +37,7 @@ jobs:
       # ── Static analysis ──────────────────────────────────────────────────
       - name: Lint with ruff
         run: |
-          pip install ruff --quiet
+          pip install ruff==0.17.2 --quiet
           ruff check app/ --output-format=github
 
       # ── Config smoke test (ensures Settings can load without real secrets) ─

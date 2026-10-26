@@ -1,8 +1,17 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Text, Integer, ForeignKey, func, UniqueConstraint, DateTime
-from sqlalchemy.dialects.postgresql import UUID, ENUM
+
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    Integer,
+    Text,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.models.base import Base
 
 application_status_enum = ENUM('applied', 'screening', 'interviewing', 'shortlisted', 'rejected', 'interview_completed', 'hr_round', 'hired', name='application_status_enum', create_type=False)
