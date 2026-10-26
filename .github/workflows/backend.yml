@@ -55,14 +55,66 @@ jobs:
           print('CORS origins:', settings.CORS_ORIGINS)
           "
 
-      # ── Placeholder for pytest ───────────────────────────────────────────
-      # Add test files under backend/tests/ and uncomment this step.
-      # - name: Run tests
-      #   env:
-      #     ENVIRONMENT: development
-      #     DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test
-      #     REDIS_URL: redis://localhost:6379/0
-      #     SECRET_KEY: ci-test-secret-key
-      #   run: |
-      #     pip install pytest pytest-asyncio --quiet
-      #     pytest tests/ -v
+  # Starts the real API against a throwaway Postgres and runs the tests that behave like real users
+  # (double-clicks, messy input, other people's IDs, password guessing, hostile resumes).
+  integration-tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test
+      SECRET_KEY: ci-integration-secret-not-real
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Create the database schema
+        run: alembic upgrade head
+
+      - name: Start the API
+        run: |
+          nohup uvicorn app.main:app --port 8000 > uvicorn.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8000/health && exit 0
+            sleep 1
+          done
+          echo "API did not start"; cat uvicorn.log; exit 1
+
+      - name: Run the tests
+        run: pytest -v
+
+      - name: Show API log if the tests failed
+        if: failure()
+        run: tail -n 80 uvicorn.log
