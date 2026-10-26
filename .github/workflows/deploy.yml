@@ -1,8 +1,8 @@
 name: Deploy
 
 on:
-  push:
-    branches: [main]
+  # Manual only until this repo has its own Render service and secrets
+  workflow_dispatch:
 
 # Cancel any in-progress deploy if a new commit arrives
 concurrency:
