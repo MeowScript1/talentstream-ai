@@ -59,6 +59,16 @@ class Settings(BaseSettings):
     SUPABASE_STORAGE_BUCKET: str = "resumes"
     SUPABASE_STORAGE_BUCKET_PUBLIC: bool = False
 
+    # ── Job feed (jobs collected from other platforms' official APIs) ───────
+    JOB_SOURCES: str = "remotive,remoteok,adzuna"   # adzuna needs the two keys below
+    ADZUNA_APP_ID: str = ""
+    ADZUNA_APP_KEY: str = ""
+    ADZUNA_COUNTRY: str = "in"
+    FEED_TIMEZONE: str = "Asia/Kolkata"             # decides what "the next 7 days" means for walk-ins
+    FEED_REFRESH_HOURS: int = 6                     # per source; Remotive asks for at most ~4 calls a day
+    FEED_MAX_REPORTS: int = 3                       # reports that hide a job
+    INGEST_TOKEN: str = ""                          # lets you force a refresh via POST /feed/refresh
+
     # ── App behaviour ───────────────────────────────────────────────────────
     ATS_SCORE_THRESHOLD: int = 65
     FRONTEND_URL: str = "http://localhost:5173"  # override in prod

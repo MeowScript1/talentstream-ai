@@ -83,6 +83,7 @@ jobs:
       ENVIRONMENT: development
       DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test
       SECRET_KEY: ci-integration-secret-not-real
+      JOB_SOURCES: ""  # tests use saved sample data; never call the real job APIs from CI
 
     steps:
       - name: Checkout
