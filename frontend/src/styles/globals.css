@@ -34,6 +34,8 @@
 
   html {
     color-scheme: dark;
+    /* Everything is sized in rem, so this one value scales the whole interface (default is 16px) */
+    font-size: 15px;
     -webkit-text-size-adjust: 100%;
     /* no double-tap-to-zoom delay on buttons and links */
     touch-action: manipulation;
@@ -125,6 +127,12 @@
   .sticker {
     @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold;
     transform: rotate(-2deg);
+  }
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 14px;
   }
 }
 

@@ -41,7 +41,7 @@ export function AuthShell({ headline, subline, children }: AuthShellProps) {
         ))}
 
         <div className="relative z-10 max-w-lg">
-          <h1 className="font-display text-6xl font-extrabold leading-[1.02] tracking-tight xl:text-7xl">
+          <h1 className="font-display text-5xl font-extrabold leading-[1.05] tracking-tight xl:text-6xl">
             {headline}
           </h1>
           <p className="mt-6 max-w-md text-lg text-text-secondary">{subline}</p>

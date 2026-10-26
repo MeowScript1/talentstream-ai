@@ -49,7 +49,7 @@ export default function Login() {
     >
       <Card className="w-full p-8 shadow-glow-violet">
         <div className="mb-8">
-          <h2 className="text-3xl font-extrabold text-text-primary">Welcome back 👋</h2>
+          <h2 className="text-2xl font-extrabold text-text-primary">Welcome back 👋</h2>
           <p className="mt-2 text-sm text-text-secondary">Log in and let's get you hired.</p>
         </div>
 

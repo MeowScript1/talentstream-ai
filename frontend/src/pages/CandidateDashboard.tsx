@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useJobStore } from '@/store/jobStore';
 import { useApplicationStore } from '@/store/applicationStore';
-import { useAuthStore } from '@/store/authStore';
 import { JobFeedCard } from '@/components/candidate/JobFeedCard';
 import { ApplyModal } from '@/components/candidate/ApplyModal';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Input } from '@/components/ui/Input';
-import { Search, BriefcaseBusiness, Clock, CheckCircle2, RefreshCw, Loader2, FileText, ArrowRight } from 'lucide-react';
+import { Search, BriefcaseBusiness, Clock, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Job } from '@/types/job';
 import { ApplicationStatus } from '@/components/candidate/JobFeedCard';
@@ -18,7 +17,6 @@ export default function CandidateDashboard() {
   const { jobs, isLoading: jobsLoading, isSearching, fetchJobs, searchJobs } = useJobStore();
   const { myApplications, fetchMyApplications } = useApplicationStore();
   const navigate = useNavigate();
-  const user = useAuthStore((s) => s.user);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -101,26 +99,9 @@ export default function CandidateDashboard() {
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
       <div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Find your next <span className="text-gradient">gig</span> ✨</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Find your next <span className="text-gradient">gig</span> ✨</h1>
         <p className="text-text-secondary mt-1">AI matches you with roles that actually fit. No doomscrolling job boards.</p>
       </div>
-
-      {/* Prompt to save a resume (shown until they do) */}
-      {user && !user.resume_filename && (
-        <Link
-          to="/profile#resume"
-          className="group flex items-center gap-4 rounded-3xl border border-accent-primary/30 bg-accent-muted p-4 transition-all hover:border-accent-primary/60 hover:shadow-glow"
-        >
-          <div className="flex h-11 w-11 flex-shrink-0 -rotate-6 items-center justify-center rounded-2xl bg-accent-primary text-bg-base">
-            <FileText className="h-5 w-5" strokeWidth={2.5} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold text-text-primary">Add your resume once, apply in one click</p>
-            <p className="text-xs text-text-secondary">Save a PDF on your profile and skip the upload on every job.</p>
-          </div>
-          <ArrowRight className="h-5 w-5 flex-shrink-0 text-accent-primary transition-transform group-hover:translate-x-1" />
-        </Link>
-      )}
 
       {/* Stats row */}
       {myApplications.length > 0 && (
@@ -135,7 +116,7 @@ export default function CandidateDashboard() {
                 <stat.icon className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <div className="font-display text-3xl font-extrabold text-text-primary leading-none">{stat.value}</div>
+                <div className="font-display text-2xl font-extrabold text-text-primary leading-none">{stat.value}</div>
                 <div className="truncate text-xs text-text-secondary">{stat.label}</div>
               </div>
             </div>
@@ -147,7 +128,7 @@ export default function CandidateDashboard() {
       <div className="relative">
         <Search className="pointer-events-none absolute left-5 top-1/2 z-10 -translate-y-1/2 h-5 w-5 text-text-secondary" />
         <Input 
-          className="pl-12 pr-12 h-14 text-base rounded-full shadow-card bg-bg-surface/80 backdrop-blur-xl"
+          className="pl-12 pr-12 h-12 text-base rounded-full shadow-card bg-bg-surface/80 backdrop-blur-xl"
           placeholder="Search roles, companies, vibes…"
           value={searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}

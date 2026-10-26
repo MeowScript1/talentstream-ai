@@ -28,7 +28,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const sizes = {
       sm: 'h-11 px-4 text-xs md:h-9',
       md: 'h-12 px-6 py-2.5 text-sm md:h-11',
-      lg: 'h-14 px-9 text-base',
+      lg: 'h-12 px-8 text-base',
       icon: 'h-11 w-11 p-0 md:h-9 md:w-9',
     };
 

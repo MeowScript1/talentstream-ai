@@ -119,7 +119,7 @@ export default function Settings() {
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Settings</h1>
         <p className="text-text-secondary mt-1">Manage your account, company profile and preferences.</p>
       </motion.div>
 

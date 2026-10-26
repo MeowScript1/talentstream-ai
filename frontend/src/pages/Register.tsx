@@ -101,7 +101,7 @@ export default function Register() {
     >
       <Card className="w-full p-8 shadow-glow-violet">
           <div className="mb-6">
-            <h2 className="text-3xl font-extrabold text-text-primary">Join the club 🎟️</h2>
+            <h2 className="text-2xl font-extrabold text-text-primary">Join the club 🎟️</h2>
             <p className="mt-2 text-sm text-text-secondary">Takes under a minute. Free forever for candidates.</p>
           </div>
 

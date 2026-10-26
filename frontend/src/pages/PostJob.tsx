@@ -83,7 +83,7 @@ export default function PostJob() {
           <ChevronRight className="h-3.5 w-3.5" />
           <span className="text-text-primary">Post a Job</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Post a New Position</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Post a New Position</h1>
         <p className="text-text-secondary">
           Fill in the details below — our AI will use these to screen and match candidates automatically.
         </p>

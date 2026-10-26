@@ -23,7 +23,7 @@ export default function RecruiterDashboard() {
     <div className="space-y-8">
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Hey {firstName} <span className="inline-block origin-[70%_70%] animate-wiggle">👋</span></h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Hey {firstName} <span className="inline-block origin-[70%_70%] animate-wiggle">👋</span></h1>
           <p className="text-text-secondary mt-1">Here's what's happening with your hiring today.</p>
         </div>
         <PostJobModal />
@@ -37,7 +37,7 @@ export default function RecruiterDashboard() {
         ].map((stat, i) => (
           <div key={i} className={`relative min-w-0 overflow-hidden rounded-3xl border border-white/[0.07] bg-bg-surface/80 p-3 sm:p-6 shadow-card backdrop-blur-xl transition-all hover:-translate-y-1 ${stat.glow}`}>
             <span className="absolute right-5 top-5 hidden text-2xl sm:block">{stat.emoji}</span>
-            <div className={`font-display text-4xl sm:text-6xl font-extrabold leading-none mb-2 sm:mb-3 ${stat.color}`}>{stat.value}</div>
+            <div className={`font-display text-3xl sm:text-5xl font-extrabold leading-none mb-2 sm:mb-3 ${stat.color}`}>{stat.value}</div>
             <div className="truncate text-xs sm:text-sm font-bold text-text-primary">{stat.label}</div>
             <div className="hidden text-xs text-text-muted mt-0.5 sm:block">{stat.sub}</div>
           </div>

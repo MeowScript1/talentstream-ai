@@ -126,7 +126,7 @@ export default function Applicants() {
     <div className="space-y-8 max-w-5xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Applicants</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Applicants</h1>
         <p className="text-text-secondary mt-1">Review and manage candidates across your job postings.</p>
       </div>
 
