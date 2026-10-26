@@ -26,6 +26,9 @@ export default function InterviewRoom() {
   const [cameraEnabled, setCameraEnabled] = useState(true);
   
   const wsRef = useRef<WebSocketService | null>(null);
+  // Mirrors isCompleted for the socket callbacks without making it an effect dependency:
+  // otherwise finishing the interview re-runs the effect and reconnects to a finished interview.
+  const isCompletedRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export default function InterviewRoom() {
       } else if (data.type === 'system') {
         toast(data.text, { icon: 'ℹ️' });
         if (data.text.includes('completed')) {
+          isCompletedRef.current = true;
           setIsCompleted(true);
         }
       } else if (data.type === 'error') {
@@ -48,18 +52,19 @@ export default function InterviewRoom() {
       }
     });
 
+    ws.onOpen(() => setIsConnected(true));
+
     ws.onDisconnect(() => {
       setIsConnected(false);
-      if (!isCompleted) toast.error('Disconnected from interview server');
+      if (!isCompletedRef.current) toast.error('Disconnected from interview server');
     });
 
     ws.connect(token);
-    setIsConnected(true);
 
     return () => {
       ws.disconnect();
     };
-  }, [applicationId, token, isCompleted]);
+  }, [applicationId, token]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
