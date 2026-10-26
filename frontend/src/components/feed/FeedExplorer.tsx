@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Briefcase, Loader2, MapPin, Search, ShieldAlert, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -202,12 +203,17 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
               <p className="mt-3 font-bold text-text-primary">No walk-in drives in the next 7 days</p>
               <p className="mx-auto mt-1 max-w-md text-sm text-text-secondary">
                 {hasIndiaSource
-                  ? 'We scan listings for walk-in drives and show the ones happening this week. Check back soon, or try a different city.'
-                  : 'Walk-in drives come from India job sources, which are not connected yet. Meanwhile, browse jobs you can apply for online.'}
+                  ? 'We scan job listings and employer posts for walk-in drives happening this week. Check back soon, or try a different city.'
+                  : 'Walk-in drives posted by employers on TalentStream show up here for the 7 days before they happen. None are scheduled yet.'}
               </p>
-              <Button className="mt-4" size="sm" variant="ghost" onClick={() => setKind('apply')}>
-                See jobs to apply online
-              </Button>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <Button size="sm" variant="ghost" onClick={() => setKind('apply')}>
+                  See jobs to apply online
+                </Button>
+                <Link to="/jobs/new" className="px-2 py-3 text-xs font-bold text-accent-primary hover:underline md:py-1">
+                  Hiring? Post a walk-in drive
+                </Link>
+              </div>
             </>
           ) : (
             <>

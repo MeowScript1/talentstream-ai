@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Flag, Globe, MapPin, Wallet } from 'lucide-react';
+import { CalendarPlus, ExternalLink, Flag, Globe, MapPin, Navigation, Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
+import { downloadWalkinCalendar } from '@/lib/calendar';
 import { describeWalkinDate, timeAgo } from '@/lib/dates';
 import { getApiError } from '@/lib/utils';
 import { reportFeedJob } from '@/services/feed';
@@ -19,6 +20,7 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
   const user = useAuthStore((s) => s.user);
   const [reported, setReported] = useState(false);
   const walkin = job.kind === 'walkin' && job.walkin_date ? describeWalkinDate(job.walkin_date) : null;
+  const lastDay = job.walkin_end_date ? describeWalkinDate(job.walkin_end_date) : null;
 
   const handleReport = async () => {
     if (!confirm('Report this job as fake or misleading? Enough reports hide it for everyone.')) return;
@@ -70,13 +72,24 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
                 <Wallet className="h-3 w-3" /> {job.salary_text}
               </span>
             )}
-            <span className="rounded-full border border-white/10 px-2 py-0.5 text-text-muted">via {job.source_label}</span>
+            {job.native ? (
+              <span className="rounded-full border border-accent-primary/40 bg-accent-muted px-2 py-0.5 font-bold text-accent-primary">
+                Posted on TalentStream
+              </span>
+            ) : (
+              <span className="rounded-full border border-white/10 px-2 py-0.5 text-text-muted">via {job.source_label}</span>
+            )}
           </div>
         </div>
       </div>
 
-      {walkin && (job.walkin_time || job.venue) && (
+      {walkin && (job.walkin_time || job.venue || job.notes) && (
         <div className="mt-3 rounded-2xl border border-accent-primary/30 bg-accent-muted p-3 text-sm">
+          {lastDay && (
+            <p className="text-text-primary">
+              <span className="font-bold">Runs until:</span> {lastDay.weekday} {lastDay.day} {lastDay.month}
+            </p>
+          )}
           {job.walkin_time && (
             <p className="text-text-primary">
               <span className="font-bold">Time:</span> {job.walkin_time}
@@ -85,6 +98,11 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
           {job.venue && (
             <p className="text-text-primary">
               <span className="font-bold">Venue:</span> {job.venue}
+            </p>
+          )}
+          {job.notes && (
+            <p className="text-text-primary">
+              <span className="font-bold">Bring / ask for:</span> {job.notes}
             </p>
           )}
         </div>
@@ -105,7 +123,7 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
       <div className="mt-4 flex flex-wrap items-start justify-between gap-3 border-t border-white/[0.07] pt-3">
         <TrustBadge label={job.trust_label} score={job.trust_score} reasons={job.trust_reasons} />
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 [&_button]:whitespace-nowrap">
           {user ? (
             <button
               type="button"
@@ -120,7 +138,21 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
               Log in to report
             </Link>
           )}
-          {/* A normal followed link to the source, as the sources' terms require */}
+          {job.native ? (
+            <>
+              {job.walkin_start_time && (
+                <Button type="button" size="sm" variant="ghost" className="gap-1.5" onClick={() => downloadWalkinCalendar(job)}>
+                  <CalendarPlus className="h-3.5 w-3.5" /> Add to calendar
+                </Button>
+              )}
+              <a href={job.url} target="_blank" rel="noopener noreferrer">
+                <Button type="button" size="sm" className="gap-1.5">
+                  <Navigation className="h-3.5 w-3.5" /> Get directions
+                </Button>
+              </a>
+            </>
+          ) : (
+          // A normal followed link to the source, as the sources' terms require
           <a href={job.url} target="_blank" rel="noopener noreferrer">
             {job.trust_label === 'likely_scam' ? (
               // Don't invite people to apply to something that looks fake
@@ -133,6 +165,7 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
               </Button>
             )}
           </a>
+          )}
         </div>
       </div>
     </article>

@@ -22,7 +22,12 @@ export interface FeedJob {
   posted_at: string | null;
   kind: FeedKind;
   walkin_date: string | null;
+  walkin_end_date?: string | null;
   walkin_time: string | null;
+  walkin_start_time?: string | null;
+  walkin_end_time?: string | null;
+  notes?: string | null;
+  native?: boolean;
   venue: string | null;
   trust_score: number;
   trust_label: TrustLabel;

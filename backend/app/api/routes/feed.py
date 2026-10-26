@@ -56,6 +56,8 @@ class FeedJobOut(BaseModel):
     walkin_date: str | None
     walkin_end_date: str | None = None
     walkin_time: str | None
+    walkin_start_time: str | None = None  # 24h HH:MM, for calendar files (posted drives only)
+    walkin_end_time: str | None = None
     notes: str | None = None
     native: bool = False  # posted directly on TalentStream (not collected from another platform)
     venue: str | None
@@ -171,6 +173,8 @@ def _native_out(job: Job, today) -> FeedJobOut:
         walkin_date=first.isoformat(),
         walkin_end_date=job.walkin_end_date.isoformat() if job.walkin_end_date and job.walkin_end_date > first else None,
         walkin_time=times,
+        walkin_start_time=job.walkin_start_time.strftime("%H:%M") if job.walkin_start_time else None,
+        walkin_end_time=job.walkin_end_time.strftime("%H:%M") if job.walkin_end_time else None,
         venue=venue,
         notes=notes or None,
         native=True,

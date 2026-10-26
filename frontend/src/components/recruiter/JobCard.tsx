@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Clock, Users } from 'lucide-react';
+import { MapPin, Clock, Users, Footprints } from 'lucide-react';
 import { Job } from '@/types/job';
 import { useJobStore } from '@/store/jobStore';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ApplicantList } from '@/components/recruiter/ApplicantList';
+import { describeWalkinDate } from '@/lib/dates';
 import { Modal, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Modal';
 import toast from 'react-hot-toast';
 
@@ -16,6 +17,11 @@ export function JobCard({ job }: { job: Job }) {
   const navigate = useNavigate();
   const [isClosing, setIsClosing] = useState(false);
   const [showApplicants, setShowApplicants] = useState(false);
+
+  const isWalkin = job.kind === 'walkin' && !!job.walkin_date;
+  const drive = isWalkin ? describeWalkinDate(job.walkin_date as string) : null;
+  const lastDay = job.walkin_end_date || job.walkin_date;
+  const ended = isWalkin && !!lastDay && new Date(`${lastDay}T23:59:59`) < new Date();
 
   const handleClose = async () => {
     if (!confirm('Are you sure you want to close this job?')) return;
@@ -82,20 +88,38 @@ export function JobCard({ job }: { job: Job }) {
             )}
           </div>
 
+          {isWalkin && drive && (
+            <div className="mb-4 rounded-2xl border border-accent-primary/30 bg-accent-muted p-3 text-sm">
+              <p className="flex items-center gap-1.5 font-bold text-text-primary">
+                <Footprints className="h-4 w-4 text-accent-primary" />
+                Walk-in · {drive.weekday} {drive.day} {drive.month}
+                {job.walkin_end_date && job.walkin_end_date !== job.walkin_date && ` – ${describeWalkinDate(job.walkin_end_date).day} ${describeWalkinDate(job.walkin_end_date).month}`}
+                {job.walkin_start_time && `, ${job.walkin_start_time.slice(0, 5)}`}
+                {job.walkin_end_time && `–${job.walkin_end_time.slice(0, 5)}`}
+                {ended && <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-text-muted">Ended</span>}
+              </p>
+              {job.venue && <p className="mt-1 text-text-secondary">{job.venue}</p>}
+            </div>
+          )}
+
           <div className="mt-auto pt-4 border-t border-border-subtle flex justify-between items-center">
             <div className="text-sm text-text-secondary truncate pr-4">
               {job.requirements.slice(0, 3).join(', ')}
               {job.requirements.length > 3 && ` +${job.requirements.length - 3} more`}
             </div>
-            <Button 
-              size="sm" 
-              variant="ghost"
-              onClick={() => setShowApplicants(true)}
-              className="flex items-center gap-1.5"
-            >
-              <Users className="h-3.5 w-3.5" />
-              View Applicants
-            </Button>
+            {isWalkin ? (
+              <span className="flex-shrink-0 text-xs text-text-muted">No applications: candidates turn up</span>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowApplicants(true)}
+                className="flex items-center gap-1.5"
+              >
+                <Users className="h-3.5 w-3.5" />
+                View Applicants
+              </Button>
+            )}
           </div>
         </Card>
       </motion.div>

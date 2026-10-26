@@ -115,6 +115,7 @@ def test_a_posted_walkin_shows_up_in_the_walkin_tab(post):
     assert j["native"] is True and j["source_label"] == "TalentStream" and j["kind"] == "walkin"
     assert j["walkin_date"] == (local_today() + timedelta(days=2)).isoformat()
     assert j["walkin_time"] == "10:00 AM – 4:00 PM"
+    assert j["walkin_start_time"] == "10:00" and j["walkin_end_time"] == "16:00"
     assert "Hitech City" in j["venue"] and "photo ID" in j["notes"]
     assert j["url"].startswith("https://www.google.com/maps/search/") and "Hitech" in j["url"]
     assert j["trust_label"] in ("looks_good", "be_careful") and j["trust_reasons"]
