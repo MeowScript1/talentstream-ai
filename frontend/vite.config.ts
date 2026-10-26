@@ -13,14 +13,12 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      // Single entry with ws enabled: '/api' would otherwise match before a
+      // more specific '/api/v1/ws' entry and websocket upgrades wouldn't be proxied.
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
-      },
-      '/api/v1/ws': {
-        target: 'ws://localhost:8000',
         ws: true,
-        changeOrigin: true,
       },
     },
   },

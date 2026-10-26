@@ -100,10 +100,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # Lazy import to avoid circular dependency; redis is initialised by lifespan
-        from app.core.redis import redis_client  # noqa: PLC0415
+        from app.core import redis as redis_module  # noqa: PLC0415
 
-        if redis_client is None:
-            # Redis not ready yet — allow the request through
+        redis_client = redis_module.redis_client
+        if redis_client is None or redis_module.redis_in_cooldown():
+            # Redis not ready or recently failing — allow the request through
             return await call_next(request)
 
         ip = self._get_client_ip(request)
@@ -111,6 +112,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         window_start = now - self.window_seconds
         key = f"rate_limit:{ip}"
 
+        # Only the Redis calls sit inside the try. call_next must stay outside it,
+        # otherwise an error raised by the endpoint would be mistaken for a Redis
+        # failure and the request would be executed a second time.
         try:
             pipe = redis_client.pipeline()
             # Remove counts outside the window
@@ -122,35 +126,34 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Reset TTL
             await pipe.expire(key, self.window_seconds * 2)
             results = await pipe.execute()
-
             request_count: int = results[1]
-
-            if request_count >= self.max_requests:
-                logger.warning(
-                    "Rate limit exceeded",
-                    extra={"ip": ip, "count": request_count, "limit": self.max_requests},
-                )
-                return JSONResponse(
-                    status_code=429,
-                    content={
-                        "detail": "Too many requests. Please slow down.",
-                        "retry_after": self.window_seconds,
-                    },
-                    headers={
-                        "Retry-After": str(self.window_seconds),
-                        "X-RateLimit-Limit": str(self.max_requests),
-                        "X-RateLimit-Remaining": "0",
-                        "X-RateLimit-Reset": str(now + self.window_seconds),
-                    },
-                )
-
-            response = await call_next(request)
-            remaining = max(0, self.max_requests - request_count - 1)
-            response.headers["X-RateLimit-Limit"] = str(self.max_requests)
-            response.headers["X-RateLimit-Remaining"] = str(remaining)
-            response.headers["X-RateLimit-Reset"] = str(now + self.window_seconds)
-            return response
-
         except Exception:  # Redis failure — fail open (don't block traffic)
+            redis_module.report_redis_failure()
             logger.warning("Rate limiter redis error — allowing request through", exc_info=True)
             return await call_next(request)
+
+        if request_count >= self.max_requests:
+            logger.warning(
+                "Rate limit exceeded",
+                extra={"ip": ip, "count": request_count, "limit": self.max_requests},
+            )
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "detail": "Too many requests. Please slow down.",
+                    "retry_after": self.window_seconds,
+                },
+                headers={
+                    "Retry-After": str(self.window_seconds),
+                    "X-RateLimit-Limit": str(self.max_requests),
+                    "X-RateLimit-Remaining": "0",
+                    "X-RateLimit-Reset": str(now + self.window_seconds),
+                },
+            )
+
+        response = await call_next(request)
+        remaining = max(0, self.max_requests - request_count - 1)
+        response.headers["X-RateLimit-Limit"] = str(self.max_requests)
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        response.headers["X-RateLimit-Reset"] = str(now + self.window_seconds)
+        return response

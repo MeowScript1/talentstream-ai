@@ -40,8 +40,8 @@ UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting up — environment=%s", settings.ENVIRONMENT)
-    await init_redis()
-    logger.info("Redis connected")
+    if await init_redis():
+        logger.info("Redis connected")
     yield
     logger.info("Shutting down")
     await close_redis()

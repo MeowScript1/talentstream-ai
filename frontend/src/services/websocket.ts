@@ -1,3 +1,13 @@
+/**
+ * Build a ws(s):// URL for a backend path from the same base the REST client uses,
+ * so it works behind the Vite proxy in dev and against VITE_API_URL in production.
+ */
+export function buildWsUrl(path: string): string {
+  const base = new URL(import.meta.env.VITE_API_URL ?? '/api/v1', window.location.origin);
+  base.protocol = base.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${base.origin}${base.pathname.replace(/\/$/, '')}${path}`;
+}
+
 export class WebSocketService {
   private ws: WebSocket | null = null;
   private url: string;
@@ -13,7 +23,7 @@ export class WebSocketService {
   connect(token: string) {
     if (this.ws?.readyState === WebSocket.OPEN) return;
 
-    this.ws = new WebSocket(`${this.url}?token=${token}`);
+    this.ws = new WebSocket(`${this.url}?token=${encodeURIComponent(token)}`);
 
     this.ws.onmessage = (event) => {
       try {

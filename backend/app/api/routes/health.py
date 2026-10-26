@@ -3,7 +3,7 @@ Health, readiness, and liveness endpoints.
 
   GET /health  — basic liveness (always 200 while the process runs)
   GET /live    — alias for /health (Kubernetes/Render liveness probe)
-  GET /ready   — deep readiness: checks PostgreSQL + Redis + Supabase URL
+  GET /ready   — deep readiness: PostgreSQL + Supabase URL must pass; Redis is reported but optional
 """
 
 import logging
@@ -56,6 +56,8 @@ async def readiness() -> JSONResponse:
     # ------------------------------------------------------------------
     # Redis
     # ------------------------------------------------------------------
+    # Redis only backs the job-list cache and rate limiter, and the app fails
+    # open without it, so an outage is reported but does not fail readiness.
     try:
         from app.core.redis import redis_client  # noqa: PLC0415
 
@@ -64,9 +66,8 @@ async def readiness() -> JSONResponse:
         await redis_client.ping()
         checks["redis"] = "ok"
     except Exception as exc:
-        logger.error("Readiness: redis check failed", exc_info=exc)
-        checks["redis"] = f"error: {type(exc).__name__}"
-        healthy = False
+        logger.warning("Readiness: redis unavailable (optional): %s", type(exc).__name__)
+        checks["redis"] = f"unavailable (optional): {type(exc).__name__}"
 
     # ------------------------------------------------------------------
     # Supabase URL reachable

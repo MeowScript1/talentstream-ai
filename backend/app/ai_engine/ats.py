@@ -1,10 +1,7 @@
 import json
-from google import genai
 from google.genai import types
+from app.ai_engine.client import get_client
 from app.core.config import settings
-
-# Initialize the client with the API key
-client = genai.Client(api_key=settings.GOOGLE_API_KEY)
 
 MODEL_ID = 'gemini-2.5-flash-lite'
 
@@ -60,7 +57,7 @@ async def score_resume(resume_text: str, job_title: str, job_description: str, r
     )
     
     try:
-        response = await client.aio.models.generate_content(
+        response = await get_client().aio.models.generate_content(
             model=MODEL_ID,
             contents=prompt,
             config=types.GenerateContentConfig(

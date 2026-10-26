@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import { WebSocketService } from '@/services/websocket';
+import { WebSocketService, buildWsUrl } from '@/services/websocket';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Send, Mic, Video, VideoOff, MicOff, Bot, User } from 'lucide-react';
@@ -31,7 +31,7 @@ export default function InterviewRoom() {
   useEffect(() => {
     if (!applicationId || !token) return;
 
-    const wsUrl = `ws://localhost:8000/api/v1/ws/interview/${applicationId}`;
+    const wsUrl = buildWsUrl(`/ws/interview/${applicationId}`);
     const ws = new WebSocketService(wsUrl);
     wsRef.current = ws;
 

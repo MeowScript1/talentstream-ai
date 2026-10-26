@@ -7,16 +7,14 @@ import uuid
 from datetime import datetime
 
 from app.core.database import get_db
+from app.core.dependencies import get_user_from_token
 from app.models.interview import Interview
 from app.models.application import Application
-from app.core.config import settings
-from google import genai
 from google.genai import types
+from app.ai_engine.client import get_client
 
 router = APIRouter(prefix="/ws", tags=["websockets"])
 
-# Initialize the client
-client = genai.Client(api_key=settings.GOOGLE_API_KEY)
 MODEL_ID = 'gemini-2.5-flash-lite'
 
 SYSTEM_PROMPT = """
@@ -35,26 +33,29 @@ active_connections = {}
 
 @router.websocket("/interview/{application_id}")
 async def websocket_endpoint(websocket: WebSocket, application_id: uuid.UUID, token: str, db: AsyncSession = Depends(get_db)):
-    # In a real app, validate token here and ensure user owns the application
-    
-    await websocket.accept()
-    
-    query = select(Interview).where(Interview.application_id == application_id).options(
-        selectinload(Interview.application).selectinload(Application.job)
+    # Authenticate and authorize before accepting, so a rejected client only
+    # sees a failed handshake. Missing application and someone else's
+    # application get the same answer to avoid leaking which IDs exist.
+    user = await get_user_from_token(token, db)
+    if user is None:
+        await websocket.close(code=1008, reason="Invalid or expired token")
+        return
+
+    res_app = await db.execute(
+        select(Application).where(Application.id == application_id).options(selectinload(Application.job))
     )
-    result = await db.execute(query)
+    app_ref = res_app.scalar_one_or_none()
+    if app_ref is None or app_ref.candidate_id != user.id:
+        await websocket.close(code=1008, reason="Not authorized for this interview")
+        return
+
+    await websocket.accept()
+
+    result = await db.execute(select(Interview).where(Interview.application_id == application_id))
     interview = result.scalar_one_or_none()
-    
+
     if not interview:
         # Create interview record if it doesn't exist
-        query_app = select(Application).where(Application.id == application_id).options(selectinload(Application.job))
-        res_app = await db.execute(query_app)
-        app = res_app.scalar_one_or_none()
-        
-        if not app:
-            await websocket.close(code=1008, reason="Application not found")
-            return
-            
         interview = Interview(
             application_id=application_id,
             status='in_progress',
@@ -70,22 +71,20 @@ async def websocket_endpoint(websocket: WebSocket, application_id: uuid.UUID, to
         return
 
     # Initialize chat with system prompt
-    app_ref = interview.application
     sys_prompt = SYSTEM_PROMPT.format(
         job_title=app_ref.job.title,
         resume_summary=app_ref.ats_summary or "No summary available."
     )
     
-    # Create an async chat session with the new SDK
-    chat = client.aio.chats.create(
-        model=MODEL_ID,
-        config=types.GenerateContentConfig(
-            system_instruction=sys_prompt,
-        )
-    )
-    
     # Send initial prompt to get the AI's first greeting
     try:
+        # Create an async chat session with the new SDK
+        chat = get_client().aio.chats.create(
+            model=MODEL_ID,
+            config=types.GenerateContentConfig(
+                system_instruction=sys_prompt,
+            )
+        )
         initial_response = await chat.send_message(
             "Start the interview by greeting the candidate and asking the first question."
         )

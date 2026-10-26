@@ -13,12 +13,14 @@ from app.models.user import User
 from app.models.application import Application
 from app.schemas.job import JobCreate, JobUpdate, JobResponse
 from app.core.dependencies import get_current_user, require_role
-from app.core.redis import get_redis
+from app.core.redis import get_redis, report_redis_failure
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 async def _invalidate_jobs_cache(redis_client):
     """Delete all cached job listing keys using SCAN to avoid missing any."""
+    if redis_client is None:
+        return
     try:
         cursor = 0
         while True:
@@ -28,8 +30,8 @@ async def _invalidate_jobs_cache(redis_client):
             if cursor == 0:
                 break
     except Exception:
-        # If Redis is unavailable, silently continue — the DB is the source of truth
-        pass
+        # If Redis is unavailable, continue — the DB is the source of truth
+        report_redis_failure()
 
 @router.post("", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
 async def create_job(
@@ -61,13 +63,14 @@ async def list_jobs(
 ):
     # Only use cache for unfiltered queries
     cache_key = f"jobs:open:page:{page}:limit:{limit}"
-    if not search and not job_type:
+    use_cache = redis_client is not None and not search and not job_type
+    if use_cache:
         try:
             cached = await redis_client.get(cache_key)
             if cached:
                 return json.loads(cached)
         except Exception:
-            pass
+            report_redis_failure()
         
     offset = (page - 1) * limit
     query = select(Job).where(Job.status == 'open').options(selectinload(Job.employer))
@@ -100,11 +103,11 @@ async def list_jobs(
         response_data.append(j.model_dump(mode='json'))
     
     # Only cache unfiltered results, with a short TTL
-    if not search and not job_type:
+    if use_cache:
         try:
             await redis_client.setex(cache_key, 10, json.dumps(response_data))
         except Exception:
-            pass
+            report_redis_failure()
     return response_data
 
 @router.get("/mine", response_model=List[JobResponse])

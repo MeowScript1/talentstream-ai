@@ -11,26 +11,30 @@ from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+async def get_user_from_token(token: str, db: AsyncSession) -> User | None:
+    """Resolve a JWT to its user, or None if the token is invalid, expired or the user is gone.
+
+    Shared by the REST dependency and the websocket handler (which cannot use
+    OAuth2PasswordBearer because browsers can't set headers on a WebSocket).
+    """
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: str = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
-        
-    query = select(User).where(User.id == uuid.UUID(user_id))
-    result = await db.execute(query)
-    user = result.scalar_one_or_none()
-    
+        user_id = uuid.UUID(payload.get("sub"))
+    except (JWTError, ValueError, TypeError):
+        return None
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User:
+    user = await get_user_from_token(token, db)
     if user is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return user
 
 def require_role(role: str):
