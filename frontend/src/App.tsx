@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import Login from '@/pages/Login';
@@ -30,40 +30,40 @@ function App() {
   }, [hydrate]);
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
-      >
-        <Routes location={location}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          <Route element={<ProtectedRoute><PageLayout /></ProtectedRoute>}>
-            {/* Shared */}
-            <Route path="/dashboard/recruiter" element={<RecruiterDashboard />} />
-            <Route path="/dashboard/candidate" element={<CandidateDashboard />} />
-            <Route path="/applicant/:id" element={<ApplicantDetail />} />
-            <Route path="/interview/:id" element={<InterviewRoom />} />
+    // Pages fade in on every route change. There is deliberately no exit animation / AnimatePresence:
+    // it kept the previous page mounted while fading out, and a protected page that was redirecting
+    // (e.g. an expired session) then re-fired its redirect in a loop and the login page never rendered.
+    <motion.div
+      key={location.pathname}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+    >
+      <Routes location={location}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
+        <Route element={<ProtectedRoute><PageLayout /></ProtectedRoute>}>
+          {/* Shared */}
+          <Route path="/dashboard/recruiter" element={<RecruiterDashboard />} />
+          <Route path="/dashboard/candidate" element={<CandidateDashboard />} />
+          <Route path="/applicant/:id" element={<ApplicantDetail />} />
+          <Route path="/interview/:id" element={<InterviewRoom />} />
 
-            {/* Employer */}
-            <Route path="/jobs/new" element={<PostJob />} />
-            <Route path="/applicants" element={<Applicants />} />
-            <Route path="/settings" element={<Settings />} />
+          {/* Employer */}
+          <Route path="/jobs/new" element={<PostJob />} />
+          <Route path="/applicants" element={<Applicants />} />
+          <Route path="/settings" element={<Settings />} />
 
-            {/* Candidate */}
-            <Route path="/applications" element={<MyApplications />} />
-            <Route path="/interview" element={<InterviewLanding />} />
-            <Route path="/profile" element={<Profile />} />
+          {/* Candidate */}
+          <Route path="/applications" element={<MyApplications />} />
+          <Route path="/interview" element={<InterviewLanding />} />
+          <Route path="/profile" element={<Profile />} />
 
-            <Route path="/" element={<Navigate to="/login" replace />} />
-          </Route>
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Route>
+      </Routes>
+    </motion.div>
   );
 }
 
