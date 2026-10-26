@@ -68,7 +68,7 @@ function ApplicationCard({ app }: { app: Application }) {
         <div className="flex items-start gap-4 flex-1 min-w-0">
           {/* Company initial avatar */}
           <div
-            className={`h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 text-base font-bold ${
+            className={`h-11 w-11 rounded-2xl flex items-center justify-center flex-shrink-0 text-base font-bold ${
               isInterviewing
                 ? 'bg-accent-muted text-accent-primary border border-accent-primary/30'
                 : 'bg-bg-elevated border border-border-subtle text-text-secondary'
@@ -172,7 +172,7 @@ export default function MyApplications() {
     <div className="space-y-8 max-w-3xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-text-primary">My Applications</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">My Applications</h1>
         <p className="text-text-secondary mt-1">Track the status of every job you've applied to.</p>
       </div>
 
@@ -192,7 +192,7 @@ export default function MyApplications() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className={`rounded-xl px-4 py-3 border border-border-subtle ${stat.bg} text-center`}
+              className={`rounded-2xl px-4 py-3 border border-border-subtle ${stat.bg} text-center`}
             >
               <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
               <div className="text-xs text-text-muted mt-0.5">{stat.label}</div>

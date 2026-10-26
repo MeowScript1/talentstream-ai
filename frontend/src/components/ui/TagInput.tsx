@@ -33,7 +33,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
     return (
       <div
         className={cn(
-          'flex min-h-12 w-full flex-wrap items-center gap-2 rounded-xl border border-border-subtle bg-bg-base px-3 py-1.5 focus-within:ring-2 focus-within:ring-border-active',
+          'flex min-h-12 w-full flex-wrap items-center gap-2 rounded-2xl border border-border-subtle bg-bg-base px-3 py-1.5 focus-within:ring-2 focus-within:ring-border-active',
           error && 'border-danger focus-within:ring-danger',
           className
         )}

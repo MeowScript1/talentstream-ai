@@ -85,7 +85,7 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Info banner */}
-          <div className="bg-accent-muted border border-accent-primary/20 rounded-xl p-4 text-sm text-text-secondary">
+          <div className="bg-accent-muted border border-accent-primary/20 rounded-2xl p-4 text-sm text-text-secondary">
             <p className="font-medium text-text-primary mb-1">How it works</p>
             <ol className="list-decimal pl-4 space-y-1 text-xs">
               <li>Upload your resume PDF</li>
@@ -100,7 +100,7 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
-            className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 cursor-pointer transition-all ${
+            className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-8 cursor-pointer transition-all ${
               isDragging
                 ? 'border-accent-primary bg-accent-muted scale-[1.01]'
                 : selectedFile

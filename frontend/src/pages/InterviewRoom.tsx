@@ -108,7 +108,7 @@ export default function InterviewRoom() {
           </div>
         </div>
         
-        <div className="mt-4 p-4 rounded-xl border border-border-subtle bg-bg-elevated text-sm text-text-secondary">
+        <div className="mt-4 p-4 rounded-2xl border border-border-subtle bg-bg-elevated text-sm text-text-secondary">
           <h3 className="font-medium text-text-primary mb-1">Interview Tips</h3>
           <ul className="list-disc pl-4 space-y-1">
             <li>Speak clearly and directly to the camera</li>
@@ -172,12 +172,12 @@ export default function InterviewRoom() {
               onChange={(e) => setInput(e.target.value)}
               placeholder={isCompleted ? "Interview completed" : "Type your answer..."}
               disabled={isCompleted || !isConnected}
-              className="flex-1 rounded-xl shadow-none"
+              className="flex-1 rounded-2xl shadow-none"
             />
             <Button 
               type="submit" 
               disabled={!input.trim() || isCompleted || !isConnected}
-              className="rounded-xl px-6"
+              className="rounded-2xl px-6"
             >
               <Send className="h-4 w-4" />
             </Button>

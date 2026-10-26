@@ -83,7 +83,7 @@ export default function PostJob() {
           <ChevronRight className="h-3.5 w-3.5" />
           <span className="text-text-primary">Post a Job</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-text-primary">Post a New Position</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Post a New Position</h1>
         <p className="text-text-secondary">
           Fill in the details below — our AI will use these to screen and match candidates automatically.
         </p>
@@ -132,7 +132,7 @@ export default function PostJob() {
                       key={type}
                       type="button"
                       onClick={() => update('job_type', type)}
-                      className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all duration-150 ${
+                      className={`px-3 py-2 rounded-2xl text-xs font-medium border transition-all duration-150 ${
                         formData.job_type === type
                           ? 'bg-accent-muted border-accent-primary text-accent-primary shadow-active'
                           : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-active hover:text-text-primary'
@@ -194,7 +194,7 @@ export default function PostJob() {
                 </span>
               </div>
               <textarea
-                className="w-full min-h-[180px] rounded-xl border border-border-subtle bg-bg-base p-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-border-active resize-y transition-colors"
+                className="w-full min-h-[180px] rounded-2xl border border-border-subtle bg-bg-base p-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-border-active resize-y transition-colors"
                 value={formData.description}
                 onChange={(e) => update('description', e.target.value)}
                 placeholder="Describe the role, what the candidate will be working on, the team culture, growth opportunities, and what you're looking for in an ideal candidate..."
@@ -276,7 +276,7 @@ export default function PostJob() {
                 </div>
               </div>
 
-              <div className="mt-4 p-4 rounded-xl bg-bg-elevated border border-border-subtle">
+              <div className="mt-4 p-4 rounded-2xl bg-bg-elevated border border-border-subtle">
                 <p className="text-sm text-text-secondary">
                   Candidates with an AI resume match score{' '}
                   <span className="text-accent-primary font-semibold">above {formData.ats_threshold}</span>{' '}

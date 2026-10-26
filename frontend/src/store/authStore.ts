@@ -23,11 +23,13 @@ interface AuthState {
   login: (token: string, user: User) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
+  /** Restore the user from the saved token after a page reload. */
+  hydrate: () => Promise<void>;
   updateProfile: (data: ProfileUpdate) => Promise<void>;
   changePassword: (current_password: string, new_password: string) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: localStorage.getItem('token'),
   isLoading: true,
@@ -40,6 +42,20 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ token: null, user: null, isLoading: false });
   },
   setLoading: (isLoading) => set({ isLoading }),
+  hydrate: async () => {
+    if (!get().token) {
+      set({ isLoading: false });
+      return;
+    }
+    try {
+      const response = await api.get('/auth/me');
+      set({ user: response.data, isLoading: false });
+    } catch {
+      // Expired or invalid token: start from a clean logged-out state
+      localStorage.removeItem('token');
+      set({ token: null, user: null, isLoading: false });
+    }
+  },
   updateProfile: async (data: ProfileUpdate) => {
     const response = await api.patch('/users/me', data);
     set((state) => ({ user: state.user ? { ...state.user, ...response.data } : null }));

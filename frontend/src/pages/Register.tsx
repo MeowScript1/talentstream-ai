@@ -5,6 +5,7 @@ import api from '@/services/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import { AuthShell } from '@/components/layout/AuthShell';
 import { Briefcase, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -58,7 +59,7 @@ export default function Register() {
       });
       
       login(response.data.access_token, response.data.user);
-      toast.success('Account created successfully!');
+      toast.success('You\'re in! 🎉');
       
       if (role === 'employer') {
         navigate('/dashboard/recruiter');
@@ -99,21 +100,20 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] w-full">
-      {/* Brand Panel - Hidden on mobile */}
-      <div className="hidden lg:flex w-1/2 flex-col items-center justify-center relative overflow-hidden bg-bg-surface border-r border-border-subtle">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(94,234,212,0.1)_0%,transparent_50%)]" />
-        <div className="relative z-10 max-w-md text-center">
-          <h1 className="text-5xl font-bold tracking-tight mb-4 text-text-primary">Join TalentStream.</h1>
-          <p className="text-lg text-text-secondary">The automated hiring platform powered by AI.</p>
-        </div>
-      </div>
-
-      {/* Register Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <Card className="w-full max-w-md p-8">
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold text-text-primary">Create an account</h2>
+    <AuthShell
+      headline={
+        <>
+          Your next gig
+          <br />
+          starts <span className="text-gradient-hot">here</span> 🚀
+        </>
+      }
+      subline="Candidates get matched and interviewed by AI. Recruiters get a ranked shortlist. Everyone saves time."
+    >
+      <Card className="w-full p-8 shadow-glow-violet">
+          <div className="mb-6">
+            <h2 className="text-3xl font-extrabold text-text-primary">Join the club 🎟️</h2>
+            <p className="mt-2 text-sm text-text-secondary">Takes under a minute. Free forever for candidates.</p>
           </div>
 
           <div className="flex gap-4 mb-6">
@@ -121,49 +121,49 @@ export default function Register() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setRole('candidate')}
-              className={`flex-1 cursor-pointer rounded-xl border p-4 text-center transition-colors ${
+              className={`flex-1 cursor-pointer rounded-2xl border p-4 text-center transition-all ${
                 role === 'candidate' 
-                  ? 'bg-accent-muted border-border-active text-accent-primary' 
-                  : 'bg-bg-surface border-border-subtle text-text-secondary'
+                  ? 'bg-accent-primary/15 border-accent-primary/60 text-accent-primary shadow-glow'
+                  : 'bg-white/[0.03] border-white/10 text-text-secondary hover:border-white/25'
               }`}
             >
               <User className="mx-auto mb-2 h-6 w-6" />
-              <div className="text-sm font-medium">I'm Looking</div>
+              <div className="text-sm font-bold">I'm job hunting 🔍</div>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setRole('employer')}
-              className={`flex-1 cursor-pointer rounded-xl border p-4 text-center transition-colors ${
+              className={`flex-1 cursor-pointer rounded-2xl border p-4 text-center transition-all ${
                 role === 'employer' 
-                  ? 'bg-accent-muted border-border-active text-accent-primary' 
-                  : 'bg-bg-surface border-border-subtle text-text-secondary'
+                  ? 'bg-accent-primary/15 border-accent-primary/60 text-accent-primary shadow-glow'
+                  : 'bg-white/[0.03] border-white/10 text-text-secondary hover:border-white/25'
               }`}
             >
               <Briefcase className="mx-auto mb-2 h-6 w-6" />
-              <div className="text-sm font-medium">I'm Hiring</div>
+              <div className="text-sm font-bold">I'm hiring 🧑‍💼</div>
             </motion.div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Full Name</label>
+              <label className="block text-sm font-bold text-text-secondary mb-1.5">Full Name</label>
               <Input
                 name="full_name"
                 value={formData.full_name}
                 onChange={handleInputChange}
-                placeholder="John Doe"
+                placeholder="Your name"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Email address</label>
+              <label className="block text-sm font-bold text-text-secondary mb-1.5">Email address</label>
               <Input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="name@example.com"
+                placeholder="you@email.com"
                 required
               />
             </div>
@@ -176,7 +176,7 @@ export default function Register() {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <label className="block text-sm font-medium text-text-secondary mb-1.5 mt-4">Company Name</label>
+                  <label className="block text-sm font-bold text-text-secondary mb-1.5 mt-4">Company Name</label>
                   <Input
                     name="company_name"
                     value={formData.company_name}
@@ -190,7 +190,7 @@ export default function Register() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1.5">Password</label>
+                <label className="block text-sm font-bold text-text-secondary mb-1.5">Password</label>
                 <Input
                   type="password"
                   name="password"
@@ -202,7 +202,7 @@ export default function Register() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1.5">Confirm Password</label>
+                <label className="block text-sm font-bold text-text-secondary mb-1.5">Confirm Password</label>
                 <Input
                   type="password"
                   name="confirm_password"
@@ -214,19 +214,18 @@ export default function Register() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full mt-6" loading={isLoading}>
-              Create Account
+            <Button type="submit" size="lg" className="w-full mt-6" loading={isLoading}>
+              Create my account →
             </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-text-secondary">
-            Already have an account?{' '}
-            <Link to="/login" className="text-accent-primary hover:underline">
-              Sign in
+            Already in?{' '}
+            <Link to="/login" className="font-bold text-accent-primary hover:underline underline-offset-4">
+              Log in
             </Link>
           </div>
-        </Card>
-      </div>
-    </div>
+      </Card>
+    </AuthShell>
   );
 }

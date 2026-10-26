@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useAuthStore } from '@/store/authStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
@@ -21,6 +23,11 @@ import Profile from '@/pages/Profile';
 
 function App() {
   const location = useLocation();
+  const hydrate = useAuthStore((s) => s.hydrate);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
   return (
     <AnimatePresence mode="wait">

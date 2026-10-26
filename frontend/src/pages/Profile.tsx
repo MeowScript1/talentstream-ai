@@ -127,7 +127,7 @@ export default function Profile() {
     <div className="max-w-2xl mx-auto space-y-8">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold tracking-tight text-text-primary">My Profile</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">My Profile</h1>
         <p className="text-text-secondary mt-1">Manage your personal information and account security.</p>
       </motion.div>
 

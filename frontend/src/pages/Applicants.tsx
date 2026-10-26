@@ -126,16 +126,16 @@ export default function Applicants() {
     <div className="space-y-8 max-w-5xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-text-primary">Applicants</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Applicants</h1>
         <p className="text-text-secondary mt-1">Review and manage candidates across your job postings.</p>
       </div>
 
       {/* Job Selector */}
       <div className="relative">
         {jobsLoading ? (
-          <Skeleton className="h-14 w-full rounded-xl" />
+          <Skeleton className="h-14 w-full rounded-2xl" />
         ) : myJobs.length === 0 ? (
-          <div className="p-6 rounded-xl border border-dashed border-border-subtle bg-bg-surface text-center">
+          <div className="p-6 rounded-2xl border border-dashed border-border-subtle bg-bg-surface text-center">
             <p className="text-text-secondary text-sm">
               You haven't posted any jobs yet.{' '}
               <button
@@ -151,7 +151,7 @@ export default function Applicants() {
             <button
               type="button"
               onClick={() => setJobDropdownOpen((o) => !o)}
-              className="w-full flex items-center justify-between gap-3 bg-bg-surface border border-border-subtle rounded-xl px-5 py-4 text-left hover:border-border-active transition-colors shadow-card"
+              className="w-full flex items-center justify-between gap-3 bg-bg-surface border border-border-subtle rounded-2xl px-5 py-4 text-left hover:border-border-active transition-colors shadow-card"
             >
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-lg bg-accent-muted flex items-center justify-center flex-shrink-0">
@@ -178,7 +178,7 @@ export default function Applicants() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-full left-0 right-0 mt-2 z-20 bg-bg-surface border border-border-subtle rounded-xl shadow-glow overflow-hidden"
+                  className="absolute top-full left-0 right-0 mt-2 z-20 bg-bg-surface border border-border-subtle rounded-2xl shadow-glow overflow-hidden"
                 >
                   {myJobs.map((job) => (
                     <button
@@ -219,7 +219,7 @@ export default function Applicants() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="bg-bg-surface border border-border-subtle rounded-xl p-4 flex items-center gap-3 shadow-card"
+              className="bg-bg-surface border border-border-subtle rounded-2xl p-4 flex items-center gap-3 shadow-card"
             >
               <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${stat.color}`}>
                 <stat.icon className="h-5 w-5" />
@@ -262,10 +262,10 @@ export default function Applicants() {
         <div className="space-y-4">
           {appsLoading ? (
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
             </div>
           ) : filteredApplicants.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border-subtle rounded-xl bg-bg-surface text-center">
+            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border-subtle rounded-2xl bg-bg-surface text-center">
               <BarChart2 className="h-12 w-12 text-text-muted mb-4 opacity-50" />
               <h3 className="text-lg font-medium text-text-primary mb-2">
                 {jobApplicants.length === 0 ? 'No applicants yet' : 'No applicants in this category'}

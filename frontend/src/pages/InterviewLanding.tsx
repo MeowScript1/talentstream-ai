@@ -52,7 +52,7 @@ export default function InterviewLanding() {
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold tracking-tight text-text-primary">Interview Room</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Interview Room</h1>
         <p className="text-text-secondary mt-1">
           Enter your scheduled AI interviews below. Take a moment to prepare before you start.
         </p>
@@ -107,7 +107,7 @@ export default function InterviewLanding() {
 
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-accent-muted border border-accent-primary/30 flex items-center justify-center flex-shrink-0">
+                      <div className="h-12 w-12 rounded-2xl bg-accent-muted border border-accent-primary/30 flex items-center justify-center flex-shrink-0">
                         <Bot className="h-6 w-6 text-accent-primary" />
                       </div>
                       <div>

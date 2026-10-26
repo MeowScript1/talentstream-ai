@@ -179,7 +179,7 @@ export default function ApplicantDetail() {
               href={applicant.resume_url} 
               target="_blank" 
               rel="noreferrer"
-              className="mt-6 flex items-center justify-center gap-2 w-full text-sm font-medium text-accent-primary bg-accent-muted px-4 py-2.5 rounded-xl hover:bg-accent-primary hover:text-bg-base transition-colors border border-accent-primary/20"
+              className="mt-6 flex items-center justify-center gap-2 w-full text-sm font-medium text-accent-primary bg-accent-muted px-4 py-2.5 rounded-2xl hover:bg-accent-primary hover:text-bg-base transition-colors border border-accent-primary/20"
             >
               <FileText className="h-4 w-4" /> View Original Resume
             </a>
@@ -250,7 +250,7 @@ export default function ApplicantDetail() {
               </Badge>
             </div>
 
-            <div className="flex-1 bg-bg-base rounded-xl border border-border-subtle overflow-hidden min-h-[300px]">
+            <div className="flex-1 bg-bg-base rounded-2xl border border-border-subtle overflow-hidden min-h-[300px]">
               {interview ? (
                 <TranscriptView transcript={interview.transcript || []} />
               ) : (
