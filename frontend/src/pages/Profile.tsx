@@ -244,7 +244,7 @@ export default function Profile() {
                   <button
                     type="button"
                     onClick={() => setShowPasswords((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                    aria-label="Show or hide password" className="absolute right-0 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center text-text-muted hover:text-text-primary transition-colors"
                   >
                     {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>

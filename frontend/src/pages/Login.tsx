@@ -82,7 +82,7 @@ export default function Login() {
 
         <div className="mt-6 text-center text-sm text-text-secondary">
           New here?{' '}
-          <Link to="/register" className="font-bold text-accent-primary hover:underline underline-offset-4">
+          <Link to="/register" className="inline-block py-3 -my-3 font-bold text-accent-primary hover:underline underline-offset-4">
             Make an account
           </Link>
         </div>

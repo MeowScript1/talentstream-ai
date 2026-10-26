@@ -76,7 +76,7 @@ export default function PostJob() {
         <div className="flex items-center gap-2 text-sm text-text-muted mb-3">
           <button
             onClick={() => navigate('/dashboard/recruiter')}
-            className="hover:text-text-secondary transition-colors"
+            className="-my-3 py-3 hover:text-text-secondary transition-colors"
           >
             Dashboard
           </button>
@@ -132,7 +132,7 @@ export default function PostJob() {
                       key={type}
                       type="button"
                       onClick={() => update('job_type', type)}
-                      className={`px-3 py-2 rounded-2xl text-xs font-medium border transition-all duration-150 ${
+                      className={`min-h-11 md:min-h-0 px-3 py-2 rounded-2xl text-xs font-medium border transition-all duration-150 ${
                         formData.job_type === type
                           ? 'bg-accent-muted border-accent-primary text-accent-primary shadow-active'
                           : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-active hover:text-text-primary'

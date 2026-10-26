@@ -18,7 +18,7 @@ const stickers = [
 
 export function AuthShell({ headline, subline, children }: AuthShellProps) {
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="flex min-h-dvh w-full">
       {/* Hero — desktop only */}
       <div className="relative hidden w-1/2 overflow-hidden border-r border-white/[0.07] lg:flex lg:flex-col lg:justify-center lg:px-16">
         <Link to="/" className="absolute left-10 top-8 flex items-center gap-2.5">

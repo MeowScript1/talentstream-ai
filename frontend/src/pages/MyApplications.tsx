@@ -208,7 +208,7 @@ export default function MyApplications() {
             <button
               key={key}
               onClick={() => setActiveFilter(key)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-3 md:py-1.5 rounded-full text-sm font-medium transition-colors ${
                 activeFilter === key
                   ? 'bg-accent-primary text-bg-base'
                   : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-active'

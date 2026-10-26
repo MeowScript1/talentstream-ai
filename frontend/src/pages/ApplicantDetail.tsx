@@ -157,7 +157,7 @@ export default function ApplicantDetail() {
                     onClick={handleRescore}
                     disabled={isRescoring}
                     title="Re-score with AI"
-                    className="h-7 w-7 flex items-center justify-center rounded-full border border-border-subtle text-text-secondary hover:text-accent-primary hover:border-accent-primary/40 transition-colors disabled:opacity-50"
+                    className="h-11 w-11 md:h-7 md:w-7 flex items-center justify-center rounded-full border border-border-subtle text-text-secondary hover:text-accent-primary hover:border-accent-primary/40 transition-colors disabled:opacity-50"
                   >
                     <RotateCw className={`h-3.5 w-3.5 ${isRescoring ? 'animate-spin' : ''}`} />
                   </button>
@@ -179,7 +179,7 @@ export default function ApplicantDetail() {
               href={applicant.resume_url} 
               target="_blank" 
               rel="noreferrer"
-              className="mt-6 flex items-center justify-center gap-2 w-full text-sm font-medium text-accent-primary bg-accent-muted px-4 py-2.5 rounded-2xl hover:bg-accent-primary hover:text-bg-base transition-colors border border-accent-primary/20"
+              className="mt-6 flex items-center justify-center gap-2 w-full text-sm font-medium text-accent-primary bg-accent-muted px-4 py-3 rounded-2xl hover:bg-accent-primary hover:text-bg-base transition-colors border border-accent-primary/20"
             >
               <FileText className="h-4 w-4" /> View Original Resume
             </a>

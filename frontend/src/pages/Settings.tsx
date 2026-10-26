@@ -146,7 +146,7 @@ export default function Settings() {
               <div>
                 <p className="text-sm font-medium text-text-primary">{user?.full_name}</p>
                 <p className="text-xs text-text-muted">{user?.email}</p>
-                <button className="text-xs text-accent-primary hover:underline mt-1">
+                <button className="-mb-3 mt-1 py-3 text-xs text-accent-primary hover:underline">
                   Upload avatar (coming soon)
                 </button>
               </div>
@@ -211,7 +211,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => setShowPasswords((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                    aria-label="Show or hide password" className="absolute right-0 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center text-text-muted hover:text-text-primary transition-colors"
                   >
                     {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -297,7 +297,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => toggleNotification(key)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors before:absolute before:inset-x-0 before:-inset-y-3 before:content-[''] ${
                       notifications[key] ? 'bg-accent-primary' : 'bg-bg-elevated border border-border-subtle'
                     }`}
                   >

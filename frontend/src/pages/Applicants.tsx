@@ -240,7 +240,7 @@ export default function Applicants() {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-3 md:py-1.5 rounded-full text-sm font-medium transition-colors ${
                 statusFilter === s
                   ? 'bg-accent-primary text-bg-base'
                   : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-active'
@@ -328,7 +328,7 @@ export default function Applicants() {
                         target="_blank"
                         rel="noreferrer"
                         title="View Resume"
-                        className="h-9 w-9 flex items-center justify-center rounded-full border border-border-subtle text-text-secondary hover:text-accent-primary hover:border-accent-primary/40 transition-colors"
+                        className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-full border border-border-subtle text-text-secondary hover:text-accent-primary hover:border-accent-primary/40 transition-colors"
                       >
                         <FileText className="h-4 w-4" />
                       </a>
@@ -336,7 +336,7 @@ export default function Applicants() {
                       <Button
                         size="icon"
                         variant="outline"
-                        className="rounded-full h-9 w-9 text-accent-primary hover:bg-accent-muted hover:text-accent-primary border-accent-primary/30 hover:border-accent-primary/50"
+                        className="rounded-full h-11 w-11 md:h-9 md:w-9 text-accent-primary hover:bg-accent-muted hover:text-accent-primary border-accent-primary/30 hover:border-accent-primary/50"
                         onClick={() => handleRescore(app.id)}
                         disabled={rescoringId === app.id}
                         title="Re-score with AI"
@@ -349,7 +349,7 @@ export default function Applicants() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="rounded-full h-9 w-9 text-success hover:bg-success/10 hover:text-success border-success/30 hover:border-success/50"
+                            className="rounded-full h-11 w-11 md:h-9 md:w-9 text-success hover:bg-success/10 hover:text-success border-success/30 hover:border-success/50"
                             onClick={() => handleStatus(app.id, 'shortlisted')}
                             disabled={updatingId === app.id}
                             title="Shortlist"
@@ -359,7 +359,7 @@ export default function Applicants() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="rounded-full h-9 w-9 text-danger hover:bg-danger/10 hover:text-danger border-danger/30 hover:border-danger/50"
+                            className="rounded-full h-11 w-11 md:h-9 md:w-9 text-danger hover:bg-danger/10 hover:text-danger border-danger/30 hover:border-danger/50"
                             onClick={() => handleStatus(app.id, 'rejected')}
                             disabled={updatingId === app.id}
                             title="Reject"
@@ -372,7 +372,7 @@ export default function Applicants() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="rounded-full h-9 w-9"
+                        className="rounded-full h-11 w-11 md:h-9 md:w-9"
                         onClick={() => navigate(`/applicant/${app.id}`)}
                         title="View full details"
                       >

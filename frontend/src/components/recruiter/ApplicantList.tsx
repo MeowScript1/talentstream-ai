@@ -118,7 +118,7 @@ export function ApplicantList({ jobId, onViewDetail }: ApplicantListProps) {
                       <Button 
                         size="icon" 
                         variant="outline" 
-                        className="text-success hover:bg-success/10 hover:text-success border-success/30 hover:border-success/50 rounded-full h-9 w-9"
+                        className="text-success hover:bg-success/10 hover:text-success border-success/30 hover:border-success/50 rounded-full h-11 w-11 md:h-9 md:w-9"
                         onClick={() => handleStatusUpdate(app.id, 'shortlisted')}
                         title="Shortlist"
                       >
@@ -127,7 +127,7 @@ export function ApplicantList({ jobId, onViewDetail }: ApplicantListProps) {
                       <Button 
                         size="icon" 
                         variant="outline" 
-                        className="text-danger hover:bg-danger/10 hover:text-danger border-danger/30 hover:border-danger/50 rounded-full h-9 w-9"
+                        className="text-danger hover:bg-danger/10 hover:text-danger border-danger/30 hover:border-danger/50 rounded-full h-11 w-11 md:h-9 md:w-9"
                         onClick={() => handleStatusUpdate(app.id, 'rejected')}
                         title="Reject"
                       >
@@ -139,7 +139,7 @@ export function ApplicantList({ jobId, onViewDetail }: ApplicantListProps) {
                     <Button 
                       size="icon" 
                       variant="ghost"
-                      className="rounded-full h-9 w-9"
+                      className="rounded-full h-11 w-11 md:h-9 md:w-9"
                       onClick={() => onViewDetail(app.id)}
                       title="View full details"
                     >

@@ -210,7 +210,7 @@ export default function Register() {
 
           <div className="mt-6 text-center text-sm text-text-secondary">
             Already in?{' '}
-            <Link to="/login" className="font-bold text-accent-primary hover:underline underline-offset-4">
+            <Link to="/login" className="inline-block py-3 -my-3 font-bold text-accent-primary hover:underline underline-offset-4">
               Log in
             </Link>
           </div>

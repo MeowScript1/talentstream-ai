@@ -124,19 +124,19 @@ export default function CandidateDashboard() {
 
       {/* Stats row */}
       {myApplications.length > 0 && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[
             { label: 'Applied', value: appliedCount, icon: BriefcaseBusiness, color: 'text-accent-primary bg-accent-muted' },
             { label: 'Interviewing', value: interviewingCount, icon: Clock, color: 'text-warning bg-warning/10' },
             { label: 'Shortlisted', value: shortlistedCount, icon: CheckCircle2, color: 'text-success bg-success/10' },
           ].map((stat) => (
-            <div key={stat.label} className="bg-bg-surface/80 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-4 flex items-center gap-3 shadow-card">
-              <div className={`h-11 w-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${stat.color}`}>
+            <div key={stat.label} className="min-w-0 bg-bg-surface/80 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-3 sm:p-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3 shadow-card">
+              <div className={`h-9 w-9 sm:h-11 sm:w-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${stat.color}`}>
                 <stat.icon className="h-5 w-5" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="font-display text-3xl font-extrabold text-text-primary leading-none">{stat.value}</div>
-                <div className="text-xs text-text-secondary">{stat.label}</div>
+                <div className="truncate text-xs text-text-secondary">{stat.label}</div>
               </div>
             </div>
           ))}
@@ -154,7 +154,7 @@ export default function CandidateDashboard() {
         />
         <button
           onClick={handleRefresh}
-          className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-all"
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 md:right-4 md:h-8 md:w-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-all"
           title="Refresh jobs"
         >
           {isSearching ? (
@@ -171,7 +171,7 @@ export default function CandidateDashboard() {
           <button
             key={opt.label}
             onClick={() => handleTypeChange(opt.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-3 md:py-1.5 rounded-full text-sm font-medium transition-colors ${
               selectedType === opt.value 
                 ? 'bg-accent-primary text-bg-base' 
                 : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary'

@@ -21,7 +21,7 @@ export default function RecruiterDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">Hey {firstName} <span className="inline-block origin-[70%_70%] animate-wiggle">👋</span></h1>
           <p className="text-text-secondary mt-1">Here's what's happening with your hiring today.</p>
@@ -29,17 +29,17 @@ export default function RecruiterDashboard() {
         <PostJobModal />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
         {[
           { label: 'Active Jobs', value: openJobs, sub: 'open positions', emoji: '🔥', color: 'text-accent-primary', glow: 'hover:border-accent-primary/50' },
           { label: 'Closed Jobs', value: closedJobs, sub: 'filled or closed', emoji: '✅', color: 'text-violet', glow: 'hover:border-violet/60' },
           { label: 'Total Posted', value: totalJobs, sub: 'all time', emoji: '📈', color: 'text-pink', glow: 'hover:border-pink/60' },
         ].map((stat, i) => (
-          <div key={i} className={`relative overflow-hidden rounded-3xl border border-white/[0.07] bg-bg-surface/80 p-6 shadow-card backdrop-blur-xl transition-all hover:-translate-y-1 ${stat.glow}`}>
-            <span className="absolute right-5 top-5 text-2xl">{stat.emoji}</span>
-            <div className={`font-display text-6xl font-extrabold leading-none mb-3 ${stat.color}`}>{stat.value}</div>
-            <div className="text-sm font-bold text-text-primary">{stat.label}</div>
-            <div className="text-xs text-text-muted mt-0.5">{stat.sub}</div>
+          <div key={i} className={`relative min-w-0 overflow-hidden rounded-3xl border border-white/[0.07] bg-bg-surface/80 p-3 sm:p-6 shadow-card backdrop-blur-xl transition-all hover:-translate-y-1 ${stat.glow}`}>
+            <span className="absolute right-5 top-5 hidden text-2xl sm:block">{stat.emoji}</span>
+            <div className={`font-display text-4xl sm:text-6xl font-extrabold leading-none mb-2 sm:mb-3 ${stat.color}`}>{stat.value}</div>
+            <div className="truncate text-xs sm:text-sm font-bold text-text-primary">{stat.label}</div>
+            <div className="hidden text-xs text-text-muted mt-0.5 sm:block">{stat.sub}</div>
           </div>
         ))}
       </div>

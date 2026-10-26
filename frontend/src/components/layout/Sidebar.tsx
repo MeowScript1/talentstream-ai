@@ -20,21 +20,23 @@ export function Sidebar() {
   if (!user) return null;
 
   const recruiterNav = [
-    { name: 'Dashboard', href: '/dashboard/recruiter', icon: LayoutDashboard },
-    { name: 'Post a Job', href: '/jobs/new', icon: Briefcase },
-    { name: 'Applicants', href: '/applicants', icon: Users },
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'Dashboard', short: 'Home', href: '/dashboard/recruiter', icon: LayoutDashboard },
+    { name: 'Post a Job', short: 'Post', href: '/jobs/new', icon: Briefcase },
+    { name: 'Applicants', short: 'People', href: '/applicants', icon: Users },
+    { name: 'Settings', short: 'Settings', href: '/settings', icon: Settings },
   ];
 
   const candidateNav = [
-    { name: 'Find Jobs', href: '/dashboard/candidate', icon: Search },
-    { name: 'My Applications', href: '/applications', icon: FileText },
-    { name: 'Interview Room', href: '/interview', icon: Video },
-    { name: 'Profile', href: '/profile', icon: UserRound },
+    { name: 'Find Jobs', short: 'Jobs', href: '/dashboard/candidate', icon: Search },
+    { name: 'My Applications', short: 'Applied', href: '/applications', icon: FileText },
+    { name: 'Interview Room', short: 'Interview', href: '/interview', icon: Video },
+    { name: 'Profile', short: 'Profile', href: '/profile', icon: UserRound },
   ];
 
   const navItems = user.role === 'employer' ? recruiterNav : candidateNav;
   const isActive = (href: string) => location.pathname.startsWith(href);
+  // Inside a live interview the chat needs the whole screen, so the tab bar steps aside
+  const inInterviewRoom = /^\/interview\/[^/]+/.test(location.pathname);
 
   return (
     <>
@@ -72,27 +74,35 @@ export function Sidebar() {
         </nav>
       </aside>
 
-      {/* Mobile: bottom tab bar (the sidebar is hidden below md) */}
-      <nav className="glass fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-full p-1.5 md:hidden">
-        {navItems.map((item) => {
-          const active = isActive(item.href);
-          const Icon = item.icon;
+      {/* Mobile: labelled bottom tab bar (the sidebar is hidden below md) */}
+      {!inInterviewRoom && (
+        <nav
+          aria-label="Main"
+          className="glass fixed inset-x-3 z-40 flex items-stretch justify-around rounded-3xl p-1.5 md:hidden"
+          style={{ bottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+        >
+          {navItems.map((item) => {
+            const active = isActive(item.href);
+            const Icon = item.icon;
 
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              aria-label={item.name}
-              className={cn(
-                'flex h-12 w-12 items-center justify-center rounded-full transition-all',
-                active ? 'bg-accent-primary text-bg-base shadow-glow' : 'text-text-secondary'
-              )}
-            >
-              <Icon className="h-5 w-5" strokeWidth={active ? 2.75 : 2} />
-            </Link>
-          );
-        })}
-      </nav>
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                aria-label={item.name}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 transition-all',
+                  active ? 'bg-accent-primary text-bg-base shadow-glow' : 'text-text-secondary active:bg-white/10'
+                )}
+              >
+                <Icon className="h-5 w-5" strokeWidth={active ? 2.75 : 2} />
+                <span className="max-w-full truncate text-[11px] font-bold leading-none">{item.short}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </>
   );
 }

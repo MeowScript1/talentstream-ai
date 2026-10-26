@@ -67,7 +67,7 @@ export default function InterviewRoom() {
   }, [applicationId, token]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
 
   const handleSend = (e?: React.FormEvent) => {
@@ -86,7 +86,7 @@ export default function InterviewRoom() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] -m-6 md:-m-8 bg-bg-base overflow-hidden">
+    <div className="flex h-[calc(100dvh-4rem)] bg-bg-base overflow-hidden">
       {/* Video Feed Area (Mock for now, but UI is there) */}
       <div className="hidden lg:flex w-1/3 flex-col border-r border-border-subtle bg-bg-surface p-4">
         <div className="flex-1 rounded-2xl bg-bg-base border border-border-subtle overflow-hidden relative group">
@@ -103,7 +103,7 @@ export default function InterviewRoom() {
               </div>
             )}
           </div>
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
             <Button size="icon" variant={micEnabled ? 'secondary' : 'danger'} className="rounded-full shadow-lg" onClick={() => setMicEnabled(!micEnabled)}>
               {micEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
             </Button>
@@ -125,44 +125,45 @@ export default function InterviewRoom() {
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col h-full bg-bg-surface relative">
-        <div className="h-16 border-b border-border-subtle flex items-center justify-between px-6 bg-bg-surface/80 backdrop-blur-md z-10">
-          <div className="flex items-center gap-3">
+        <div className="h-16 border-b border-border-subtle flex items-center justify-between gap-2 px-4 sm:px-6 bg-bg-surface/80 backdrop-blur-md z-10">
+          <div className="flex min-w-0 items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-accent-muted flex items-center justify-center border border-accent-primary/20">
               <Bot className="h-5 w-5 text-accent-primary" />
             </div>
-            <div>
-              <h2 className="font-bold text-text-primary leading-tight">AI Interviewer</h2>
+            <div className="min-w-0">
+              <h2 className="truncate font-bold text-text-primary leading-tight">AI Interviewer</h2>
               <p className="text-xs text-text-secondary flex items-center gap-1">
                 <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-success' : 'bg-danger'}`} />
                 {isConnected ? 'Connected' : 'Disconnected'}
               </p>
             </div>
           </div>
-          <Button variant="danger" size="sm" onClick={leaveInterview}>
-            Leave Interview
+          <Button variant="danger" size="sm" className="flex-shrink-0" onClick={leaveInterview}>
+            <span className="sm:hidden">Leave</span>
+            <span className="hidden sm:inline">Leave Interview</span>
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 sm:space-y-6">
           <AnimatePresence>
             {messages.map((msg, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
+                className={`flex gap-2 sm:gap-4 max-w-[92%] sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
               >
                 <div className={`h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center ${
                   msg.role === 'ai' ? 'bg-accent-muted text-accent-primary' : 'bg-text-primary text-bg-base'
                 }`}>
                   {msg.role === 'ai' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
                 </div>
-                <div className={`p-4 rounded-2xl ${
+                <div className={`min-w-0 p-3 sm:p-4 rounded-2xl ${
                   msg.role === 'ai' 
                     ? 'bg-bg-elevated border border-border-subtle text-text-primary rounded-tl-none' 
                     : 'bg-accent-primary text-bg-base rounded-tr-none'
                 }`}>
-                  <p className="whitespace-pre-wrap">{msg.text}</p>
+                  <p className="whitespace-pre-wrap break-words">{msg.text}</p>
                 </div>
               </motion.div>
             ))}
@@ -170,19 +171,20 @@ export default function InterviewRoom() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-4 border-t border-border-subtle bg-bg-surface">
+        <div className="p-4 border-t border-border-subtle bg-bg-surface" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
           <form onSubmit={handleSend} className="flex gap-3">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={isCompleted ? "Interview completed" : "Type your answer..."}
               disabled={isCompleted || !isConnected}
-              className="flex-1 rounded-2xl shadow-none"
+              className="min-w-0 flex-1 rounded-2xl shadow-none"
             />
             <Button 
               type="submit" 
               disabled={!input.trim() || isCompleted || !isConnected}
-              className="rounded-2xl px-6"
+              aria-label="Send"
+              className="rounded-2xl px-5 sm:px-6"
             >
               <Send className="h-4 w-4" />
             </Button>

@@ -34,11 +34,17 @@
 
   html {
     color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    /* no double-tap-to-zoom delay on buttons and links */
+    touch-action: manipulation;
   }
 
   body {
     @apply bg-bg-base text-text-primary font-sans antialiased;
     min-height: 100vh;
+    min-height: 100dvh; /* the visible height, not the height behind a phone's collapsing address bar */
+    overflow-x: clip;   /* one stray wide element must never make the whole page scroll sideways */
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Aurora glow behind everything */
@@ -119,6 +125,15 @@
   .sticker {
     @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold;
     transform: rotate(-2deg);
+  }
+}
+
+/* iPhones zoom the whole page in when a field under 16px gets focus, and don't zoom back out. */
+@media (max-width: 767px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }
 

@@ -105,8 +105,8 @@ export default function InterviewLanding() {
                   {/* Glow accent */}
                   <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-accent-primary to-transparent" />
 
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-4">
                       <div className="h-12 w-12 rounded-2xl bg-accent-muted border border-accent-primary/30 flex items-center justify-center flex-shrink-0">
                         <Bot className="h-6 w-6 text-accent-primary" />
                       </div>
@@ -133,7 +133,7 @@ export default function InterviewLanding() {
 
                     <Button
                       onClick={() => navigate(`/interview/${app.id}`)}
-                      className="flex-shrink-0 gap-2 ring-2 ring-accent-primary/30 ring-offset-1 ring-offset-bg-base"
+                      className="w-full flex-shrink-0 gap-2 ring-2 ring-accent-primary/30 ring-offset-1 ring-offset-bg-base sm:w-auto"
                     >
                       <Play className="h-4 w-4" />
                       Start Interview
