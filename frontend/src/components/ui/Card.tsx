@@ -1,8 +1,12 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { motion, type HTMLMotionProps } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+// Framer Motion redefines these four handlers with different signatures, so they can't
+// be spread onto motion.div. Omit them from the public props rather than casting.
+type MotionClashingProps = 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart';
+
+export interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, MotionClashingProps> {
   variant?: 'default' | 'elevated' | 'interactive';
 }
 
@@ -22,7 +26,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           ref={ref}
           whileHover={{ y: -2, transition: { type: "spring", stiffness: 400, damping: 25 } }}
           className={cn(baseStyles, variants[variant], className)}
-          {...(props as unknown as HTMLMotionProps<'div'>)}
+          {...props}
         />
       );
     }
