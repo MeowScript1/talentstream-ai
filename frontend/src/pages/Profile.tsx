@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -17,6 +18,7 @@ import { useApplicationStore } from '@/store/applicationStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import { ResumeCard } from '@/components/candidate/ResumeCard';
 import toast from 'react-hot-toast';
 import { getApiError } from '@/lib/utils';
 
@@ -56,6 +58,14 @@ function SectionHeader({
 
 export default function Profile() {
   const { user, updateProfile, changePassword } = useAuthStore();
+  const location = useLocation();
+
+  // Deep link from the dashboard prompt: /profile#resume
+  useEffect(() => {
+    if (location.hash === '#resume') {
+      document.getElementById('resume')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [location.hash]);
   const { myApplications } = useApplicationStore();
 
   // Profile form
@@ -167,6 +177,11 @@ export default function Profile() {
               ))}
             </div>
           </Card>
+        </motion.div>
+
+        {/* Resume */}
+        <motion.div variants={itemVariants}>
+          <ResumeCard />
         </motion.div>
 
         {/* Personal Info */}

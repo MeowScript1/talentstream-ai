@@ -3,9 +3,11 @@ import { Modal, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '
 import { Button } from '@/components/ui/Button';
 import { Job } from '@/types/job';
 import { useApplicationStore } from '@/store/applicationStore';
-import { Upload, FileText, X } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { Upload, FileText, X, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiError } from '@/lib/utils';
+import { formatResumeDate, validateResumeFile } from '@/lib/resume';
 
 interface ApplyModalProps {
   job: Job;
@@ -20,6 +22,12 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { applyToJob } = useApplicationStore();
+  const user = useAuthStore((s) => s.user);
+
+  // Candidates with a saved resume apply with it by default, or choose to upload another file
+  const savedResume = user?.resume_filename ?? null;
+  const [useSaved, setUseSaved] = useState(true);
+  const usingSaved = Boolean(savedResume) && useSaved;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,12 +35,9 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
   };
 
   const validateAndSet = (file: File) => {
-    if (!file.name.endsWith('.pdf')) {
-      toast.error('Only PDF files are accepted');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be under 5MB');
+    const problem = validateResumeFile(file);
+    if (problem) {
+      toast.error(problem);
       return;
     }
     setSelectedFile(file);
@@ -47,14 +52,15 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) {
+    if (!usingSaved && !selectedFile) {
       toast.error('Please select your resume PDF');
       return;
     }
 
     setIsLoading(true);
     try {
-      await applyToJob(job.id, selectedFile);
+      // No file => the backend applies with the saved resume
+      await applyToJob(job.id, usingSaved ? undefined : (selectedFile ?? undefined));
       toast.success('Application submitted! AI is now reviewing your resume.');
       setOpen(false);
       setSelectedFile(null);
@@ -89,12 +95,50 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
           <div className="bg-accent-muted border border-accent-primary/20 rounded-2xl p-4 text-sm text-text-secondary">
             <p className="font-medium text-text-primary mb-1">How it works</p>
             <ol className="list-decimal pl-4 space-y-1 text-xs">
-              <li>Upload your resume PDF</li>
+              <li>{usingSaved ? 'We use your saved resume' : 'Upload your resume PDF'}</li>
               <li>Our AI instantly scores your match for this role</li>
               <li>If you score ≥ {job.ats_threshold}, you'll be invited to an AI interview</li>
             </ol>
           </div>
 
+          {/* Saved resume choice */}
+          {savedResume && (
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setUseSaved(true)}
+                className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-all ${
+                  useSaved ? 'border-accent-primary/60 bg-accent-muted' : 'border-white/10 hover:border-white/25'
+                }`}
+              >
+                <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl ${useSaved ? 'bg-accent-primary text-bg-base' : 'bg-white/10 text-text-muted'}`}>
+                  {useSaved ? <Check className="h-5 w-5" strokeWidth={3} /> : <FileText className="h-5 w-5" />}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-text-primary">Use my saved resume</p>
+                  <p className="truncate text-xs text-text-muted">
+                    {savedResume}
+                    {user?.resume_updated_at && <> · saved {formatResumeDate(user.resume_updated_at)}</>}
+                  </p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setUseSaved(false)}
+                className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-all ${
+                  !useSaved ? 'border-accent-primary/60 bg-accent-muted' : 'border-white/10 hover:border-white/25'
+                }`}
+              >
+                <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl ${!useSaved ? 'bg-accent-primary text-bg-base' : 'bg-white/10 text-text-muted'}`}>
+                  {!useSaved ? <Check className="h-5 w-5" strokeWidth={3} /> : <Upload className="h-5 w-5" />}
+                </div>
+                <p className="text-sm font-bold text-text-primary">Upload a different one for this job</p>
+              </button>
+            </div>
+          )}
+
+          {!usingSaved && (
+            <>
           {/* Upload area */}
           <div
             onClick={() => fileInputRef.current?.click()}
@@ -144,10 +188,12 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
             className="hidden"
             onChange={handleFileChange}
           />
+            </>
+          )}
 
           <div className="flex justify-end gap-3 pt-2 border-t border-border-subtle">
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" loading={isLoading} disabled={!selectedFile}>
+            <Button type="submit" loading={isLoading} disabled={!usingSaved && !selectedFile}>
               Submit Application
             </Button>
           </div>

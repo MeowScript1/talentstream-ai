@@ -22,7 +22,8 @@ interface ApplicationState {
   
   fetchMyApplications: () => Promise<void>;
   fetchJobApplicants: (jobId: string) => Promise<void>;
-  applyToJob: (jobId: string, file: File) => Promise<void>;
+  /** Without a file, the backend applies with the candidate's saved resume. */
+  applyToJob: (jobId: string, file?: File) => Promise<void>;
   updateApplicantStatus: (appId: string, status: Application['status']) => Promise<void>;
   rescoreApplication: (appId: string) => Promise<void>;
 }
@@ -54,17 +55,13 @@ export const useApplicationStore = create<ApplicationState>((set) => ({
     }
   },
 
-  applyToJob: async (jobId: string, file: File) => {
+  applyToJob: async (jobId: string, file?: File) => {
     try {
       const formData = new FormData();
       formData.append('job_id', jobId);
-      formData.append('resume', file);
-      
-      const response = await api.post('/applications', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      if (file) formData.append('resume', file);
+
+      const response = await api.post('/applications', formData);
       set((state) => ({ myApplications: [response.data, ...state.myApplications] }));
     } catch (error) {
       console.error(error);
