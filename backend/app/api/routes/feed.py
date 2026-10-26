@@ -11,7 +11,7 @@ from urllib.parse import quote_plus
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -20,6 +20,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.jobfeed import ingest
+from app.jobfeed.places import location_variants
 from app.jobfeed.sources import SOURCE_INFO, enabled_sources
 from app.jobfeed.trust import assess
 from app.jobfeed.types import RawJob
@@ -200,8 +201,7 @@ async def _native_walkins(db: AsyncSession, today, q: str | None = None, locatio
         like = f"%{q.strip()}%"
         stmt = stmt.where(Job.title.ilike(like) | Job.description.ilike(like) | Job.venue.ilike(like))
     if location:
-        like = f"%{location.strip()}%"
-        stmt = stmt.where(Job.location.ilike(like) | Job.venue.ilike(like))
+        stmt = stmt.where(or_(*(Job.location.ilike(f"%{v}%") | Job.venue.ilike(f"%{v}%") for v in location_variants(location))))
     rows = (await db.execute(stmt)).scalars().all()
     return [_native_out(j, today) for j in rows]
 
@@ -255,7 +255,7 @@ async def list_feed_jobs(
         like = f"%{q.strip()}%"
         conditions.append(ExternalJob.title.ilike(like) | ExternalJob.company.ilike(like) | ExternalJob.description.ilike(like))
     if location:
-        conditions.append(ExternalJob.location.ilike(f"%{location.strip()}%"))
+        conditions.append(or_(*(ExternalJob.location.ilike(f"%{v}%") for v in location_variants(location))))
     if remote is not None:
         conditions.append(ExternalJob.remote.is_(remote))
 

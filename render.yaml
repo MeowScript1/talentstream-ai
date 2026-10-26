@@ -76,6 +76,9 @@ services:
       - key: ADZUNA_COUNTRY
         value: in
 
+      - key: JOOBLE_API_KEY
+        sync: false            # https://jooble.org/api/about (free); another India aggregator
+
       - key: INGEST_TOKEN
         generateValue: true    # lets you force a refresh: POST /api/v1/feed/refresh with header X-Ingest-Token
 

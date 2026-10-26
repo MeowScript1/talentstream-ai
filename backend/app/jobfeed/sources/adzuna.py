@@ -12,15 +12,22 @@ from datetime import datetime
 import httpx
 
 from app.core.config import settings
+from app.jobfeed.places import MAJOR_CITIES
 from app.jobfeed.text import html_to_text
 from app.jobfeed.types import RawJob
 
 NAME = "adzuna"
 BASE = "https://api.adzuna.com/v1/api/jobs"
-# A general search plus one aimed at walk-in drives. Few calls: the free plan is rate limited.
-QUERIES = ("", "walk-in interview")
-PAGES = 2
+# (phrase, city, pages). A general search, one aimed at walk-in drives, and one per big city so that
+# searching by city has real results. About 14 calls per refresh; the free plan is rate limited.
 PER_PAGE = 50
+
+
+def searches() -> list[tuple[str, str, int]]:
+    plan = [("", "", 2), ("walk-in interview", "", 1)]
+    if settings.ADZUNA_COUNTRY == "in":
+        plan += [("", city, 1) for city in MAJOR_CITIES]
+    return plan
 
 
 def _salary(item: dict) -> str | None:
@@ -64,8 +71,8 @@ async def fetch(client: httpx.AsyncClient) -> list[RawJob]:
     if not (settings.ADZUNA_APP_ID and settings.ADZUNA_APP_KEY):
         return []
     found: dict[str, RawJob] = {}
-    for query in QUERIES:
-        for page in range(1, PAGES + 1):
+    for phrase, city, pages in searches():
+        for page in range(1, pages + 1):
             params = {
                 "app_id": settings.ADZUNA_APP_ID,
                 "app_key": settings.ADZUNA_APP_KEY,
@@ -74,8 +81,10 @@ async def fetch(client: httpx.AsyncClient) -> list[RawJob]:
                 "sort_by": "date",
                 "content-type": "application/json",
             }
-            if query:
-                params["what_phrase"] = query
+            if phrase:
+                params["what_phrase"] = phrase
+            if city:
+                params["where"] = city
             response = await client.get(f"{BASE}/{settings.ADZUNA_COUNTRY}/search/{page}", params=params)
             response.raise_for_status()
             for job in parse(response.json()):

@@ -60,10 +60,12 @@ class Settings(BaseSettings):
     SUPABASE_STORAGE_BUCKET_PUBLIC: bool = False
 
     # ── Job feed (jobs collected from other platforms' official APIs) ───────
-    JOB_SOURCES: str = "remotive,remoteok,adzuna"   # adzuna needs the two keys below
+    JOB_SOURCES: str = "remotive,remoteok,adzuna,jooble"   # adzuna and jooble need free keys, below
     ADZUNA_APP_ID: str = ""
     ADZUNA_APP_KEY: str = ""
     ADZUNA_COUNTRY: str = "in"
+    JOOBLE_API_KEY: str = ""                        # https://jooble.org/api/about (free)
+    JOOBLE_COUNTRY_LOCATION: str = "India"
     FEED_TIMEZONE: str = "Asia/Kolkata"             # decides what "the next 7 days" means for walk-ins
     FEED_REFRESH_HOURS: int = 6                     # per source; Remotive asks for at most ~4 calls a day
     FEED_MAX_REPORTS: int = 3                       # reports that hide a job

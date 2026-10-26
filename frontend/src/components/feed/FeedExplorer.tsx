@@ -10,6 +10,7 @@ import type { FeedJob, FeedKind, FeedPage } from '@/types/feed';
 import { FeedJobCard } from './FeedJobCard';
 
 const PAGE_SIZE = 15;
+const CITIES = ['Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi', 'Pune', 'Chennai', 'Kolkata', 'Gurugram'];
 
 function useDebounced<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -118,7 +119,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
     if (hidden) setItems((prev) => prev.filter((j) => j.id !== jobId));
   };
 
-  const hasIndiaSource = meta?.sources.some((s) => s.name === 'adzuna') ?? false;
+  const hasIndiaSource = meta?.sources.some((s) => s.name === 'adzuna' || s.name === 'jooble') ?? false;
   const canLoadMore = meta !== null && items.length < meta.total;
 
   return (
@@ -143,6 +144,26 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
           <MapPin className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-text-secondary" />
           <Input value={place} onChange={(e) => setPlace(e.target.value)} placeholder="City or country" className="pl-11" />
         </div>
+      </div>
+
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" aria-label="Popular cities">
+        {CITIES.map((city) => {
+          const on = place.trim().toLowerCase() === city.toLowerCase();
+          return (
+            <button
+              key={city}
+              type="button"
+              onClick={() => setPlace(on ? '' : city)}
+              aria-pressed={on}
+              className={cn(
+                'inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1',
+                on ? 'border-accent-primary bg-accent-primary text-bg-base' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
+              )}
+            >
+              {city}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -218,8 +239,19 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
           ) : (
             <>
               <Search className="mx-auto h-6 w-6 text-accent-primary" />
-              <p className="mt-3 font-bold text-text-primary">No jobs match</p>
-              <p className="mt-1 text-sm text-text-secondary">Try fewer words or clear the filters.</p>
+              <p className="mt-3 font-bold text-text-primary">{debouncedPlace.trim() ? `No jobs in ${debouncedPlace.trim()} yet` : 'No jobs match'}</p>
+              <p className="mt-1 text-sm text-text-secondary">
+                {debouncedPlace.trim()
+                  ? hasIndiaSource
+                    ? 'Try the nearest big city, or clear the city to see everything.'
+                    : 'Most jobs here are remote and not tied to a city. India city listings are still being connected, so try Remote only or clear the city.'
+                  : 'Try fewer words or clear the filters.'}
+              </p>
+              {debouncedPlace.trim() && (
+                <Button className="mt-3" size="sm" variant="ghost" onClick={() => setPlace('')}>
+                  Clear city
+                </Button>
+              )}
             </>
           )}
         </div>

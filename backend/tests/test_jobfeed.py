@@ -16,7 +16,8 @@ from sqlalchemy.pool import NullPool
 
 from app.core.config import settings
 from app.jobfeed import ingest
-from app.jobfeed.sources import adzuna, remoteok, remotive
+from app.jobfeed.places import MAJOR_CITIES, location_variants
+from app.jobfeed.sources import adzuna, jooble, remoteok, remotive
 from app.jobfeed.text import dedupe_key, html_to_text
 from app.jobfeed.trust import GOOD_THRESHOLD, RISKY_THRESHOLD, assess
 from app.jobfeed.types import RawJob
@@ -345,3 +346,53 @@ def test_broken_encoding_from_a_feed_is_repaired():
 )
 def test_more_broken_encodings_are_repaired(broken, fixed):
     assert html_to_text(f"<p>{broken}</p>") == fixed
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cities and extra sources
+# ─────────────────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("typed,also", [("Bangalore", "Bengaluru"), ("bengaluru", "Bangalore"), ("Gurgaon", "Gurugram"), ("Bombay", "Mumbai"), ("Poona", "Pune")])
+def test_a_city_is_found_under_its_other_names(typed, also):
+    variants = location_variants(typed)
+    assert variants[0] == typed and also in variants
+
+
+def test_an_unknown_place_is_searched_as_typed():
+    assert location_variants("  Somewhere Else ") == ["Somewhere Else"]
+
+
+def test_searching_for_a_city_by_an_old_name_still_finds_its_jobs(sample_feed):
+    assert any("zzqx" in j["title"] for j in _titles({"q": "zzqx", "location": "Poona"})["items"])  # stored as Pune
+    assert not _titles({"q": "zzqx", "location": "Chennai"})["items"]
+
+
+def test_adzuna_asks_about_every_big_city_when_set_to_india(monkeypatch):
+    monkeypatch.setattr(settings, "ADZUNA_COUNTRY", "in")
+    cities = [city for _, city, _ in adzuna.searches() if city]
+    assert cities == list(MAJOR_CITIES)
+    monkeypatch.setattr(settings, "ADZUNA_COUNTRY", "gb")
+    assert not [c for _, c, _ in adzuna.searches() if c]
+
+
+def test_jooble_payload_is_parsed():
+    jobs = jooble.parse({"jobs": [
+        {"id": 7, "title": "<b>Sales</b> Executive", "location": "Mumbai", "snippet": "Walk-in &amp; hire", "salary": "20k",
+         "source": "naukri.com", "type": "Full-time", "link": "https://in.jooble.org/desc/7", "company": "Acme", "updated": "2026-10-24T08:00:00.0000000"},
+        {"title": "No link", "link": ""},
+        {"title": "No id", "link": "https://in.jooble.org/desc/9"},
+    ]})
+    assert [j.title for j in jobs] == ["Sales Executive", "No id"]
+    assert jobs[0].location == "Mumbai" and jobs[0].url.startswith("https://in.jooble.org/") and jobs[0].salary_text == "20k"
+    assert jobs[1].external_id  # made up from the link when Jooble sends none
+
+
+def test_a_source_without_its_key_is_switched_off(monkeypatch):
+    from app.jobfeed.sources import enabled_sources
+
+    monkeypatch.setattr(settings, "JOB_SOURCES", "remotive,adzuna,jooble")
+    monkeypatch.setattr(settings, "ADZUNA_APP_ID", "")
+    monkeypatch.setattr(settings, "JOOBLE_API_KEY", "")
+    assert enabled_sources() == ["remotive"]
+    monkeypatch.setattr(settings, "JOOBLE_API_KEY", "k")
+    assert enabled_sources() == ["remotive", "jooble"]
