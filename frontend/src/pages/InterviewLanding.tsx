@@ -41,7 +41,7 @@ export default function InterviewLanding() {
 
   useEffect(() => {
     fetchMyApplications();
-  }, []);
+  }, [fetchMyApplications]);
 
   const pendingInterviews = useMemo(
     () => myApplications.filter((a) => a.status === 'interviewing'),

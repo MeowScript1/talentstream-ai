@@ -18,7 +18,7 @@ export function ApplicantList({ jobId, onViewDetail }: ApplicantListProps) {
 
   useEffect(() => {
     fetchJobApplicants(jobId);
-  }, [jobId]);
+  }, [jobId, fetchJobApplicants]);
 
   const handleStatusUpdate = async (appId: string, status: Application['status']) => {
     try {

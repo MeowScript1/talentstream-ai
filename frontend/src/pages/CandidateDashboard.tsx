@@ -25,7 +25,7 @@ export default function CandidateDashboard() {
   useEffect(() => {
     fetchJobs();
     fetchMyApplications();
-  }, []);
+  }, [fetchJobs, fetchMyApplications]);
 
   // Auto-refresh jobs every 30 seconds so newly posted jobs appear quickly
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function CandidateDashboard() {
       }
     }, 30_000);
     return () => clearInterval(interval);
-  }, [searchQuery, selectedType]);
+  }, [searchQuery, selectedType, fetchJobs]);
 
   // Debounced server-side search
   const handleSearchChange = useCallback((value: string) => {

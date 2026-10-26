@@ -40,7 +40,7 @@ jobs:
 
       # ── Type check ────────────────────────────────────────────────────────
       - name: TypeScript type check
-        run: npx tsc --noEmit
+        run: npx tsc -p tsconfig.app.json --noEmit
 
       # ── Production build ──────────────────────────────────────────────────
       - name: Build

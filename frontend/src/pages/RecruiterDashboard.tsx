@@ -13,7 +13,7 @@ export default function RecruiterDashboard() {
 
   useEffect(() => {
     fetchMyJobs();
-  }, []);
+  }, [fetchMyJobs]);
 
   const openJobs = myJobs.filter((j) => j.status === 'open').length;
   const closedJobs = myJobs.filter((j) => j.status === 'closed').length;

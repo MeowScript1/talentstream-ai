@@ -153,7 +153,7 @@ export default function MyApplications() {
 
   useEffect(() => {
     fetchMyApplications();
-  }, []);
+  }, [fetchMyApplications]);
 
   const stats = useMemo(() => ({
     total: myApplications.length,

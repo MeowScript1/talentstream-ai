@@ -47,20 +47,20 @@ export default function Applicants() {
 
   useEffect(() => {
     fetchMyJobs();
-  }, []);
+  }, [fetchMyJobs]);
 
   useEffect(() => {
     if (myJobs.length > 0 && !selectedJobId) {
       setSelectedJobId(myJobs[0].id);
     }
-  }, [myJobs]);
+  }, [myJobs, selectedJobId]);
 
   useEffect(() => {
     if (selectedJobId) {
       fetchJobApplicants(selectedJobId);
       setStatusFilter('all');
     }
-  }, [selectedJobId]);
+  }, [selectedJobId, fetchJobApplicants]);
 
   const selectedJob = useMemo(
     () => myJobs.find((j) => j.id === selectedJobId),
