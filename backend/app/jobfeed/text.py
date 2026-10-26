@@ -30,6 +30,31 @@ class _Stripper(HTMLParser):
             self.parts.append(data)
 
 
+# Characters a UTF-8 continuation byte (0x80-0xBF) turns into when mis-decoded as Windows-1252/Latin-1
+_CONT = "".join(bytes([b]).decode("cp1252", errors="ignore") for b in range(0x80, 0xC0))
+# "Â·", "Â®", "Ã©" (2-byte sequences) and "â€™" (3-byte sequences) left behind by that mistake
+_BROKEN_SEQ = re.compile(rf"[\u00c2-\u00df][{_CONT}]|[\u00e0-\u00ef][{_CONT}]{{2}}")
+
+
+def _repair(match: re.Match) -> str:
+    try:
+        return match.group(0).encode("cp1252").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return match.group(0)
+
+
+def fix_mojibake(text: str) -> str:
+    """Repair text that was UTF-8 but got decoded as Latin-1 somewhere upstream.
+
+    Some feeds (Remote OK) ship descriptions like "Full-timeÂ\u00a0Permanent", "Â£134,600" or "donâ€™t",
+    which otherwise show up as stray characters. Correct text is left untouched.
+    """
+    if not _BROKEN_SEQ.search(text) and "Â" not in text:
+        return text
+    text = _BROKEN_SEQ.sub(_repair, text)
+    return re.sub(r"Â(?=[\s.,;:!?)]|$)", "", text)  # a lone leftover "Â" next to whitespace or punctuation
+
+
 def html_to_text(raw: str | None) -> str:
     """Strip tags from a job description while keeping paragraph and bullet breaks."""
     if not raw:
@@ -37,7 +62,7 @@ def html_to_text(raw: str | None) -> str:
     parser = _Stripper()
     parser.feed(raw)
     parser.close()
-    text = "".join(parser.parts)
+    text = fix_mojibake("".join(parser.parts))
     text = re.sub(r"[ \t\r\f\v ]+", " ", text)
     text = re.sub(r" ?\n ?", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)

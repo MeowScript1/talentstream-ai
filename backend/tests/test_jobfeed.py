@@ -323,3 +323,25 @@ def test_venue_is_found_in_the_middle_of_a_sentence_too():
     assert info.venue == "Plot 12, Hitech City, Hyderabad"
     piped = detect_walkin("WALK IN DRIVE 28 Oct 2026 | 11 am - 3 pm | Address: Whitefield, Bengaluru | Contact HR", TODAY)
     assert piped.venue == "Whitefield, Bengaluru"
+
+
+def test_broken_encoding_from_a_feed_is_repaired():
+    assert html_to_text("<p>Full-timeÂ Permanent</p>") == "Full-time Permanent"
+    assert html_to_text("<p>We do not interview over WhatsApp.Â Beware of scams.</p>") == "We do not interview over WhatsApp. Beware of scams."
+    assert html_to_text("<p>Donâ€™t pay anything</p>") == "Don’t pay anything"
+    assert html_to_text("<p>Café résumé</p>") == "Café résumé"  # correct text is left alone
+
+
+@pytest.mark.parametrize(
+    "broken,fixed",
+    [
+        ("Based in the EU Â· Remote", "Based in the EU · Remote"),
+        ("GartnerÂ® Magic Quadrant", "Gartner® Magic Quadrant"),
+        ("United Kingdom: Â£134,600", "United Kingdom: £134,600"),
+        ("desde LATAM, Â¡queremos", "desde LATAM, ¡queremos"),
+        ("cafÃ© and Ã±", "café and ñ"),
+        ("Ação em São Paulo, ÂÃO", "Ação em São Paulo, ÂÃO"),  # genuine accented text must not be touched
+    ],
+)
+def test_more_broken_encodings_are_repaired(broken, fixed):
+    assert html_to_text(f"<p>{broken}</p>") == fixed
