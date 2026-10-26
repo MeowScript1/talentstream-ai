@@ -16,7 +16,7 @@ import {
   RotateCw,
 } from 'lucide-react';
 import { useJobStore } from '@/store/jobStore';
-import { useApplicationStore } from '@/store/applicationStore';
+import { useApplicationStore, type Application } from '@/store/applicationStore';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -80,7 +80,7 @@ export default function Applicants() {
     rejected: jobApplicants.filter((a) => a.status === 'rejected').length,
   }), [jobApplicants]);
 
-  const handleStatus = async (appId: string, status: string) => {
+  const handleStatus = async (appId: string, status: Application['status']) => {
     setUpdatingId(appId);
     try {
       await updateApplicantStatus(appId, status);

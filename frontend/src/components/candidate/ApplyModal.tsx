@@ -5,6 +5,7 @@ import { Job } from '@/types/job';
 import { useApplicationStore } from '@/store/applicationStore';
 import { Upload, FileText, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getApiError } from '@/lib/utils';
 
 interface ApplyModalProps {
   job: Job;
@@ -58,12 +59,12 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
       setOpen(false);
       setSelectedFile(null);
       onSuccess?.();
-    } catch (error: any) {
-      const msg = error.response?.data?.detail;
-      if (msg?.includes('already applied')) {
+    } catch (error) {
+      const msg = getApiError(error, 'Failed to submit application');
+      if (msg.includes('already applied')) {
         toast.error('You have already applied to this position');
       } else {
-        toast.error(msg || 'Failed to submit application');
+        toast.error(msg);
       }
     } finally {
       setIsLoading(false);

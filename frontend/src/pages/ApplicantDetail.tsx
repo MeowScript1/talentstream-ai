@@ -72,12 +72,12 @@ export default function ApplicantDetail() {
     fetchDetails();
   }, [id]);
 
-  const handleStatusUpdate = async (newStatus: string) => {
+  const handleStatusUpdate = async (newStatus: ApplicationDetail['status']) => {
     if (!applicant) return;
     setIsUpdating(newStatus);
     try {
       await updateApplicantStatus(applicant.id, newStatus);
-      setApplicant((prev) => prev ? { ...prev, status: newStatus as any } : null);
+      setApplicant((prev) => prev ? { ...prev, status: newStatus } : null);
       toast.success(`Candidate ${newStatus === 'shortlisted' ? 'shortlisted' : 'rejected'} successfully`);
     } catch {
       toast.error('Failed to update status');
@@ -171,7 +171,7 @@ export default function ApplicantDetail() {
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="text-sm text-text-secondary">Current Status</span>
-                <Badge variant={applicant.status as any}>{applicant.status}</Badge>
+                <Badge variant={applicant.status}>{applicant.status}</Badge>
               </div>
             </div>
 
@@ -226,7 +226,7 @@ export default function ApplicantDetail() {
 
           {(applicant.status === 'shortlisted' || applicant.status === 'rejected') && (
             <div className="text-center py-3">
-              <Badge variant={applicant.status as any} className="text-base px-4 py-2">
+              <Badge variant={applicant.status} className="text-base px-4 py-2">
                 {applicant.status === 'shortlisted' ? '✓ Shortlisted' : '✗ Rejected'}
               </Badge>
             </div>

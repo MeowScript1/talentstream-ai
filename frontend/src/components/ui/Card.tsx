@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'elevated' | 'interactive';
@@ -19,10 +19,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     if (variant === 'interactive') {
       return (
         <motion.div
-          ref={ref as any}
+          ref={ref}
           whileHover={{ y: -2, transition: { type: "spring", stiffness: 400, damping: 25 } }}
           className={cn(baseStyles, variants[variant], className)}
-          {...(props as any)}
+          {...(props as unknown as HTMLMotionProps<'div'>)}
         />
       );
     }

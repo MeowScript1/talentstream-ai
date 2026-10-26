@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { isAxiosError } from 'axios';
 import api from '@/services/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -66,17 +67,18 @@ export default function Register() {
       } else {
         navigate('/dashboard/candidate');
       }
-    } catch (error: any) {
-      const data = error.response?.data;
-      const status = error.response?.status;
+    } catch (error) {
+      const axiosError = isAxiosError(error) ? error : null;
+      const data = axiosError?.response?.data;
+      const status = axiosError?.response?.status;
       
       if (data?.detail) {
         // Pydantic validation errors come as an array of objects
         if (Array.isArray(data.detail)) {
-          const messages = data.detail.map((err: any) => {
+          const messages = data.detail.map((err: { loc?: (string | number)[]; msg: string }) => {
             const field = err.loc?.[err.loc.length - 1];
             const fieldLabel = field
-              ? field.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+              ? String(field).replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
               : '';
             return fieldLabel ? `${fieldLabel}: ${err.msg}` : err.msg;
           });
@@ -89,7 +91,7 @@ export default function Register() {
         toast.error('This email address is already registered');
       } else if (status === 422) {
         toast.error('Please check your input and try again');
-      } else if (!error.response) {
+      } else if (!axiosError?.response) {
         toast.error('Unable to connect to server. Please check your connection.');
       } else {
         toast.error('An unexpected error occurred. Please try again.');

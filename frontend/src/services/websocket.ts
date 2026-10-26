@@ -8,10 +8,14 @@ export function buildWsUrl(path: string): string {
   return `${base.origin}${base.pathname.replace(/\/$/, '')}${path}`;
 }
 
+export type ServerMessage =
+  | { type: 'message'; role: 'ai' | 'user'; text: string }
+  | { type: 'system' | 'error'; text: string };
+
 export class WebSocketService {
   private ws: WebSocket | null = null;
   private url: string;
-  private onMessageCallback: ((data: any) => void) | null = null;
+  private onMessageCallback: ((data: ServerMessage) => void) | null = null;
   private onDisconnectCallback: (() => void) | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 3;
@@ -53,13 +57,13 @@ export class WebSocketService {
     }
   }
 
-  send(data: any) {
+  send(data: unknown) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));
     }
   }
 
-  onMessage(callback: (data: any) => void) {
+  onMessage(callback: (data: ServerMessage) => void) {
     this.onMessageCallback = callback;
   }
 

@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, type SVGProps } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useApplicationStore } from '@/store/applicationStore';
+import { useApplicationStore, type Application } from '@/store/applicationStore';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -20,11 +20,11 @@ export function ApplicantList({ jobId, onViewDetail }: ApplicantListProps) {
     fetchJobApplicants(jobId);
   }, [jobId]);
 
-  const handleStatusUpdate = async (appId: string, status: string) => {
+  const handleStatusUpdate = async (appId: string, status: Application['status']) => {
     try {
       await updateApplicantStatus(appId, status);
       toast.success('Status updated');
-    } catch (error) {
+    } catch {
       toast.error('Failed to update status');
     }
   };
@@ -82,7 +82,7 @@ export function ApplicantList({ jobId, onViewDetail }: ApplicantListProps) {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-base font-bold text-text-primary">
-                    {(app as any).candidate_name || `Candidate #${app.candidate_id.substring(0, 8)}`}
+                    {app.candidate_name || `Candidate #${app.candidate_id.substring(0, 8)}`}
                   </h4>
                   <div className="md:hidden">{renderScore(app.ats_score)}</div>
                 </div>
@@ -156,7 +156,7 @@ export function ApplicantList({ jobId, onViewDetail }: ApplicantListProps) {
   );
 }
 
-function UsersIcon(props: any) {
+function UsersIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />

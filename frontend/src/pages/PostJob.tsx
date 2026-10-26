@@ -31,7 +31,7 @@ export default function PostJob() {
     ats_threshold: 65,
   });
 
-  const update = (field: keyof JobCreate, value: any) =>
+  const update = <K extends keyof JobCreate>(field: K, value: JobCreate[K]) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {

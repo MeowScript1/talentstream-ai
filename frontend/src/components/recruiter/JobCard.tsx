@@ -23,7 +23,7 @@ export function JobCard({ job }: { job: Job }) {
     try {
       await closeJob(job.id);
       toast.success('Job closed successfully');
-    } catch (error) {
+    } catch {
       toast.error('Failed to close job');
     } finally {
       setIsClosing(false);

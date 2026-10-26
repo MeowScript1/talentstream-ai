@@ -38,7 +38,7 @@ export function PostJobModal() {
         title: '', description: '', requirements: [], location: '',
         job_type: 'full_time', salary_range: '', ats_threshold: 65,
       });
-    } catch (error) {
+    } catch {
       toast.error('Failed to post job');
     } finally {
       setIsLoading(false);
@@ -114,7 +114,7 @@ export function PostJobModal() {
               <select
                 className="w-full h-12 rounded-2xl border border-border-subtle bg-bg-base px-4 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-border-active appearance-none"
                 value={formData.job_type}
-                onChange={(e) => setFormData({ ...formData, job_type: e.target.value as any })}
+                onChange={(e) => setFormData({ ...formData, job_type: e.target.value as JobCreate['job_type'] })}
               >
                 <option value="full_time">Full Time</option>
                 <option value="part_time">Part Time</option>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import toast from 'react-hot-toast';
+import { getApiError } from '@/lib/utils';
 import { AuthShell } from '@/components/layout/AuthShell';
 
 export default function Login() {
@@ -28,8 +29,8 @@ export default function Login() {
       } else {
         navigate('/dashboard/candidate');
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Invalid credentials');
+    } catch (error) {
+      toast.error(getApiError(error, 'Invalid credentials'));
     } finally {
       setIsLoading(false);
     }

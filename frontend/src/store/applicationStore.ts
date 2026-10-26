@@ -23,7 +23,7 @@ interface ApplicationState {
   fetchMyApplications: () => Promise<void>;
   fetchJobApplicants: (jobId: string) => Promise<void>;
   applyToJob: (jobId: string, file: File) => Promise<void>;
-  updateApplicantStatus: (appId: string, status: string) => Promise<void>;
+  updateApplicantStatus: (appId: string, status: Application['status']) => Promise<void>;
   rescoreApplication: (appId: string) => Promise<void>;
 }
 
@@ -72,12 +72,12 @@ export const useApplicationStore = create<ApplicationState>((set) => ({
     }
   },
 
-  updateApplicantStatus: async (appId: string, status: string) => {
+  updateApplicantStatus: async (appId: string, status: Application['status']) => {
     try {
       await api.patch(`/applications/${appId}/status`, { status });
       set((state) => ({
         jobApplicants: state.jobApplicants.map((app) => 
-          app.id === appId ? { ...app, status: status as any } : app
+          app.id === appId ? { ...app, status } : app
         )
       }));
     } catch (error) {

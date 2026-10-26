@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import toast from 'react-hot-toast';
+import { getApiError } from '@/lib/utils';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -105,8 +106,8 @@ export default function Settings() {
       await changePassword(passwordForm.current_password, passwordForm.new_password);
       toast.success('Password changed successfully');
       setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Failed to change password');
+    } catch (err) {
+      toast.error(getApiError(err, 'Failed to change password'));
     } finally {
       setPasswordSaving(false);
     }
