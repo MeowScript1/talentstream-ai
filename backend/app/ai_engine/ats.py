@@ -1,4 +1,5 @@
 import json
+import re
 
 from google.genai import types
 
@@ -6,6 +7,17 @@ from app.ai_engine.client import get_client
 from app.core.config import settings
 
 MODEL_ID = 'gemini-2.5-flash-lite'
+
+# A real resume is a few thousand characters. Anything beyond this is padding or an attack,
+# and it would be billed by the model on every score and re-score.
+MAX_RESUME_CHARS = 20_000
+
+_RESUME_TAG = re.compile(r"</?\s*resume\s*>", re.IGNORECASE)
+
+
+def prepare_resume_text(text: str) -> str:
+    """Cap the size and stop the text from closing the <resume> fence early."""
+    return _RESUME_TAG.sub("", text)[:MAX_RESUME_CHARS]
 
 def parse_ats_json(text: str) -> dict:
     try:
@@ -55,7 +67,7 @@ async def score_resume(resume_text: str, job_title: str, job_description: str, r
         job_title=job_title,
         job_description=job_description,
         requirements=", ".join(requirements),
-        resume_text=resume_text
+        resume_text=prepare_resume_text(resume_text)
     )
     
     try:

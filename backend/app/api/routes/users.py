@@ -2,13 +2,14 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, require_role
 from app.core.security import get_password_hash, verify_password
 from app.models.user import User
+from app.schemas.types import MAX_PASSWORD_LENGTH, text
 from app.schemas.user import UserResponse
 from app.services.resume import read_resume
 from app.services.storage import StorageError, safe_filename, upload_profile_resume
@@ -17,14 +18,14 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 class ProfileUpdate(BaseModel):
-    full_name: Optional[str] = None
-    company_name: Optional[str] = None
-    avatar_url: Optional[str] = None
+    full_name: Optional[text(255, min_length=1)] = None
+    company_name: Optional[text(255)] = None
+    avatar_url: Optional[text(2048)] = None
 
 
 class PasswordChange(BaseModel):
-    current_password: str
-    new_password: str
+    current_password: str = Field(max_length=MAX_PASSWORD_LENGTH)
+    new_password: str = Field(max_length=MAX_PASSWORD_LENGTH)
 
 
 class ResumeInfo(BaseModel):

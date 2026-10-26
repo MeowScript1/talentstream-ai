@@ -10,6 +10,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -103,7 +104,13 @@ async def submit_application(
     )
     
     db.add(new_app)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        # Two requests passed the "already applied?" check at the same moment (a double-click);
+        # the unique constraint let exactly one through, so tell the other one the truth.
+        await db.rollback()
+        raise HTTPException(status_code=409, detail="You have already applied to this job") from None
     await db.refresh(new_app)
     
     # Trigger ATS scoring in background

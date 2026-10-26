@@ -4,19 +4,21 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.schemas.types import MAX_PASSWORD_LENGTH, text
+
 
 class UserBase(BaseModel):
     email: EmailStr
-    full_name: str
+    full_name: text(255, min_length=1)
     role: str = Field(pattern="^(employer|candidate)$")
-    company_name: Optional[str] = None
+    company_name: Optional[text(255)] = None
 
 class UserCreate(UserBase):
-    password: str = Field(min_length=8)
+    password: str = Field(min_length=8, max_length=MAX_PASSWORD_LENGTH)
 
 class UserLogin(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(max_length=MAX_PASSWORD_LENGTH)
 
 class UserResponse(UserBase):
     id: uuid.UUID

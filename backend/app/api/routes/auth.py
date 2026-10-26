@@ -1,12 +1,13 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.login_throttle import client_ip, login_throttle
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.user import User
 from app.schemas.user import TokenResponse, UserCreate, UserLogin, UserResponse
@@ -48,18 +49,29 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer", "user": new_user}
 
 @router.post("/login", response_model=TokenResponse)
-async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
+async def login(request: Request, user_data: UserLogin, db: AsyncSession = Depends(get_db)):
+    ip = client_ip(request)
+    wait = login_throttle.retry_after(ip, user_data.email)
+    if wait:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many failed login attempts. Please wait a few minutes and try again.",
+            headers={"Retry-After": str(wait)},
+        )
+
     query = select(User).where(User.email == user_data.email)
     result = await db.execute(query)
     user = result.scalar_one_or_none()
     
     if not user or not verify_password(user_data.password, user.password_hash):
+        login_throttle.record_failure(ip, user_data.email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        
+
+    login_throttle.reset(ip, user_data.email)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(user.id), "role": user.role},
