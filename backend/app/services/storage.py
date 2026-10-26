@@ -1,82 +1,82 @@
+"""Resume file storage: Supabase Storage in production, local disk in development."""
+
 import asyncio
 import logging
+import re
 import uuid
-
-from fastapi import UploadFile
+from pathlib import Path
 
 from app.core.config import settings
 from app.core.supabase import get_supabase_client
 
 logger = logging.getLogger(__name__)
 
-async def upload_resume(file: UploadFile, candidate_id: uuid.UUID, job_id: uuid.UUID) -> str:
-    """Save resume PDF to Supabase Storage and return its URL."""
-    content = await file.read()
-    
-    # Sanitize filename
-    safe_name = file.filename.replace(" ", "_") if file.filename else "resume.pdf"
-    
-    # Create the storage path: {candidate_id}/{job_id}/{safe_name}
-    storage_path = f"{candidate_id}/{job_id}/{safe_name}"
-    
-    supabase = get_supabase_client()
-    bucket = settings.SUPABASE_STORAGE_BUCKET
-    
-    def _upload_to_supabase():
-        # Using Supabase sync client, wrapped in to_thread
-        res = supabase.storage.from_(bucket).upload(
-            path=storage_path,
-            file=content,
-            file_options={"content-type": "application/pdf"}
-        )
-        return res
-        
-    try:
-        # Run the synchronous upload in a thread pool to avoid blocking the event loop
-        await asyncio.to_thread(_upload_to_supabase)
-    except Exception as exc:
-        # If the file already exists or there is an issue, we'll catch it.
-        # supabase-py raises an exception on error, but we can also just log it and potentially return the existing URL
-        # if it's a conflict. For simplicity, we just log and raise.
-        logger.warning(f"Storage upload error (might already exist): {exc}")
-        # Note: If it already exists, we can still return the URL safely.
+# Same folder app.main serves at /api/v1/uploads/resumes
+LOCAL_UPLOADS_DIR = Path(__file__).resolve().parents[2] / "uploads" / "resumes"
+# ~10 years. The URL is stored with the application/profile, so it must outlive any normal expiry.
+SIGNED_URL_SECONDS = 315360000
 
-    # Return the public URL if the bucket is public, else the signed URL
-    if settings.SUPABASE_STORAGE_BUCKET_PUBLIC:
-        public_url = supabase.storage.from_(bucket).get_public_url(storage_path)
-        return public_url
-    else:
-        # For non-public buckets, usually we create a signed URL with a long expiry,
-        # or we return an internal API path that proxies the download.
-        # But wait! If the frontend needs to view the resume, we need a signed URL, 
-        # or we need to proxy it. Let's create a proxy path that matches the previous local path,
-        # OR we just return the signed URL. 
-        # The previous version returned a proxy path: `/api/v1/uploads/resumes/{relative_path}`
-        # Let's keep returning a relative proxy path or just return the Supabase signed URL directly.
-        # Returning a signed URL directly is easier for the frontend, but it expires.
-        # Let's return the Supabase URL and proxy it if needed, or just return the signed url with 1 week expiry.
-        # But wait, earlier the code returned `/api/v1/uploads/resumes/...`
-        # Let's keep that API contract for now, but since we deleted local files, that endpoint will fail unless we proxy it.
-        # Actually, let's just return a signed URL valid for a long time (e.g., 10 years for simplicity in this prototype).
-        # We can also just configure the bucket as public and return get_public_url.
-        pass
 
-    # Actually, returning a signed URL is best if not public:
-    try:
-        # Valid for ~10 years (315360000 seconds)
-        signed_url_res = await asyncio.to_thread(
-            supabase.storage.from_(bucket).create_signed_url,
-            storage_path,
-            315360000 
-        )
-        # create_signed_url returns a dictionary `{'signedURL': '...'}` in storage3
-        if isinstance(signed_url_res, dict) and 'signedURL' in signed_url_res:
-            return signed_url_res['signedURL']
-        elif hasattr(signed_url_res, 'signed_url'):
-            return signed_url_res.signed_url
-        return str(signed_url_res)
-    except Exception as exc:
-        logger.error(f"Failed to generate signed URL: {exc}")
-        # Fallback to returning a relative path that we must proxy
+class StorageError(RuntimeError):
+    """The file could not be stored or a URL for it could not be created."""
+
+
+def safe_filename(name: str | None) -> str:
+    """Basename only, with anything outside letters, digits, dot, dash and underscore replaced."""
+    base = Path(name or "resume.pdf").name
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", base).strip("._") or "resume.pdf"
+    return cleaned[-120:]
+
+
+def _use_local_storage() -> bool:
+    # Production startup already refuses to boot without Supabase settings,
+    # so falling back to disk only ever happens in development.
+    return settings.ENVIRONMENT != "production" and not (
+        settings.SUPABASE_URL and settings.SUPABASE_SERVICE_ROLE_KEY
+    )
+
+
+async def _store(content: bytes, storage_path: str) -> str:
+    """Save PDF bytes at storage_path and return a URL for it. Raises StorageError on failure."""
+    if _use_local_storage():
+        target = LOCAL_UPLOADS_DIR / storage_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        await asyncio.to_thread(target.write_bytes, content)
         return f"/api/v1/uploads/resumes/{storage_path}"
 
+    bucket = settings.SUPABASE_STORAGE_BUCKET
+    try:
+        files = get_supabase_client().storage.from_(bucket)
+        # supabase-py's client is synchronous, so keep it off the event loop
+        await asyncio.to_thread(
+            files.upload,
+            path=storage_path,
+            file=content,
+            file_options={"content-type": "application/pdf", "upsert": "true"},
+        )
+        if settings.SUPABASE_STORAGE_BUCKET_PUBLIC:
+            return files.get_public_url(storage_path)
+
+        signed = await asyncio.to_thread(files.create_signed_url, storage_path, SIGNED_URL_SECONDS)
+        # storage3 returns a dict in some versions and an object in others
+        url = signed.get("signedURL") if isinstance(signed, dict) else getattr(signed, "signed_url", None)
+        if not url:
+            raise StorageError("Supabase returned no signed URL")
+        return url
+    except StorageError:
+        raise
+    except Exception as exc:
+        logger.error("Resume storage failed for %s: %s", storage_path, exc)
+        raise StorageError(str(exc)) from exc
+
+
+async def upload_application_resume(
+    content: bytes, candidate_id: uuid.UUID, job_id: uuid.UUID, filename: str | None
+) -> str:
+    return await _store(content, f"{candidate_id}/{job_id}/{safe_filename(filename)}")
+
+
+async def upload_profile_resume(content: bytes, candidate_id: uuid.UUID, filename: str | None) -> str:
+    # A unique name per upload: applications keep pointing at the exact file they used,
+    # even after the candidate replaces their saved resume.
+    return await _store(content, f"{candidate_id}/profile/{uuid.uuid4().hex[:12]}-{safe_filename(filename)}")

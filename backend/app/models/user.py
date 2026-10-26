@@ -19,5 +19,10 @@ class User(Base):
     role: Mapped[str] = mapped_column(role_enum, nullable=False, index=True)
     company_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Saved resume (candidates): reused when applying so it isn't re-uploaded every time
+    resume_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    resume_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    resume_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    resume_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

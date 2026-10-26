@@ -21,6 +21,8 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     id: uuid.UUID
     avatar_url: Optional[str] = None
+    resume_filename: Optional[str] = None
+    resume_updated_at: Optional[datetime] = None
     created_at: datetime
     is_active: bool
 

@@ -1,6 +1,5 @@
 import uuid
 
-import fitz  # PyMuPDF
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -22,7 +21,8 @@ from app.models.application import Application
 from app.models.job import Job
 from app.models.user import User
 from app.schemas.application import ApplicationResponse
-from app.services.storage import upload_resume
+from app.services.resume import read_resume
+from app.services.storage import StorageError, upload_application_resume
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
@@ -56,13 +56,10 @@ async def run_ats_scoring(application_id: uuid.UUID):
 async def submit_application(
     background_tasks: BackgroundTasks,
     job_id: uuid.UUID = Form(...),
-    resume: UploadFile = File(...),
+    resume: UploadFile | None = File(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("candidate"))
 ):
-    if not resume.filename.endswith('.pdf'):
-        raise HTTPException(status_code=400, detail="Only PDF resumes are supported")
-
     # Check if already applied
     query = select(Application).where(Application.job_id == job_id, Application.candidate_id == current_user.id)
     result = await db.execute(query)
@@ -77,21 +74,25 @@ async def submit_application(
     if not job or job.status != 'open':
         raise HTTPException(status_code=400, detail="Job is not available")
 
-    # Upload resume
-    resume_url = await upload_resume(resume, current_user.id, job_id)
-    
-    # Extract text using PyMuPDF
-    await resume.seek(0)
-    pdf_bytes = await resume.read()
-    
-    resume_text = ""
-    try:
-        with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
-            for page in doc:
-                resume_text += page.get_text()
-    except Exception as e:
-        print(f"Failed to parse PDF: {e}")
-        # We can still proceed without text, but ATS score will be low
+    if resume is not None and resume.filename:
+        # A fresh file was sent: validate it and store it with this application
+        content, resume_text = await read_resume(resume)
+        try:
+            resume_url = await upload_application_resume(content, current_user.id, job_id, resume.filename)
+        except StorageError:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="We couldn't store your resume right now. Please try again in a moment.",
+            ) from None
+    elif current_user.resume_url and current_user.resume_text:
+        # No file sent: reuse the resume saved on the candidate's profile
+        resume_url = current_user.resume_url
+        resume_text = current_user.resume_text
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Upload a resume, or save one on your profile first",
+        )
 
     new_app = Application(
         job_id=job_id,
@@ -106,8 +107,7 @@ async def submit_application(
     await db.refresh(new_app)
     
     # Trigger ATS scoring in background
-    if resume_text:
-        background_tasks.add_task(run_ats_scoring, new_app.id)
+    background_tasks.add_task(run_ats_scoring, new_app.id)
         
     return new_app
 
