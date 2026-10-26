@@ -45,7 +45,7 @@ jobs:
       # ── Production build ──────────────────────────────────────────────────
       - name: Build
         env:
-          VITE_API_URL: https://seven-day-interview.onrender.com/api/v1
+          VITE_API_URL: /api/v1
         run: npm run build
 
       - name: Upload build artifact

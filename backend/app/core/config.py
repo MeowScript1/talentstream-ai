@@ -81,10 +81,7 @@ class Settings(BaseSettings):
     def CORS_ORIGINS(self) -> list[str]:
         """Allowed CORS origins based on environment."""
         dev_origins = ["http://localhost:5173", "http://localhost:3000"]
-        prod_origins = [
-            self.FRONTEND_URL,
-            "https://seven-day-interview.onrender.com",
-        ]
+        prod_origins = [self.FRONTEND_URL]
         if self.ENVIRONMENT == "production":
             return list({*dev_origins, *prod_origins})  # deduplicated
         return dev_origins

@@ -65,7 +65,6 @@ if settings.ENVIRONMENT == "production":
     app.add_middleware(
         TrustedHostMiddleware,
         allowed_hosts=[
-            "seven-day-interview.onrender.com",
             "*.onrender.com",
             "localhost",
         ],

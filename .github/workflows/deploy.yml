@@ -72,7 +72,7 @@ jobs:
           for i in 1 2 3; do
             response=$(curl --silent --fail \
               --max-time 10 \
-              https://seven-day-interview.onrender.com/health || echo "FAIL")
+              ${{ vars.BACKEND_URL }}/health || echo "FAIL")
             if echo "$response" | grep -q '"ok"'; then
               echo "Health check passed: $response"
               exit 0
