@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -20,6 +20,7 @@ import Settings from '@/pages/Settings';
 import MyApplications from '@/pages/MyApplications';
 import InterviewLanding from '@/pages/InterviewLanding';
 import Profile from '@/pages/Profile';
+import PublicJobs from '@/pages/PublicJobs';
 
 function App() {
   const location = useLocation();
@@ -40,6 +41,8 @@ function App() {
       transition={{ duration: 0.2, ease: 'easeOut' }}
     >
       <Routes location={location}>
+        <Route path="/" element={<PublicJobs />} />
+        <Route path="/jobs" element={<PublicJobs />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
@@ -60,7 +63,6 @@ function App() {
           <Route path="/interview" element={<InterviewLanding />} />
           <Route path="/profile" element={<Profile />} />
 
-          <Route path="/" element={<Navigate to="/login" replace />} />
         </Route>
       </Routes>
     </motion.div>

@@ -1,0 +1,250 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Briefcase, Loader2, MapPin, Search, ShieldAlert, Wifi } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { cn } from '@/lib/utils';
+import { fetchFeed, fetchFeedStats, type FeedStats } from '@/services/feed';
+import type { FeedJob, FeedKind, FeedPage } from '@/types/feed';
+import { FeedJobCard } from './FeedJobCard';
+
+const PAGE_SIZE = 15;
+
+function useDebounced<T>(value: T, ms: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return debounced;
+}
+
+interface TabProps {
+  active: boolean;
+  onClick: () => void;
+  icon: typeof Briefcase;
+  label: string;
+  count?: number;
+}
+
+function Tab({ active, onClick, icon: Icon, label, count }: TabProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full px-4 text-sm font-bold transition-all',
+        active ? 'bg-accent-primary text-bg-base shadow-pop' : 'text-text-secondary hover:text-text-primary'
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      {label}
+      {count !== undefined && (
+        <span className={cn('rounded-full px-1.5 text-xs', active ? 'bg-bg-base/15' : 'bg-white/10')}>{count}</span>
+      )}
+    </button>
+  );
+}
+
+/** Jobs collected from other platforms: "Apply online" and "Walk-in (next 7 days)", each with its own tab. */
+export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind }) {
+  const [kind, setKind] = useState<FeedKind>(initialKind);
+  const [query, setQuery] = useState('');
+  const [place, setPlace] = useState('');
+  const [remoteOnly, setRemoteOnly] = useState(false);
+  const [includeRisky, setIncludeRisky] = useState(false);
+  const debouncedQuery = useDebounced(query, 350);
+  const debouncedPlace = useDebounced(place, 350);
+
+  const [items, setItems] = useState<FeedJob[]>([]);
+  const [meta, setMeta] = useState<Omit<FeedPage, 'items'> | null>(null);
+  const [stats, setStats] = useState<FeedStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(false);
+  const latest = useRef(0); // ignore responses from searches that were replaced
+
+  const load = useCallback(
+    async (page: number) => {
+      const id = ++latest.current;
+      if (page === 1) setLoading(true);
+      else setLoadingMore(true);
+      setError(false);
+      try {
+        const data = await fetchFeed({
+          kind,
+          q: debouncedQuery,
+          location: debouncedPlace,
+          remote: kind === 'apply' && remoteOnly ? true : undefined,
+          include_risky: includeRisky,
+          page,
+          limit: PAGE_SIZE,
+        });
+        if (id !== latest.current) return;
+        const { items: fresh, ...rest } = data;
+        setItems((prev) => (page === 1 ? fresh : [...prev, ...fresh]));
+        setMeta(rest);
+      } catch {
+        if (id === latest.current) setError(true);
+      } finally {
+        if (id === latest.current) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
+      }
+    },
+    [kind, debouncedQuery, debouncedPlace, remoteOnly, includeRisky]
+  );
+
+  useEffect(() => {
+    load(1);
+  }, [load]);
+
+  useEffect(() => {
+    fetchFeedStats().then(setStats).catch(() => undefined);
+  }, []);
+
+  // The very first visit starts collecting jobs in the background: check again shortly
+  useEffect(() => {
+    if (meta?.syncing && items.length === 0) {
+      const t = setTimeout(() => load(1), 6000);
+      return () => clearTimeout(t);
+    }
+  }, [meta?.syncing, items.length, load]);
+
+  const handleReported = (jobId: string, hidden: boolean) => {
+    if (hidden) setItems((prev) => prev.filter((j) => j.id !== jobId));
+  };
+
+  const hasIndiaSource = meta?.sources.some((s) => s.name === 'adzuna') ?? false;
+  const canLoadMore = meta !== null && items.length < meta.total;
+
+  return (
+    <div className="space-y-4">
+      <div className="glass flex gap-1 rounded-full p-1">
+        <Tab active={kind === 'apply'} onClick={() => setKind('apply')} icon={Briefcase} label="Apply online" count={stats?.apply_jobs} />
+        <Tab
+          active={kind === 'walkin'}
+          onClick={() => setKind('walkin')}
+          icon={MapPin}
+          label="Walk-in · 7 days"
+          count={stats?.walkin_jobs_next_7_days}
+        />
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-[1fr_14rem]">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search roles, companies, skills…" className="pl-11" />
+        </div>
+        <div className="relative">
+          <MapPin className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+          <Input value={place} onChange={(e) => setPlace(e.target.value)} placeholder="City or country" className="pl-11" />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {kind === 'apply' && (
+          <button
+            type="button"
+            onClick={() => setRemoteOnly((v) => !v)}
+            aria-pressed={remoteOnly}
+            className={cn(
+              'inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1.5',
+              remoteOnly ? 'border-accent-primary bg-accent-primary text-bg-base' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
+            )}
+          >
+            <Wifi className="h-3.5 w-3.5" /> Remote only
+          </button>
+        )}
+        {(meta?.hidden_risky ?? 0) > 0 && !includeRisky && (
+          <span className="inline-flex items-center gap-2 text-xs text-text-muted">
+            <ShieldAlert className="h-3.5 w-3.5 text-warning" />
+            {meta?.hidden_risky} suspicious {meta?.hidden_risky === 1 ? 'listing' : 'listings'} hidden.
+            <button type="button" onClick={() => setIncludeRisky(true)} className="py-3 font-bold text-accent-primary hover:underline md:py-0">
+              Show anyway
+            </button>
+          </span>
+        )}
+        {includeRisky && (
+          <button type="button" onClick={() => setIncludeRisky(false)} className="py-3 text-xs font-bold text-accent-primary hover:underline md:py-0">
+            Hide suspicious listings again
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-44 w-full rounded-3xl" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-3xl border border-danger/30 bg-danger/10 p-6 text-center">
+          <p className="font-bold text-text-primary">Couldn't load jobs</p>
+          <p className="mt-1 text-sm text-text-secondary">The server may be waking up. Give it a few seconds.</p>
+          <Button className="mt-3" size="sm" onClick={() => load(1)}>
+            Try again
+          </Button>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="rounded-3xl border-2 border-dashed border-white/15 bg-white/[0.02] p-8 text-center">
+          {meta?.syncing ? (
+            <>
+              <Loader2 className="mx-auto h-6 w-6 animate-spin text-accent-primary" />
+              <p className="mt-3 font-bold text-text-primary">Fetching the latest jobs…</p>
+              <p className="mt-1 text-sm text-text-secondary">This only takes a few seconds the first time.</p>
+            </>
+          ) : kind === 'walkin' ? (
+            <>
+              <MapPin className="mx-auto h-6 w-6 text-accent-primary" />
+              <p className="mt-3 font-bold text-text-primary">No walk-in drives in the next 7 days</p>
+              <p className="mx-auto mt-1 max-w-md text-sm text-text-secondary">
+                {hasIndiaSource
+                  ? 'We scan listings for walk-in drives and show the ones happening this week. Check back soon, or try a different city.'
+                  : 'Walk-in drives come from India job sources, which are not connected yet. Meanwhile, browse jobs you can apply for online.'}
+              </p>
+              <Button className="mt-4" size="sm" variant="ghost" onClick={() => setKind('apply')}>
+                See jobs to apply online
+              </Button>
+            </>
+          ) : (
+            <>
+              <Search className="mx-auto h-6 w-6 text-accent-primary" />
+              <p className="mt-3 font-bold text-text-primary">No jobs match</p>
+              <p className="mt-1 text-sm text-text-secondary">Try fewer words or clear the filters.</p>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.map((job) => (
+            <FeedJobCard key={job.id} job={job} onReported={handleReported} />
+          ))}
+          {canLoadMore && (
+            <div className="flex justify-center pt-2">
+              <Button variant="secondary" onClick={() => load((meta?.page ?? 1) + 1)} loading={loadingMore}>
+                Load more ({meta ? meta.total - items.length : 0} left)
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="pt-2 text-center text-xs text-text-muted">
+        Jobs are collected from{' '}
+        {(meta?.sources ?? []).map((s, i, all) => (
+          <span key={s.name}>
+            <a href={s.url} target="_blank" rel="noopener noreferrer" className="font-bold text-text-secondary hover:underline">
+              {s.label}
+            </a>
+            {i < all.length - 1 ? ', ' : ''}
+          </span>
+        ))}{' '}
+        through their official feeds, and every listing links to the original posting. Ratings are automatic checks, not
+        guarantees. Never pay to get a job.
+      </p>
+    </div>
+  );
+}

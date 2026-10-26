@@ -81,6 +81,9 @@ export default function Login() {
         </form>
 
         <div className="mt-6 text-center text-sm text-text-secondary">
+          <Link to="/" className="mb-2 block py-2 text-xs font-bold text-text-secondary hover:text-text-primary">
+            Just browsing? See jobs without signing up
+          </Link>
           New here?{' '}
           <Link to="/register" className="inline-block py-3 -my-3 font-bold text-accent-primary hover:underline underline-offset-4">
             Make an account

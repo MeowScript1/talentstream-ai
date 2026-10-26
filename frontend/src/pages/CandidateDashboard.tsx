@@ -5,6 +5,7 @@ import { useApplicationStore } from '@/store/applicationStore';
 import { JobFeedCard } from '@/components/candidate/JobFeedCard';
 import { ApplyModal } from '@/components/candidate/ApplyModal';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { FeedExplorer } from '@/components/feed/FeedExplorer';
 import { Input } from '@/components/ui/Input';
 import { Search, BriefcaseBusiness, Clock, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +18,8 @@ export default function CandidateDashboard() {
   const { jobs, isLoading: jobsLoading, isSearching, fetchJobs, searchJobs } = useJobStore();
   const { myApplications, fetchMyApplications } = useApplicationStore();
   const navigate = useNavigate();
+  // 'feed' = jobs collected from other platforms (the default); 'native' = jobs posted directly on TalentStream
+  const [section, setSection] = useState<'feed' | 'native'>('feed');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -124,117 +127,142 @@ export default function CandidateDashboard() {
         </div>
       )}
 
-      {/* Search bar with refresh */}
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-5 top-1/2 z-10 -translate-y-1/2 h-5 w-5 text-text-secondary" />
-        <Input 
-          className="pl-12 pr-12 h-12 text-base rounded-full shadow-card bg-bg-surface/80 backdrop-blur-xl"
-          placeholder="Search roles, companies, vibes…"
-          value={searchQuery}
-          onChange={(e) => handleSearchChange(e.target.value)}
-        />
-        <button
-          onClick={handleRefresh}
-          className="absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 md:right-4 md:h-8 md:w-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-all"
-          title="Refresh jobs"
-        >
-          {isSearching ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4" />
-          )}
-        </button>
-      </div>
-
-      {/* Job type filter chips */}
-      <div className="flex flex-wrap gap-2">
-        {JOB_TYPE_OPTIONS.map((opt) => (
+      {/* Where the jobs come from */}
+      <div className="flex flex-wrap items-center gap-2">
+        {([['feed', 'Jobs from everywhere'], ['native', 'Posted on TalentStream']] as const).map(([key, label]) => (
           <button
-            key={opt.label}
-            onClick={() => handleTypeChange(opt.value)}
-            className={`px-4 py-3 md:py-1.5 rounded-full text-sm font-medium transition-colors ${
-              selectedType === opt.value 
-                ? 'bg-accent-primary text-bg-base' 
-                : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary'
+            key={key}
+            type="button"
+            onClick={() => setSection(key)}
+            aria-pressed={section === key}
+            className={`min-h-11 rounded-full border px-4 text-sm font-bold transition-colors md:min-h-0 md:py-1.5 ${
+              section === key
+                ? 'border-accent-primary bg-accent-primary text-bg-base'
+                : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
             }`}
           >
-            {opt.label}
+            {label}
           </button>
         ))}
       </div>
 
-      <div className="space-y-6">
-        {jobsLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-48 w-full rounded-2xl" />
-            ))}
-          </div>
-        ) : filteredJobs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4 border border-dashed border-border-subtle rounded-2xl bg-bg-surface text-center">
-            <Search className="h-12 w-12 text-text-muted mb-4" />
-            <h3 className="text-lg font-medium text-text-primary mb-2">No jobs found</h3>
-            <p className="text-text-secondary max-w-sm">
-              We couldn't find any open positions matching your search criteria. Try adjusting your filters.
-            </p>
-            {(searchQuery || selectedType) && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedType(null);
-                  fetchJobs();
-                }}
-                className="mt-4 px-5 py-2 rounded-2xl text-sm font-semibold text-accent-primary border border-accent-primary hover:bg-accent-muted transition-colors"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
-        ) : (
-          <motion.div 
-            className="space-y-4"
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: 0.05 }
-              }
-            }}
-            initial="hidden"
-            animate="show"
-          >
-            <AnimatePresence>
-              {filteredJobs.map((job: Job) => {
-                const status = applicationStatusMap.get(job.id) ?? null;
-                const appId = applicationIdMap.get(job.id);
+      {section === 'feed' && <FeedExplorer />}
 
-                return (
-                  <JobFeedCard 
-                    key={job.id} 
-                    job={job} 
-                    status={status}
-                    onApply={undefined} // handled by ApplyModal below as trigger
-                    onInterview={() => appId && navigate(`/interview/${appId}`)}
-                    applyTrigger={
-                      status === null ? (
-                        <ApplyModal
-                          job={job}
-                          trigger={
-                            <button className="px-5 py-2.5 rounded-2xl text-sm font-semibold bg-accent-primary text-bg-base hover:bg-accent-primary/90 transition-colors">
-                              Apply Now
-                            </button>
-                          }
-                          onSuccess={() => fetchMyApplications()}
-                        />
-                      ) : undefined
-                    }
-                  />
-                );
-              })}
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </div>
+      {section === 'native' && (
+        <>
+        {/* Search bar with refresh */}
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-5 top-1/2 z-10 -translate-y-1/2 h-5 w-5 text-text-secondary" />
+          <Input 
+            className="pl-12 pr-12 h-12 text-base rounded-full shadow-card bg-bg-surface/80 backdrop-blur-xl"
+            placeholder="Search roles, companies, vibes…"
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+          />
+          <button
+            onClick={handleRefresh}
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 md:right-4 md:h-8 md:w-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-all"
+            title="Refresh jobs"
+          >
+            {isSearching ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+
+        {/* Job type filter chips */}
+        <div className="flex flex-wrap gap-2">
+          {JOB_TYPE_OPTIONS.map((opt) => (
+            <button
+              key={opt.label}
+              onClick={() => handleTypeChange(opt.value)}
+              className={`px-4 py-3 md:py-1.5 rounded-full text-sm font-medium transition-colors ${
+                selectedType === opt.value 
+                  ? 'bg-accent-primary text-bg-base' 
+                  : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-6">
+          {jobsLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : filteredJobs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 px-4 border border-dashed border-border-subtle rounded-2xl bg-bg-surface text-center">
+              <Search className="h-12 w-12 text-text-muted mb-4" />
+              <h3 className="text-lg font-medium text-text-primary mb-2">No jobs found</h3>
+              <p className="text-text-secondary max-w-sm">
+                We couldn't find any open positions matching your search criteria. Try adjusting your filters.
+              </p>
+              {(searchQuery || selectedType) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedType(null);
+                    fetchJobs();
+                  }}
+                  className="mt-4 px-5 py-2 rounded-2xl text-sm font-semibold text-accent-primary border border-accent-primary hover:bg-accent-muted transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          ) : (
+            <motion.div 
+              className="space-y-4"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.05 }
+                }
+              }}
+              initial="hidden"
+              animate="show"
+            >
+              <AnimatePresence>
+                {filteredJobs.map((job: Job) => {
+                  const status = applicationStatusMap.get(job.id) ?? null;
+                  const appId = applicationIdMap.get(job.id);
+
+                  return (
+                    <JobFeedCard 
+                      key={job.id} 
+                      job={job} 
+                      status={status}
+                      onApply={undefined} // handled by ApplyModal below as trigger
+                      onInterview={() => appId && navigate(`/interview/${appId}`)}
+                      applyTrigger={
+                        status === null ? (
+                          <ApplyModal
+                            job={job}
+                            trigger={
+                              <button className="px-5 py-2.5 rounded-2xl text-sm font-semibold bg-accent-primary text-bg-base hover:bg-accent-primary/90 transition-colors">
+                                Apply Now
+                              </button>
+                            }
+                            onSuccess={() => fetchMyApplications()}
+                          />
+                        ) : undefined
+                      }
+                    />
+                  );
+                })}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </div>
+        </>
+      )}
     </div>
   );
 }

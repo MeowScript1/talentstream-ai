@@ -65,6 +65,20 @@ services:
       - key: FRONTEND_URL
         value: https://talentstream-ai-pi.vercel.app
 
+      # ── Job feed (jobs collected from other platforms' official APIs) ───────
+      # Remotive and Remote OK need no key. Adzuna is the India source and needs a free key.
+      - key: ADZUNA_APP_ID
+        sync: false            # https://developer.adzuna.com (free)
+
+      - key: ADZUNA_APP_KEY
+        sync: false
+
+      - key: ADZUNA_COUNTRY
+        value: in
+
+      - key: INGEST_TOKEN
+        generateValue: true    # lets you force a refresh: POST /api/v1/feed/refresh with header X-Ingest-Token
+
       # ── ATS ───────────────────────────────────────────────────────────────
       - key: ATS_SCORE_THRESHOLD
         value: "65"
