@@ -8,7 +8,6 @@ overdue, so a free server that sleeps still refreshes the first time someone vis
 import asyncio
 import logging
 from datetime import date, datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
 
 import httpx
 from sqlalchemy import select, update
@@ -16,6 +15,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
+from app.core.timeutil import local_today
 from app.jobfeed.sources import SOURCES, enabled_sources
 from app.jobfeed.text import dedupe_key, truncate
 from app.jobfeed.trust import assess
@@ -34,7 +34,7 @@ _background: set[asyncio.Task] = set()
 
 
 def today_local() -> date:
-    return datetime.now(ZoneInfo(settings.FEED_TIMEZONE)).date()
+    return local_today()
 
 
 def to_row(job: RawJob, today: date, now: datetime) -> dict:

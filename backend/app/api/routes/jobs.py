@@ -11,12 +11,24 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.core.dependencies import require_role
 from app.core.redis import get_redis, report_redis_failure
+from app.jobfeed.trust import looks_like_fee_request
 from app.models.application import Application
 from app.models.job import Job
 from app.models.user import User
-from app.schemas.job import JobCreate, JobResponse, JobUpdate
+from app.schemas.job import JobCreate, JobResponse, JobUpdate, check_walkin_fields
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
+
+NO_FEES_MESSAGE = (
+    "Job posts can't ask candidates for money (registration fees, deposits, kits...). "
+    "Please remove that wording. Genuine employers never charge to hire."
+)
+
+
+def _reject_fee_requests(*texts: str | None) -> None:
+    # Scammers can register as employers too, so refuse the classic "pay a fee to get the job" post
+    if any(t and looks_like_fee_request(t) for t in texts):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=NO_FEES_MESSAGE)
 
 async def _invalidate_jobs_cache(redis_client):
     """Delete all cached job listing keys using SCAN to avoid missing any."""
@@ -41,6 +53,7 @@ async def create_job(
     current_user: User = Depends(require_role("employer")),
     redis_client = Depends(get_redis)
 ):
+    _reject_fee_requests(job_data.title, job_data.description, job_data.walkin_notes, *job_data.requirements)
     new_job = Job(**job_data.model_dump(), employer_id=current_user.id)
     db.add(new_job)
     await db.commit()
@@ -74,7 +87,7 @@ async def list_jobs(
             report_redis_failure()
         
     offset = (page - 1) * limit
-    query = select(Job).where(Job.status == 'open').options(selectinload(Job.employer))
+    query = select(Job).where(Job.status == 'open', Job.kind == 'apply').options(selectinload(Job.employer))
     
     # Apply server-side search filter
     if search:
@@ -158,9 +171,19 @@ async def update_job(
         raise HTTPException(status_code=403, detail="Not authorized to edit this job")
         
     update_data = job_data.model_dump(exclude_unset=True)
+    _reject_fee_requests(
+        update_data.get("title"), update_data.get("description"), update_data.get("walkin_notes"), *(update_data.get("requirements") or [])
+    )
     for key, value in update_data.items():
         setattr(job, key, value)
-        
+
+    if job.kind == "walkin" and any(k.startswith("walkin_") or k == "venue" for k in update_data):
+        try:
+            check_walkin_fields(job.walkin_date, job.walkin_end_date, job.walkin_start_time, job.walkin_end_time, job.venue)
+        except ValueError as exc:
+            await db.rollback()
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from None
+
     await db.commit()
     await db.refresh(job)
     

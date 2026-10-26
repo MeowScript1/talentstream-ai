@@ -6,20 +6,25 @@ and every job links back to where it came from.
 
 import secrets
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
+from urllib.parse import quote_plus
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.jobfeed import ingest
 from app.jobfeed.sources import SOURCE_INFO, enabled_sources
+from app.jobfeed.trust import assess
+from app.jobfeed.types import RawJob
 from app.models.external_job import ExternalJob, FeedSync, JobReport
+from app.models.job import Job
 from app.models.user import User
 from app.schemas.types import text
 
@@ -49,7 +54,10 @@ class FeedJobOut(BaseModel):
     posted_at: datetime | None
     kind: str
     walkin_date: str | None
+    walkin_end_date: str | None = None
     walkin_time: str | None
+    notes: str | None = None
+    native: bool = False  # posted directly on TalentStream (not collected from another platform)
     venue: str | None
     trust_score: int
     trust_label: str
@@ -118,6 +126,113 @@ def _visible():
     ]
 
 
+def _fmt_time(t: time) -> str:
+    return t.strftime("%I:%M %p").lstrip("0")
+
+
+def _native_out(job: Job, today) -> FeedJobOut:
+    """A walk-in drive posted on TalentStream, shown the same way (and judged the same way) as collected ones."""
+    employer = job.employer.company_name or job.employer.full_name
+    venue = job.venue or ""
+    directions = f"https://www.google.com/maps/search/?api=1&query={quote_plus(venue)}"
+    notes = job.walkin_notes or ""
+    trust = assess(
+        RawJob(
+            source="talentstream",
+            external_id=str(job.id),
+            title=job.title,
+            url=directions,
+            company=employer,
+            location=job.location or venue,
+            description=f"{job.description}\n{notes}",
+            posted_at=job.created_at,
+            salary_text=job.salary_range,
+            remote=False,
+        )
+    )
+    times = _fmt_time(job.walkin_start_time) if job.walkin_start_time else None
+    if times and job.walkin_end_time:
+        times = f"{times} – {_fmt_time(job.walkin_end_time)}"
+    first = max(job.walkin_date, today)  # a drive that already started is "on now"
+    return FeedJobOut(
+        id=job.id,
+        source="talentstream",
+        source_label="TalentStream",
+        title=job.title,
+        company=employer,
+        location=job.location or venue,
+        remote=False,
+        snippet=" ".join(job.description.split())[:300],
+        url=directions,
+        salary_text=job.salary_range,
+        tags=[str(r) for r in (job.requirements or [])][:5],
+        posted_at=job.created_at,
+        kind="walkin",
+        walkin_date=first.isoformat(),
+        walkin_end_date=job.walkin_end_date.isoformat() if job.walkin_end_date and job.walkin_end_date > first else None,
+        walkin_time=times,
+        venue=venue,
+        notes=notes or None,
+        native=True,
+        trust_score=trust.score,
+        trust_label=trust.label,
+        trust_reasons=[TrustReasonOut(**r) for r in trust.reasons_as_dicts()[:5]],
+    )
+
+
+async def _native_walkins(db: AsyncSession, today, q: str | None = None, location: str | None = None) -> list[FeedJobOut]:
+    window_end = today + timedelta(days=WALKIN_WINDOW_DAYS)
+    stmt = (
+        select(Job)
+        .where(
+            Job.kind == "walkin",
+            Job.status == "open",
+            Job.walkin_date <= window_end,
+            func.coalesce(Job.walkin_end_date, Job.walkin_date) >= today,
+        )
+        .options(selectinload(Job.employer))
+    )
+    if q:
+        like = f"%{q.strip()}%"
+        stmt = stmt.where(Job.title.ilike(like) | Job.description.ilike(like) | Job.venue.ilike(like))
+    if location:
+        like = f"%{location.strip()}%"
+        stmt = stmt.where(Job.location.ilike(like) | Job.venue.ilike(like))
+    rows = (await db.execute(stmt)).scalars().all()
+    return [_native_out(j, today) for j in rows]
+
+
+async def _walkin_page(db, conditions, q, location, include_risky, page, limit) -> FeedPage:
+    """Walk-in tab: drives posted here plus any collected from other platforms, soonest first."""
+    today = ingest.today_local()
+    window_end = today + timedelta(days=WALKIN_WINDOW_DAYS)
+    external = (
+        await db.execute(
+            select(ExternalJob)
+            .where(*conditions, ExternalJob.walkin_date >= today, ExternalJob.walkin_date <= window_end)
+            .limit(300)
+        )
+    ).scalars().all()
+    items = [*(await _native_walkins(db, today, q, location)), *(_out(r) for r in external)]
+    hidden = sum(1 for i in items if i.trust_label == "likely_scam")
+    if not include_risky:
+        items = [i for i in items if i.trust_label != "likely_scam"]
+    else:
+        hidden = 0
+    items.sort(key=lambda i: (i.walkin_date or "9999", -i.trust_score))
+    updated = await db.scalar(select(func.max(FeedSync.last_ok_at)))
+    return FeedPage(
+        items=items[(page - 1) * limit : page * limit],
+        total=len(items),
+        page=page,
+        limit=limit,
+        hidden_risky=hidden,
+        updated_at=updated,
+        syncing=ingest._lock.locked(),
+        sources=[SourceOut(name=n, label=SOURCE_INFO[n]["label"], url=SOURCE_INFO[n]["url"]) for n in enabled_sources()],
+    )
+
+
 @router.get("/jobs", response_model=FeedPage)
 async def list_feed_jobs(
     kind: str = Query("apply", pattern="^(apply|walkin)$"),
@@ -132,12 +247,6 @@ async def list_feed_jobs(
     await ingest.maybe_refresh_in_background()
 
     conditions = [*_visible(), ExternalJob.kind == kind]
-    if kind == "walkin":
-        today = ingest.today_local()
-        conditions += [
-            ExternalJob.walkin_date >= today,
-            ExternalJob.walkin_date <= today + timedelta(days=WALKIN_WINDOW_DAYS),
-        ]
     if q:
         like = f"%{q.strip()}%"
         conditions.append(ExternalJob.title.ilike(like) | ExternalJob.company.ilike(like) | ExternalJob.description.ilike(like))
@@ -145,6 +254,9 @@ async def list_feed_jobs(
         conditions.append(ExternalJob.location.ilike(f"%{location.strip()}%"))
     if remote is not None:
         conditions.append(ExternalJob.remote.is_(remote))
+
+    if kind == "walkin":
+        return await _walkin_page(db, [c for c in conditions if c is not None], q, location, include_risky, page, limit)
 
     risky = ExternalJob.trust_label == "likely_scam"
     shown = conditions if include_risky else [*conditions, ~risky]
@@ -188,6 +300,7 @@ async def feed_stats(db: AsyncSession = Depends(get_db)):
         )
         or 0
     )
+    walkin_count += sum(1 for j in await _native_walkins(db, today) if j.trust_label != "likely_scam")
     syncs = (await db.execute(select(FeedSync))).scalars().all()
     return {
         "apply_jobs": apply_count,

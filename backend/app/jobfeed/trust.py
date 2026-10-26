@@ -124,6 +124,11 @@ def _asks_for_money(text: str) -> bool:
     return False
 
 
+def looks_like_fee_request(text: str) -> bool:
+    """True if the text asks candidates to pay (registration fee, deposit, kit...). Used to refuse such posts."""
+    return _asks_for_money(text)
+
+
 def assess(job: RawJob, now: datetime | None = None) -> TrustResult:
     now = now or datetime.now(timezone.utc)
     reasons: list[Reason] = []

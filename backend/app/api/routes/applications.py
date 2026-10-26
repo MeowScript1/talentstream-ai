@@ -74,6 +74,8 @@ async def submit_application(
     
     if not job or job.status != 'open':
         raise HTTPException(status_code=400, detail="Job is not available")
+    if job.kind != 'apply':
+        raise HTTPException(status_code=400, detail="This is a walk-in drive: no application needed, just turn up on the day")
 
     if resume is not None and resume.filename:
         # A fresh file was sent: validate it and store it with this application

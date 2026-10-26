@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime, time
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Text, Time, func
 from sqlalchemy.dialects.postgresql import ENUM, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -23,6 +23,14 @@ class Job(Base):
     salary_range: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[str] = mapped_column(job_status_enum, default='open', index=True)
     ats_threshold: Mapped[int] = mapped_column(Integer, default=65)
+    # 'apply' = candidates apply online; 'walkin' = candidates just show up on the day
+    kind: Mapped[str] = mapped_column(String(10), nullable=False, default="apply", server_default="apply")
+    walkin_date: Mapped[date | None] = mapped_column(Date, nullable=True)          # first day
+    walkin_end_date: Mapped[date | None] = mapped_column(Date, nullable=True)      # last day, if the drive spans several
+    walkin_start_time: Mapped[time | None] = mapped_column(Time, nullable=True)
+    walkin_end_time: Mapped[time | None] = mapped_column(Time, nullable=True)
+    venue: Mapped[str | None] = mapped_column(Text, nullable=True)
+    walkin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)           # what to bring, who to ask for
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 
     # Relationships
