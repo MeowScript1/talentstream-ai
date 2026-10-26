@@ -20,8 +20,13 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str = Field(max_length=MAX_PASSWORD_LENGTH)
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
+    # Plain types on purpose (see JobResponse): an older row must still be readable.
     id: uuid.UUID
+    email: EmailStr
+    full_name: str
+    role: str
+    company_name: Optional[str] = None
     avatar_url: Optional[str] = None
     resume_filename: Optional[str] = None
     resume_updated_at: Optional[datetime] = None

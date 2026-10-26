@@ -29,9 +29,18 @@ class JobUpdate(BaseModel):
     status: Optional[str] = Field(None, pattern="^(open|closed)$")
     ats_threshold: Optional[int] = Field(None, ge=0, le=100)
 
-class JobResponse(JobBase):
+class JobResponse(BaseModel):
+    # Deliberately NOT built on JobBase: those limits are for what we accept. Reading must never be
+    # stricter than writing, or a single older row that predates a limit would break the whole list.
     id: uuid.UUID
     employer_id: uuid.UUID
+    title: str
+    description: str
+    requirements: List[str]
+    location: Optional[str] = None
+    job_type: str
+    salary_range: Optional[str] = None
+    ats_threshold: int
     status: str
     created_at: datetime
     
