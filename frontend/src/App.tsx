@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -20,7 +20,21 @@ import Settings from '@/pages/Settings';
 import MyApplications from '@/pages/MyApplications';
 import InterviewLanding from '@/pages/InterviewLanding';
 import Profile from '@/pages/Profile';
-import PublicJobs from '@/pages/PublicJobs';
+import { Spinner } from '@/components/ui/Spinner';
+
+/** The front door: sign in first, then you land on your dashboard (where candidates see the jobs). */
+function Home() {
+  const { user, token } = useAuthStore();
+  if (!token) return <Navigate to="/login" replace />;
+  if (!user) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+  return <Navigate to={user.role === 'employer' ? '/dashboard/recruiter' : '/dashboard/candidate'} replace />;
+}
 
 function App() {
   const location = useLocation();
@@ -41,8 +55,8 @@ function App() {
       transition={{ duration: 0.2, ease: 'easeOut' }}
     >
       <Routes location={location}>
-        <Route path="/" element={<PublicJobs />} />
-        <Route path="/jobs" element={<PublicJobs />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/jobs" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
