@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
@@ -22,17 +22,30 @@ import InterviewLanding from '@/pages/InterviewLanding';
 import Profile from '@/pages/Profile';
 import { Spinner } from '@/components/ui/Spinner';
 
+/** Shown while the server wakes up after being idle; says so instead of spinning silently. */
+function WakingUp() {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 3000);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center">
+      <Spinner size="lg" />
+      {slow && (
+        <p className="text-sm text-text-secondary">
+          Waking up the server after a quiet spell. This can take up to a minute the first time.
+        </p>
+      )}
+    </div>
+  );
+}
+
 /** The front door: sign in first, then you land on your dashboard (where candidates see the jobs). */
 function Home() {
   const { user, token } = useAuthStore();
   if (!token) return <Navigate to="/login" replace />;
-  if (!user) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  if (!user) return <WakingUp />;
   return <Navigate to={user.role === 'employer' ? '/dashboard/recruiter' : '/dashboard/candidate'} replace />;
 }
 
@@ -42,6 +55,13 @@ function App() {
 
   useEffect(() => {
     hydrate();
+    // Start waking the server right away so it is ready by the time someone logs in
+    try {
+      const base = import.meta.env.VITE_API_URL;
+      if (base) fetch(new URL('/health', base).href, { mode: 'no-cors' }).catch(() => undefined);
+    } catch {
+      // warming up is only an optimisation
+    }
   }, [hydrate]);
 
   return (

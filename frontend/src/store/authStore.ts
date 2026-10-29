@@ -40,8 +40,18 @@ interface AuthState {
   removeResume: () => Promise<void>;
 }
 
+// The last known user is kept so a returning visitor sees their dashboard at once, even while the server wakes up
+function savedUser(): User | null {
+  try {
+    const raw = localStorage.getItem('user');
+    return raw && localStorage.getItem('token') ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
+  user: savedUser(),
   token: localStorage.getItem('token'),
   isLoading: true,
   login: (token, user) => {
@@ -61,10 +71,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const response = await api.get('/auth/me');
       set({ user: response.data, isLoading: false });
-    } catch {
-      // Expired or invalid token: start from a clean logged-out state
-      localStorage.removeItem('token');
-      set({ token: null, user: null, isLoading: false });
+    } catch (error) {
+      // Only a rejected token ends the session; a slow or sleeping server must not log anyone out
+      if ((error as { response?: { status?: number } }).response?.status === 401) {
+        localStorage.removeItem('token');
+        set({ token: null, user: null, isLoading: false });
+      } else {
+        set({ isLoading: false });
+      }
     }
   },
   updateProfile: async (data: ProfileUpdate) => {
@@ -92,3 +106,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }));
   },
 }));
+
+useAuthStore.subscribe((state) => {
+  try {
+    if (state.user && state.token) localStorage.setItem('user', JSON.stringify(state.user));
+    else localStorage.removeItem('user');
+  } catch {
+    // storage unavailable: the cache is only a convenience
+  }
+});
