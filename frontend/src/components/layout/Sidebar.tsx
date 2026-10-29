@@ -2,16 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
-import {
-  LayoutDashboard,
-  Briefcase,
-  Users,
-  Settings,
-  Search,
-  FileText,
-  Video,
-  UserRound,
-} from 'lucide-react';
+import { navItemsFor } from './navItems';
 
 export function Sidebar() {
   const { user } = useAuthStore();
@@ -19,21 +10,7 @@ export function Sidebar() {
 
   if (!user) return null;
 
-  const recruiterNav = [
-    { name: 'Dashboard', short: 'Home', href: '/dashboard/recruiter', icon: LayoutDashboard },
-    { name: 'Post a Job', short: 'Post', href: '/jobs/new', icon: Briefcase },
-    { name: 'Applicants', short: 'People', href: '/applicants', icon: Users },
-    { name: 'Settings', short: 'Settings', href: '/settings', icon: Settings },
-  ];
-
-  const candidateNav = [
-    { name: 'Find Jobs', short: 'Jobs', href: '/dashboard/candidate', icon: Search },
-    { name: 'My Applications', short: 'Applied', href: '/applications', icon: FileText },
-    { name: 'Interview Room', short: 'Interview', href: '/interview', icon: Video },
-    { name: 'Profile', short: 'Profile', href: '/profile', icon: UserRound },
-  ];
-
-  const navItems = user.role === 'employer' ? recruiterNav : candidateNav;
+  const navItems = navItemsFor(user.role);
   const isActive = (href: string) => location.pathname.startsWith(href);
   // Inside a live interview the chat needs the whole screen, so the tab bar steps aside
   const inInterviewRoom = /^\/interview\/[^/]+/.test(location.pathname);

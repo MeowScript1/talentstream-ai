@@ -146,7 +146,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
         </div>
       </div>
 
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" aria-label="Popular cities">
+      <div className="flex flex-wrap gap-2" aria-label="Popular cities">
         {CITIES.map((city) => {
           const on = place.trim().toLowerCase() === city.toLowerCase();
           return (
@@ -156,7 +156,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
               onClick={() => setPlace(on ? '' : city)}
               aria-pressed={on}
               className={cn(
-                'inline-flex min-h-11 shrink-0 items-center rounded-md border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1',
+                'inline-flex min-h-11 items-center rounded-md border px-3 text-sm font-medium transition-colors md:min-h-0 md:py-1',
                 on ? 'border-accent-primary bg-accent-primary text-on-accent' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
               )}
             >
