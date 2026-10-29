@@ -154,14 +154,14 @@ export default function InterviewRoom() {
                 className={`flex gap-2 sm:gap-4 max-w-[92%] sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
               >
                 <div className={`h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center ${
-                  msg.role === 'ai' ? 'bg-accent-muted text-accent-primary' : 'bg-text-primary text-bg-base'
+                  msg.role === 'ai' ? 'bg-accent-muted text-accent-primary' : 'bg-text-primary text-on-accent'
                 }`}>
                   {msg.role === 'ai' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
                 </div>
                 <div className={`min-w-0 p-3 sm:p-4 rounded-lg ${
                   msg.role === 'ai' 
                     ? 'bg-bg-elevated border border-border-subtle text-text-primary rounded-tl-none' 
-                    : 'bg-accent-primary text-bg-base rounded-tr-none'
+                    : 'bg-accent-primary text-on-accent rounded-tr-none'
                 }`}>
                   <p className="whitespace-pre-wrap break-words">{msg.text}</p>
                 </div>

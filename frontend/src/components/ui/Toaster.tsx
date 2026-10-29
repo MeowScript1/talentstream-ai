@@ -8,26 +8,25 @@ export function Toaster() {
       toastOptions={{
         duration: 4000,
         style: {
-          background: 'rgba(27, 27, 46, 0.92)',
-          backdropFilter: 'blur(12px)',
+          background: theme.colors.bgSurface,
           color: theme.colors.textPrimary,
-          border: '1px solid rgba(255,255,255,0.12)',
+          border: `1px solid ${theme.colors.borderSubtle}`,
           borderRadius: '8px',
           padding: '10px 18px',
           fontSize: '14px',
           fontWeight: 600,
-          boxShadow: '0 12px 30px -10px rgba(0,0,0,0.7)',
+          boxShadow: '0 4px 14px -4px rgba(16,24,40,0.18)',
         },
         success: {
           iconTheme: {
             primary: theme.colors.accentPrimary,
-            secondary: theme.colors.bgBase,
+            secondary: '#FFFFFF',
           },
         },
         error: {
           iconTheme: {
             primary: theme.colors.danger,
-            secondary: theme.colors.bgBase,
+            secondary: '#FFFFFF',
           },
         },
       }}

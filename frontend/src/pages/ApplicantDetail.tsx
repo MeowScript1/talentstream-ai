@@ -179,7 +179,7 @@ export default function ApplicantDetail() {
               href={applicant.resume_url} 
               target="_blank" 
               rel="noreferrer"
-              className="mt-6 flex items-center justify-center gap-2 w-full text-sm font-medium text-accent-primary bg-accent-muted px-4 py-3 rounded-lg hover:bg-accent-primary hover:text-bg-base transition-colors border border-accent-primary/20"
+              className="mt-6 flex items-center justify-center gap-2 w-full text-sm font-medium text-accent-primary bg-accent-muted px-4 py-3 rounded-lg hover:bg-accent-primary hover:text-on-accent transition-colors border border-accent-primary/20"
             >
               <FileText className="h-4 w-4" /> View Original Resume
             </a>
@@ -208,7 +208,7 @@ export default function ApplicantDetail() {
           {applicant.status !== 'rejected' && applicant.status !== 'shortlisted' && (
             <div className="flex gap-3 pt-2">
               <Button 
-                className="flex-1 bg-success hover:bg-success/90 text-white"
+                className="flex-1 bg-success hover:bg-success/90 text-[#fff]"
                 loading={isUpdating === 'shortlisted'}
                 onClick={() => handleStatusUpdate('shortlisted')}
               >

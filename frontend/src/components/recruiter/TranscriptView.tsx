@@ -21,7 +21,7 @@ export function TranscriptView({ transcript }: { transcript: TranscriptItem[] })
       {transcript.map((msg, idx) => (
         <div key={idx} className={`flex gap-4 max-w-[90%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
           <div className={`h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center mt-1 ${
-            msg.role === 'ai' ? 'bg-accent-muted text-accent-primary' : 'bg-text-primary text-bg-base'
+            msg.role === 'ai' ? 'bg-accent-muted text-accent-primary' : 'bg-text-primary text-on-accent'
           }`}>
             {msg.role === 'ai' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
           </div>

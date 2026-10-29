@@ -37,7 +37,7 @@ function Tab({ active, onClick, icon: Icon, label, count }: TabProps) {
       aria-pressed={active}
       className={cn(
         'flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold transition-all',
-        active ? 'bg-accent-primary text-bg-base ' : 'text-text-secondary hover:text-text-primary'
+        active ? 'bg-accent-primary text-on-accent ' : 'text-text-secondary hover:text-text-primary'
       )}
     >
       <Icon className="h-4 w-4" />
@@ -157,7 +157,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
               aria-pressed={on}
               className={cn(
                 'inline-flex min-h-11 shrink-0 items-center rounded-md border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1',
-                on ? 'border-accent-primary bg-accent-primary text-bg-base' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
+                on ? 'border-accent-primary bg-accent-primary text-on-accent' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
               )}
             >
               {city}
@@ -174,7 +174,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
             aria-pressed={remoteOnly}
             className={cn(
               'inline-flex min-h-11 items-center gap-1.5 rounded-md border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1.5',
-              remoteOnly ? 'border-accent-primary bg-accent-primary text-bg-base' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
+              remoteOnly ? 'border-accent-primary bg-accent-primary text-on-accent' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
             )}
           >
             <Wifi className="h-3.5 w-3.5" /> Remote only

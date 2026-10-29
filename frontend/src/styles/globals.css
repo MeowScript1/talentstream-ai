@@ -6,34 +6,37 @@
 
 @layer base {
   :root {
-    /* Neutral dark surfaces with one calm accent */
-    --bg-base: #0C0E11;
-    --bg-surface: #13161B;
-    --bg-elevated: #1B1F26;
+    /* Light, neutral surfaces with one blue accent */
+    --bg-base: #F6F7F9;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #EEF0F3;
 
-    --accent-primary: #6EE7B7;
-    --accent-hover: #9BF0CD;
-    --accent-muted: rgba(110, 231, 183, 0.10);
-    --accent-shadow: #3FB488;
+    --accent-primary: #2563EB;
+    --accent-hover: #1D4ED8;
+    --accent-muted: rgba(37, 99, 235, 0.08);
+    --accent-shadow: #1E40AF;
+    --on-accent: #FFFFFF;
     /* Supporting colours are muted and used only for status */
-    --violet: #94A3B8;
-    --pink: #F59E9E;
-    --cyan: #7DB8E8;
+    --violet: #64748B;
+    --pink: #BE185D;
+    --cyan: #0369A1;
 
-    --text-primary: #F1F3F5;
-    --text-secondary: #A1A8B3;
-    --text-muted: #6E7683;
+    /* Ink: borders and tints are drawn with this at low opacity */
+    --ink-rgb: 17 24 39;
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-muted: #6B7280;
 
-    --border-subtle: #262B33;
-    --border-active: rgba(110, 231, 183, 0.45);
+    --border-subtle: #E5E7EB;
+    --border-active: rgba(37, 99, 235, 0.45);
 
-    --danger: #F26D7D;
-    --success: #5AD39A;
-    --warning: #E8B64C;
+    --danger: #DC2626;
+    --success: #15803D;
+    --warning: #B45309;
   }
 
   html {
-    color-scheme: dark;
+    color-scheme: light;
     /* Everything is sized in rem, so this one value scales the whole interface (default is 16px) */
     font-size: 15px;
     -webkit-text-size-adjust: 100%;

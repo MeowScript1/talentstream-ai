@@ -54,7 +54,7 @@ export function Sidebar() {
                 className={cn(
                   'relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-bold transition-colors duration-150',
                   active
-                    ? 'text-bg-base'
+                    ? 'text-on-accent'
                     : 'text-text-secondary hover:bg-white/[0.06] hover:text-text-primary'
                 )}
               >
@@ -93,7 +93,7 @@ export function Sidebar() {
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 transition-all',
-                  active ? 'bg-accent-primary text-bg-base shadow-glow' : 'text-text-secondary active:bg-white/10'
+                  active ? 'bg-accent-primary text-on-accent shadow-glow' : 'text-text-secondary active:bg-white/10'
                 )}
               >
                 <Icon className="h-5 w-5" strokeWidth={active ? 2.75 : 2} />

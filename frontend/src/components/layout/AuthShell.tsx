@@ -13,7 +13,7 @@ export function AuthShell({ headline, subline, children }: AuthShellProps) {
       {/* Hero, desktop only */}
       <div className="relative hidden w-1/2 overflow-hidden border-r border-white/[0.07] lg:flex lg:flex-col lg:justify-center lg:px-16">
         <Link to="/" className="absolute left-10 top-8 flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-primary font-display text-lg font-bold text-bg-base">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-primary font-display text-lg font-bold text-on-accent">
             T
           </span>
           <span className="font-display text-xl font-semibold tracking-tight">
@@ -34,7 +34,7 @@ export function AuthShell({ headline, subline, children }: AuthShellProps) {
         {/* Brand + one-liner for phones, where the hero is hidden */}
         <div className="mb-8 text-center lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-primary font-display text-lg font-bold text-bg-base">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-primary font-display text-lg font-bold text-on-accent">
               T
             </span>
             <span className="font-display text-2xl font-semibold tracking-tight">

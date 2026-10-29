@@ -137,7 +137,7 @@ export default function CandidateDashboard() {
             aria-pressed={section === key}
             className={`min-h-11 rounded-md border px-4 text-sm font-bold transition-colors md:min-h-0 md:py-1.5 ${
               section === key
-                ? 'border-accent-primary bg-accent-primary text-bg-base'
+                ? 'border-accent-primary bg-accent-primary text-on-accent'
                 : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -180,7 +180,7 @@ export default function CandidateDashboard() {
               onClick={() => handleTypeChange(opt.value)}
               className={`px-4 py-3 md:py-1.5 rounded-md text-sm font-medium transition-colors ${
                 selectedType === opt.value 
-                  ? 'bg-accent-primary text-bg-base' 
+                  ? 'bg-accent-primary text-on-accent' 
                   : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary'
               }`}
             >
@@ -246,7 +246,7 @@ export default function CandidateDashboard() {
                           <ApplyModal
                             job={job}
                             trigger={
-                              <button className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-accent-primary text-bg-base hover:bg-accent-primary/90 transition-colors">
+                              <button className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-accent-primary text-on-accent hover:bg-accent-primary/90 transition-colors">
                                 Apply Now
                               </button>
                             }

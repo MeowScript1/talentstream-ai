@@ -302,7 +302,7 @@ export default function Settings() {
                     }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                      className={`inline-block h-4 w-4 transform rounded-full bg-[#fff] shadow transition-transform ${
                         notifications[key] ? 'translate-x-6' : 'translate-x-1'
                       }`}
                     />

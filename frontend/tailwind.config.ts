@@ -12,6 +12,9 @@ const config = {
         display: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // "white" is the ink colour, so every white/10 border and white/[0.03] tint works on a light page
+        'white': 'rgb(var(--ink-rgb) / <alpha-value>)',
+        'on-accent': 'var(--on-accent)',
         'bg-base': 'var(--bg-base)',
         'bg-surface': 'var(--bg-surface)',
         'bg-elevated': 'var(--bg-elevated)',
@@ -31,7 +34,7 @@ const config = {
         'warning': 'var(--warning)',
       },
       boxShadow: {
-        'card': '0 0 0 1px var(--border-subtle)',
+        'card': '0 1px 2px rgba(16,24,40,0.05), 0 0 0 1px var(--border-subtle)',
         'active': '0 0 0 2px var(--border-active)',
         'glow': 'none',
         'glow-violet': 'none',

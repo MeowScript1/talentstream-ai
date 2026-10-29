@@ -154,7 +154,7 @@ export default function Profile() {
           <Card className="p-6">
             <div className="flex items-center gap-5 mb-6">
               {/* Avatar */}
-              <div className={`h-20 w-20 rounded-lg ${avatarColor} flex items-center justify-center flex-shrink-0 text-3xl font-bold text-white`}>
+              <div className={`h-20 w-20 rounded-lg ${avatarColor} flex items-center justify-center flex-shrink-0 text-3xl font-bold text-[#fff]`}>
                 {(user?.full_name ?? 'U').charAt(0).toUpperCase()}
               </div>
               <div>

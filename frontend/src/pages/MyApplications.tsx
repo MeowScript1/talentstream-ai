@@ -210,7 +210,7 @@ export default function MyApplications() {
               onClick={() => setActiveFilter(key)}
               className={`px-4 py-3 md:py-1.5 rounded-md text-sm font-medium transition-colors ${
                 activeFilter === key
-                  ? 'bg-accent-primary text-bg-base'
+                  ? 'bg-accent-primary text-on-accent'
                   : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-active'
               }`}
             >

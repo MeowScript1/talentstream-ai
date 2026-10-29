@@ -38,7 +38,7 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
     <article className="rounded-xl border border-white/[0.07] bg-bg-surface/80 p-4 shadow-card  sm:p-5">
       <div className="flex gap-4">
         {walkin && (
-          <div className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-accent-primary text-bg-base ">
+          <div className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-accent-primary text-on-accent ">
             <span className="text-[10px] font-bold uppercase leading-none">{walkin.weekday}</span>
             <span className="font-display text-2xl font-semibold leading-none">{walkin.day}</span>
             <span className="text-[10px] font-bold uppercase leading-none">{walkin.month}</span>
