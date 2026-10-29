@@ -100,10 +100,10 @@ export default function CandidateDashboard() {
   ];
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-4 sm:space-y-8 max-w-5xl mx-auto">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary">Jobs</h1>
-        <p className="text-text-secondary mt-1">Listings from several job sites with a scam check on each, plus jobs and walk-in drives posted on TalentStream.</p>
+        <h1 className="text-xl sm:text-3xl font-semibold tracking-tight text-text-primary">Jobs</h1>
+        <p className="mt-1 hidden text-text-secondary sm:block">Listings from several job sites with a scam check on each, plus jobs and walk-in drives posted on TalentStream.</p>
       </div>
 
       {/* Stats row */}
@@ -114,8 +114,8 @@ export default function CandidateDashboard() {
             { label: 'Interviewing', value: interviewingCount, icon: Clock, color: 'text-warning bg-warning/10' },
             { label: 'Shortlisted', value: shortlistedCount, icon: CheckCircle2, color: 'text-success bg-success/10' },
           ].map((stat) => (
-            <div key={stat.label} className="min-w-0 bg-bg-surface/80  border border-white/[0.07] rounded-xl p-3 sm:p-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3 shadow-card">
-              <div className={`h-9 w-9 sm:h-11 sm:w-11 rounded-lg flex items-center justify-center flex-shrink-0 ${stat.color}`}>
+            <div key={stat.label} className="min-w-0 bg-bg-surface/80  border border-white/[0.07] rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 shadow-card">
+              <div className={`hidden h-9 w-9 sm:flex sm:h-11 sm:w-11 rounded-lg items-center justify-center flex-shrink-0 ${stat.color}`}>
                 <stat.icon className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -128,14 +128,14 @@ export default function CandidateDashboard() {
       )}
 
       {/* Where the jobs come from */}
-      <div className="flex flex-wrap items-center gap-2">
-        {([['feed', 'Jobs from everywhere'], ['native', 'Posted on TalentStream']] as const).map(([key, label]) => (
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+        {([['feed', 'All sources'], ['native', 'Posted here']] as const).map(([key, label]) => (
           <button
             key={key}
             type="button"
             onClick={() => setSection(key)}
             aria-pressed={section === key}
-            className={`min-h-11 rounded-md border px-4 text-sm font-bold transition-colors md:min-h-0 md:py-1.5 ${
+            className={`min-h-11 rounded-md border px-3 text-sm font-bold transition-colors sm:px-4 md:min-h-0 md:py-1.5 ${
               section === key
                 ? 'border-accent-primary bg-accent-primary text-on-accent'
                 : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
