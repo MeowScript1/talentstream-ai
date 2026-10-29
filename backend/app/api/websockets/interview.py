@@ -9,6 +9,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from app.ai_engine.client import get_client
+from app.ai_engine.interview_eval import evaluate_interview
 from app.core.database import get_db
 from app.core.dependencies import get_user_from_token
 from app.models.application import Application
@@ -126,12 +127,12 @@ async def websocket_endpoint(websocket: WebSocket, application_id: uuid.UUID, to
                         ai_text = ai_text.replace("[INTERVIEW_COMPLETE]", "").strip()
                         interview.status = 'completed'
                         interview.completed_at = datetime.utcnow()
-                        
-                        # In a real app, trigger a background task to evaluate the entire transcript and generate score/feedback
-                        interview.ai_score = 85 # Mock score
-                        interview.ai_feedback = "Strong technical answers, good communication."
-                        
+
                     interview.transcript.append({"role": "ai", "content": ai_text})
+                    if interview.status == 'completed':
+                        interview.ai_score, interview.ai_feedback = await evaluate_interview(
+                            app_ref.job.title, interview.transcript
+                        )
                     flag_modified(interview, "transcript")
                     await db.commit()
                     

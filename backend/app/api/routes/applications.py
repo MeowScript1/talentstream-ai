@@ -125,7 +125,7 @@ async def get_my_applications(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("candidate"))
 ):
-    query = select(Application).where(Application.candidate_id == current_user.id).order_by(Application.created_at.desc()).options(selectinload(Application.job))
+    query = select(Application).where(Application.candidate_id == current_user.id).order_by(Application.created_at.desc()).options(selectinload(Application.job).selectinload(Job.employer))
     result = await db.execute(query)
     apps = result.scalars().all()
     
@@ -136,7 +136,7 @@ async def get_my_applications(
             "id": app.id,
             "job_id": app.job_id,
             "job_title": app.job.title,
-            "employer_name": "Employer", # We'd need to join User here
+            "employer_name": app.job.employer.company_name or app.job.employer.full_name,
             "status": app.status,
             "ats_score": app.ats_score,
             "created_at": app.created_at

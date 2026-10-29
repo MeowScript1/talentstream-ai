@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 const TIPS = [
-  { icon: Mic, text: 'Speak clearly — AI analyses both content and communication style.' },
+  { icon: Mic, text: 'Answer in full sentences. The AI scores what you write: relevance, specifics and clarity.' },
   { icon: Lightbulb, text: 'Think out loud. Walking through your reasoning shows problem-solving skill.' },
   { icon: Clock, text: 'Take your time. Pausing to formulate a good answer is always better than rushing.' },
   { icon: CheckCircle2, text: 'Be specific. Use real examples from your past experience whenever possible.' },
