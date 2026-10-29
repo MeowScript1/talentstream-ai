@@ -35,7 +35,7 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
   };
 
   return (
-    <article className="rounded-xl border border-white/[0.07] bg-bg-surface/80 p-4 shadow-card  sm:p-5">
+    <article className="rounded-xl border border-text-primary bg-bg-surface p-4 shadow-card  sm:p-5">
       <div className="flex gap-4">
         {walkin && (
           <div className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-accent-primary text-on-accent ">

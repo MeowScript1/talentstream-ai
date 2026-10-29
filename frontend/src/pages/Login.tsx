@@ -40,7 +40,7 @@ export default function Login() {
     <AuthShell
       headline={
         <>
-          Real jobs and walk-in drives, in one place
+          Real jobs and walk‑in drives, in one place
         </>
       }
       subline="Listings from several job sites, each with a scam check. Upload your resume once to see how well it fits a role, and take the first interview online."

@@ -15,9 +15,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const baseStyles = 'rounded-xl p-6 border transition-all duration-200';
     
     const variants = {
-      default: 'bg-bg-surface/80  border-white/[0.07] shadow-card',
+      default: 'bg-bg-surface border-white/25',
       elevated: 'bg-bg-elevated border-white/10 shadow-glow',
-      interactive: 'bg-bg-surface/80  border-white/[0.07] shadow-card hover:border-accent-primary/50 hover:shadow-glow cursor-pointer',
+      interactive: 'bg-bg-surface border-white/25 hover:border-accent-primary/50 hover:shadow-glow cursor-pointer',
     };
 
     if (variant === 'interactive') {

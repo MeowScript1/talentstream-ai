@@ -10,23 +10,23 @@ export function Toaster() {
         style: {
           background: theme.colors.bgSurface,
           color: theme.colors.textPrimary,
-          border: `1px solid ${theme.colors.borderSubtle}`,
-          borderRadius: '8px',
+          border: `1px solid ${theme.colors.textPrimary}`,
+          borderRadius: '4px',
           padding: '10px 18px',
           fontSize: '14px',
           fontWeight: 600,
-          boxShadow: '0 4px 14px -4px rgba(16,24,40,0.18)',
+          boxShadow: 'none',
         },
         success: {
           iconTheme: {
             primary: theme.colors.accentPrimary,
-            secondary: '#FFFFFF',
+            secondary: theme.colors.bgSurface,
           },
         },
         error: {
           iconTheme: {
             primary: theme.colors.danger,
-            secondary: '#FFFFFF',
+            secondary: theme.colors.bgSurface,
           },
         },
       }}
