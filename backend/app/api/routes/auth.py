@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -26,7 +27,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
         )
     
     # Create new user
-    hashed_password = get_password_hash(user_data.password)
+    hashed_password = await run_in_threadpool(get_password_hash, user_data.password)
     new_user = User(
         email=user_data.email,
         password_hash=hashed_password,
@@ -63,7 +64,7 @@ async def login(request: Request, user_data: UserLogin, db: AsyncSession = Depen
     result = await db.execute(query)
     user = result.scalar_one_or_none()
     
-    if not user or not verify_password(user_data.password, user.password_hash):
+    if not user or not await run_in_threadpool(verify_password, user_data.password, user.password_hash):
         login_throttle.record_failure(ip, user_data.email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

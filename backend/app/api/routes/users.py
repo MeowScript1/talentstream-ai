@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,7 +61,7 @@ async def change_password(
     current_user: User = Depends(get_current_user),
 ):
     """Change the current user's password."""
-    if not verify_password(payload.current_password, current_user.password_hash):
+    if not await run_in_threadpool(verify_password, payload.current_password, current_user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect",
@@ -71,7 +72,7 @@ async def change_password(
             detail="New password must be at least 8 characters",
         )
 
-    current_user.password_hash = get_password_hash(payload.new_password)
+    current_user.password_hash = await run_in_threadpool(get_password_hash, payload.new_password)
     await db.commit()
     return None
 
