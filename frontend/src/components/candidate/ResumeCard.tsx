@@ -45,7 +45,7 @@ export function ResumeCard() {
     setIsUploading(true);
     try {
       await uploadResume(file);
-      toast.success(hasResume ? 'Resume updated ✨' : 'Resume saved! Applying is now one click ✨');
+      toast.success(hasResume ? 'Resume updated' : 'Resume saved. You can now apply in one click');
     } catch (error) {
       toast.error(getApiError(error, 'Could not upload your resume'));
     } finally {
@@ -92,7 +92,7 @@ export function ResumeCard() {
       {hasResume ? (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="h-12 w-12 flex-shrink-0 rounded-2xl border border-accent-primary/30 bg-accent-muted flex items-center justify-center">
+            <div className="h-12 w-12 flex-shrink-0 rounded-lg border border-accent-primary/30 bg-accent-muted flex items-center justify-center">
               <FileText className="h-6 w-6 text-accent-primary" />
             </div>
             <div className="min-w-0">
@@ -134,13 +134,13 @@ export function ResumeCard() {
             setIsDragging(false);
             handleFile(e.dataTransfer.files?.[0]);
           }}
-          className={`flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed p-8 text-center transition-all ${
+          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all ${
             isDragging
               ? 'scale-[1.01] border-accent-primary bg-accent-muted'
               : 'border-white/15 hover:border-accent-primary/60 hover:bg-white/[0.03]'
           }`}
         >
-          <div className="mb-3 flex h-14 w-14 -rotate-6 items-center justify-center rounded-2xl bg-accent-muted">
+          <div className="mb-3 flex h-14 w-14 -rotate-6 items-center justify-center rounded-lg bg-accent-muted">
             {isUploading ? (
               <RefreshCw className="h-6 w-6 animate-spin text-accent-primary" />
             ) : (

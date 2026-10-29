@@ -61,7 +61,7 @@ export default function Register() {
       });
       
       login(response.data.access_token, response.data.user);
-      toast.success('You\'re in! 🎉');
+      toast.success('Account created');
       
       if (role === 'employer') {
         navigate('/dashboard/recruiter');
@@ -92,45 +92,39 @@ export default function Register() {
     <AuthShell
       headline={
         <>
-          Your next gig
-          <br />
-          starts <span className="text-gradient-hot">here</span> 🚀
+          Find work, or find people to hire
         </>
       }
-      subline="Candidates get matched and interviewed by AI. Recruiters get a ranked shortlist. Everyone saves time."
+      subline="Candidates browse checked job listings and walk-in drives. Employers post jobs and drives and review applicants who have been scored and interviewed by AI."
     >
-      <Card className="w-full p-8 shadow-glow-violet">
+      <Card className="w-full p-8 ">
           <div className="mb-6">
-            <h2 className="text-2xl font-extrabold text-text-primary">Join the club 🎟️</h2>
-            <p className="mt-2 text-sm text-text-secondary">Takes under a minute. Free forever for candidates.</p>
+            <h2 className="text-2xl font-semibold text-text-primary">Create your account</h2>
+            <p className="mt-2 text-sm text-text-secondary">Choose how you will use TalentStream.</p>
           </div>
 
           <div className="flex gap-4 mb-6">
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => setRole('candidate')}
-              className={`flex-1 cursor-pointer rounded-2xl border p-4 text-center transition-all ${
+              className={`flex-1 cursor-pointer rounded-lg border p-4 text-center transition-all ${
                 role === 'candidate' 
                   ? 'bg-accent-primary/15 border-accent-primary/60 text-accent-primary shadow-glow'
                   : 'bg-white/[0.03] border-white/10 text-text-secondary hover:border-white/25'
               }`}
             >
               <User className="mx-auto mb-2 h-6 w-6" />
-              <div className="text-sm font-bold">I'm job hunting 🔍</div>
+              <div className="text-sm font-bold">I'm looking for work</div>
             </motion.div>
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => setRole('employer')}
-              className={`flex-1 cursor-pointer rounded-2xl border p-4 text-center transition-all ${
+              className={`flex-1 cursor-pointer rounded-lg border p-4 text-center transition-all ${
                 role === 'employer' 
                   ? 'bg-accent-primary/15 border-accent-primary/60 text-accent-primary shadow-glow'
                   : 'bg-white/[0.03] border-white/10 text-text-secondary hover:border-white/25'
               }`}
             >
               <Briefcase className="mx-auto mb-2 h-6 w-6" />
-              <div className="text-sm font-bold">I'm hiring 🧑‍💼</div>
+              <div className="text-sm font-bold">I'm hiring</div>
             </motion.div>
           </div>
 
@@ -204,12 +198,12 @@ export default function Register() {
             </div>
 
             <Button type="submit" size="lg" className="w-full mt-6" loading={isLoading}>
-              Create my account →
+              Create account
             </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-text-secondary">
-            Already in?{' '}
+            Already registered?{' '}
             <Link to="/login" className="inline-block py-3 -my-3 font-bold text-accent-primary hover:underline underline-offset-4">
               Log in
             </Link>

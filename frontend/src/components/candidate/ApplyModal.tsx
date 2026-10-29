@@ -70,7 +70,7 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="bg-accent-muted border border-accent-primary/20 rounded-2xl p-4 text-sm text-text-secondary">
+          <div className="bg-accent-muted border border-accent-primary/20 rounded-lg p-4 text-sm text-text-secondary">
             <p className="font-medium text-text-primary mb-1">How it works</p>
             <ol className="list-decimal pl-4 space-y-1 text-xs">
               <li>We send the resume saved on your profile</li>
@@ -80,7 +80,7 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
           </div>
 
           {savedResume ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-accent-primary/40 bg-white/[0.03] p-3">
+            <div className="flex items-center gap-3 rounded-lg border border-accent-primary/40 bg-white/[0.03] p-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent-muted">
                 <FileText className="h-5 w-5 text-accent-primary" />
               </div>
@@ -99,7 +99,7 @@ export function ApplyModal({ job, trigger, onSuccess }: ApplyModalProps) {
               </button>
             </div>
           ) : (
-            <div className="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-center">
+            <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 text-center">
               <p className="text-sm font-bold text-text-primary">Add your resume first</p>
               <p className="mt-1 text-xs text-text-secondary">
                 Upload it once on your Profile and every application uses it.

@@ -14,15 +14,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     { className, variant = 'primary', size = 'md', loading, children, disabled, ...props },
     ref
   ) => {
-    const baseStyles = 'inline-flex items-center justify-center rounded-full font-bold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base disabled:pointer-events-none disabled:opacity-50';
+    const baseStyles = 'inline-flex items-center justify-center rounded-lg font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base disabled:pointer-events-none disabled:opacity-50';
     
     const variants = {
-      primary: 'bg-accent-primary text-bg-base shadow-pop hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_6px_0_0_var(--accent-shadow)] active:translate-y-1 active:shadow-none',
+      primary: 'bg-accent-primary text-bg-base hover:bg-accent-hover',
       ghost: 'bg-white/[0.03] text-text-primary hover:bg-white/[0.08] border border-white/10 hover:border-accent-primary/40',
-      danger: 'bg-danger text-bg-base hover:brightness-110 active:scale-95',
+      danger: 'bg-danger text-bg-base hover:brightness-110',
       link: 'bg-transparent text-accent-primary hover:underline underline-offset-4',
       outline: 'bg-transparent border border-white/15 text-text-secondary hover:bg-white/[0.06] hover:text-text-primary',
-      secondary: 'bg-bg-elevated text-text-primary border border-white/10 hover:border-violet/60 hover:shadow-glow-violet',
+      secondary: 'bg-bg-elevated text-text-primary border border-white/10 hover:border-white/25',
     };
 
     const sizes = {

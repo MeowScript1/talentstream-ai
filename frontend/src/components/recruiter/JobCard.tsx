@@ -89,14 +89,14 @@ export function JobCard({ job }: { job: Job }) {
           </div>
 
           {isWalkin && drive && (
-            <div className="mb-4 rounded-2xl border border-accent-primary/30 bg-accent-muted p-3 text-sm">
+            <div className="mb-4 rounded-lg border border-accent-primary/30 bg-accent-muted p-3 text-sm">
               <p className="flex items-center gap-1.5 font-bold text-text-primary">
                 <Footprints className="h-4 w-4 text-accent-primary" />
                 Walk-in · {drive.weekday} {drive.day} {drive.month}
                 {job.walkin_end_date && job.walkin_end_date !== job.walkin_date && ` – ${describeWalkinDate(job.walkin_end_date).day} ${describeWalkinDate(job.walkin_end_date).month}`}
                 {job.walkin_start_time && `, ${job.walkin_start_time.slice(0, 5)}`}
                 {job.walkin_end_time && `–${job.walkin_end_time.slice(0, 5)}`}
-                {ended && <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-text-muted">Ended</span>}
+                {ended && <span className="ml-1 rounded-md bg-white/10 px-2 py-0.5 text-xs font-medium text-text-muted">Ended</span>}
               </p>
               {job.venue && <p className="mt-1 text-text-secondary">{job.venue}</p>}
             </div>
@@ -128,7 +128,7 @@ export function JobCard({ job }: { job: Job }) {
       <Modal open={showApplicants} onOpenChange={setShowApplicants}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-xl">Applicants — {job.title}</DialogTitle>
+            <DialogTitle className="text-xl">Applicants: {job.title}</DialogTitle>
             <p className="text-sm text-text-secondary mt-1">
               Candidates are sorted by their AI match score.
             </p>

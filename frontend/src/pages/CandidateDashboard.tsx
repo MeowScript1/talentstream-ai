@@ -102,8 +102,8 @@ export default function CandidateDashboard() {
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Find your next <span className="text-gradient">gig</span> ✨</h1>
-        <p className="text-text-secondary mt-1">AI matches you with roles that actually fit. No doomscrolling job boards.</p>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary">Jobs</h1>
+        <p className="text-text-secondary mt-1">Listings from several job sites with a scam check on each, plus jobs and walk-in drives posted on TalentStream.</p>
       </div>
 
       {/* Stats row */}
@@ -114,12 +114,12 @@ export default function CandidateDashboard() {
             { label: 'Interviewing', value: interviewingCount, icon: Clock, color: 'text-warning bg-warning/10' },
             { label: 'Shortlisted', value: shortlistedCount, icon: CheckCircle2, color: 'text-success bg-success/10' },
           ].map((stat) => (
-            <div key={stat.label} className="min-w-0 bg-bg-surface/80 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-3 sm:p-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3 shadow-card">
-              <div className={`h-9 w-9 sm:h-11 sm:w-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${stat.color}`}>
+            <div key={stat.label} className="min-w-0 bg-bg-surface/80  border border-white/[0.07] rounded-xl p-3 sm:p-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3 shadow-card">
+              <div className={`h-9 w-9 sm:h-11 sm:w-11 rounded-lg flex items-center justify-center flex-shrink-0 ${stat.color}`}>
                 <stat.icon className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <div className="font-display text-2xl font-extrabold text-text-primary leading-none">{stat.value}</div>
+                <div className="font-display text-2xl font-semibold text-text-primary leading-none">{stat.value}</div>
                 <div className="truncate text-xs text-text-secondary">{stat.label}</div>
               </div>
             </div>
@@ -135,7 +135,7 @@ export default function CandidateDashboard() {
             type="button"
             onClick={() => setSection(key)}
             aria-pressed={section === key}
-            className={`min-h-11 rounded-full border px-4 text-sm font-bold transition-colors md:min-h-0 md:py-1.5 ${
+            className={`min-h-11 rounded-md border px-4 text-sm font-bold transition-colors md:min-h-0 md:py-1.5 ${
               section === key
                 ? 'border-accent-primary bg-accent-primary text-bg-base'
                 : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
@@ -154,8 +154,8 @@ export default function CandidateDashboard() {
         <div className="relative">
           <Search className="pointer-events-none absolute left-5 top-1/2 z-10 -translate-y-1/2 h-5 w-5 text-text-secondary" />
           <Input 
-            className="pl-12 pr-12 h-12 text-base rounded-full shadow-card bg-bg-surface/80 backdrop-blur-xl"
-            placeholder="Search roles, companies, vibes…"
+            className="pl-12 pr-12 h-12 text-base rounded-md shadow-card bg-bg-surface/80 "
+            placeholder="Search roles, companies, skills"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
           />
@@ -178,7 +178,7 @@ export default function CandidateDashboard() {
             <button
               key={opt.label}
               onClick={() => handleTypeChange(opt.value)}
-              className={`px-4 py-3 md:py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-3 md:py-1.5 rounded-md text-sm font-medium transition-colors ${
                 selectedType === opt.value 
                   ? 'bg-accent-primary text-bg-base' 
                   : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary'
@@ -193,11 +193,11 @@ export default function CandidateDashboard() {
           {jobsLoading ? (
             <div className="space-y-4">
               {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+                <Skeleton key={i} className="h-48 w-full rounded-lg" />
               ))}
             </div>
           ) : filteredJobs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 px-4 border border-dashed border-border-subtle rounded-2xl bg-bg-surface text-center">
+            <div className="flex flex-col items-center justify-center py-20 px-4 border border-dashed border-border-subtle rounded-lg bg-bg-surface text-center">
               <Search className="h-12 w-12 text-text-muted mb-4" />
               <h3 className="text-lg font-medium text-text-primary mb-2">No jobs found</h3>
               <p className="text-text-secondary max-w-sm">
@@ -210,7 +210,7 @@ export default function CandidateDashboard() {
                     setSelectedType(null);
                     fetchJobs();
                   }}
-                  className="mt-4 px-5 py-2 rounded-2xl text-sm font-semibold text-accent-primary border border-accent-primary hover:bg-accent-muted transition-colors"
+                  className="mt-4 px-5 py-2 rounded-lg text-sm font-semibold text-accent-primary border border-accent-primary hover:bg-accent-muted transition-colors"
                 >
                   Clear filters
                 </button>
@@ -246,7 +246,7 @@ export default function CandidateDashboard() {
                           <ApplyModal
                             job={job}
                             trigger={
-                              <button className="px-5 py-2.5 rounded-2xl text-sm font-semibold bg-accent-primary text-bg-base hover:bg-accent-primary/90 transition-colors">
+                              <button className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-accent-primary text-bg-base hover:bg-accent-primary/90 transition-colors">
                                 Apply Now
                               </button>
                             }

@@ -47,7 +47,7 @@ export function ApplicantList({ jobId, onViewDetail }: ApplicantListProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
+        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full rounded-lg" />)}
       </div>
     );
   }

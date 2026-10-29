@@ -1,5 +1,4 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/Button';
 
@@ -13,13 +12,13 @@ export function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 z-40 w-full h-16 border-b border-white/[0.07] bg-bg-base/60 backdrop-blur-xl">
+    <nav className="fixed top-0 z-40 w-full h-16 border-b border-white/[0.07] bg-bg-base/60 ">
       <div className="flex h-full items-center justify-between px-4 sm:px-6">
         <Link to={user ? (user.role === 'employer' ? '/dashboard/recruiter' : '/dashboard/candidate') : '/'} className="group flex min-h-11 items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-accent-primary text-bg-base shadow-pop transition-transform group-hover:-rotate-6">
-            <Sparkles className="h-5 w-5" strokeWidth={2.5} />
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-primary font-display text-lg font-bold text-bg-base">
+            T
           </span>
-          <span className="font-display text-xl font-extrabold tracking-tight text-text-primary">
+          <span className="font-display text-xl font-semibold tracking-tight text-text-primary">
             Talent<span className="text-gradient">Stream</span>
           </span>
         </Link>
@@ -39,7 +38,7 @@ export function Navbar() {
                     className="h-10 w-10 rounded-full object-cover ring-2 ring-accent-primary/60 ring-offset-2 ring-offset-bg-base"
                   />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet to-pink text-sm font-extrabold text-white ring-2 ring-white/20 ring-offset-2 ring-offset-bg-base">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bg-elevated text-sm font-semibold text-white ring-2 ring-white/20 ring-offset-2 ring-offset-bg-base">
                     {user.full_name.charAt(0).toUpperCase()}
                   </div>
                 )}

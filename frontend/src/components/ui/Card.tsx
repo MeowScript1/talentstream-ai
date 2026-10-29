@@ -12,20 +12,19 @@ export interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, Mo
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', ...props }, ref) => {
-    const baseStyles = 'rounded-3xl p-6 border transition-all duration-200';
+    const baseStyles = 'rounded-xl p-6 border transition-all duration-200';
     
     const variants = {
-      default: 'bg-bg-surface/80 backdrop-blur-xl border-white/[0.07] shadow-card',
+      default: 'bg-bg-surface/80  border-white/[0.07] shadow-card',
       elevated: 'bg-bg-elevated border-white/10 shadow-glow',
-      interactive: 'bg-bg-surface/80 backdrop-blur-xl border-white/[0.07] shadow-card hover:border-accent-primary/50 hover:shadow-glow cursor-pointer',
+      interactive: 'bg-bg-surface/80  border-white/[0.07] shadow-card hover:border-accent-primary/50 hover:shadow-glow cursor-pointer',
     };
 
     if (variant === 'interactive') {
       return (
         <motion.div
           ref={ref}
-          whileHover={{ y: -2, transition: { type: "spring", stiffness: 400, damping: 25 } }}
-          className={cn(baseStyles, variants[variant], className)}
+                    className={cn(baseStyles, variants[variant], className)}
           {...props}
         />
       );

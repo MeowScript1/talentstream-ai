@@ -22,7 +22,7 @@ export default function Login() {
     try {
       const response = await api.post('/auth/login', { email, password });
       login(response.data.access_token, response.data.user);
-      toast.success('Welcome back! 🎉');
+      toast.success('Logged in');
       
       if (response.data.user.role === 'employer') {
         navigate('/dashboard/recruiter');
@@ -40,17 +40,15 @@ export default function Login() {
     <AuthShell
       headline={
         <>
-          Job hunting,
-          <br />
-          but make it <span className="text-gradient">easy</span> ✨
+          Real jobs and walk-in drives, in one place
         </>
       }
-      subline="AI reads your resume, runs the first interview, and tells recruiters you're the one. No ghosting, no waiting."
+      subline="Listings from several job sites, each with a scam check. Upload your resume once to see how well it fits a role, and take the first interview online."
     >
-      <Card className="w-full p-8 shadow-glow-violet">
+      <Card className="w-full p-8 ">
         <div className="mb-8">
-          <h2 className="text-2xl font-extrabold text-text-primary">Welcome back 👋</h2>
-          <p className="mt-2 text-sm text-text-secondary">Log in and let's get you hired.</p>
+          <h2 className="text-2xl font-semibold text-text-primary">Log in</h2>
+          <p className="mt-2 text-sm text-text-secondary">Use the email and password you registered with.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -76,14 +74,14 @@ export default function Login() {
           </div>
 
           <Button type="submit" size="lg" className="mt-6 w-full" loading={isLoading}>
-            Let's go →
+            Log in
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm text-text-secondary">
-          New here?{' '}
+          No account yet?{' '}
           <Link to="/register" className="inline-block py-3 -my-3 font-bold text-accent-primary hover:underline underline-offset-4">
-            Make an account
+            Create an account
           </Link>
         </div>
       </Card>

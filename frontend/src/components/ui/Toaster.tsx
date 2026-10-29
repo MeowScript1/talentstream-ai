@@ -12,7 +12,7 @@ export function Toaster() {
           backdropFilter: 'blur(12px)',
           color: theme.colors.textPrimary,
           border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: '9999px',
+          borderRadius: '8px',
           padding: '10px 18px',
           fontSize: '14px',
           fontWeight: 600,

@@ -42,7 +42,7 @@ export function Sidebar() {
     <>
       {/* Desktop: floating glass rail */}
       <aside className="fixed left-4 top-20 z-30 hidden h-[calc(100vh-6.5rem)] w-60 md:block">
-        <nav className="glass flex h-full flex-col gap-1.5 rounded-3xl p-3">
+        <nav className="glass flex h-full flex-col gap-1.5 rounded-xl p-3">
           {navItems.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
@@ -52,7 +52,7 @@ export function Sidebar() {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition-colors duration-150',
+                  'relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-bold transition-colors duration-150',
                   active
                     ? 'text-bg-base'
                     : 'text-text-secondary hover:bg-white/[0.06] hover:text-text-primary'
@@ -61,7 +61,7 @@ export function Sidebar() {
                 {active && (
                   <motion.div
                     layoutId="sidebar-indicator"
-                    className="absolute inset-0 rounded-2xl bg-accent-primary shadow-glow"
+                    className="absolute inset-0 rounded-lg bg-accent-primary shadow-glow"
                     initial={false}
                     transition={{ type: 'spring', stiffness: 500, damping: 32 }}
                   />
@@ -78,7 +78,7 @@ export function Sidebar() {
       {!inInterviewRoom && (
         <nav
           aria-label="Main"
-          className="glass fixed inset-x-3 z-40 flex items-stretch justify-around rounded-3xl p-1.5 md:hidden"
+          className="glass fixed inset-x-3 z-40 flex items-stretch justify-around rounded-xl p-1.5 md:hidden"
           style={{ bottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
         >
           {navItems.map((item) => {
@@ -92,7 +92,7 @@ export function Sidebar() {
                 aria-label={item.name}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 transition-all',
+                  'flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 transition-all',
                   active ? 'bg-accent-primary text-bg-base shadow-glow' : 'text-text-secondary active:bg-white/10'
                 )}
               >

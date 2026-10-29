@@ -78,7 +78,7 @@ export default function PostJob() {
     setIsLoading(true);
     try {
       await createJob(payload);
-      toast.success(isWalkin ? 'Walk-in drive posted! 🎉' : 'Job posted successfully! 🎉');
+      toast.success(isWalkin ? 'Walk-in drive posted' : 'Job posted');
       navigate('/dashboard/recruiter');
     } catch (error) {
       // Show the server's reason (e.g. "can't ask candidates for money") instead of a generic message
@@ -117,7 +117,7 @@ export default function PostJob() {
           <ChevronRight className="h-3.5 w-3.5" />
           <span className="text-text-primary">Post a Job</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Post a New Position</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary">Post a New Position</h1>
         <p className="text-text-secondary">
           Fill in the details below. For online jobs our AI uses them to screen and match candidates automatically.
         </p>
@@ -133,7 +133,7 @@ export default function PostJob() {
           {/* How will candidates join? */}
           <motion.div
             variants={itemVariants}
-            className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-4"
+            className="bg-bg-surface border border-border-subtle rounded-lg p-6 shadow-card space-y-4"
           >
             <div>
               <h2 className="text-base font-semibold text-text-primary">How will candidates join?</h2>
@@ -150,7 +150,7 @@ export default function PostJob() {
                   onClick={() => update('kind', value)}
                   aria-pressed={formData.kind === value}
                   className={cn(
-                    'rounded-2xl border p-4 text-left transition-all',
+                    'rounded-lg border p-4 text-left transition-all',
                     formData.kind === value
                       ? 'border-accent-primary bg-accent-muted shadow-glow'
                       : 'border-border-subtle hover:border-white/25'
@@ -167,7 +167,7 @@ export default function PostJob() {
           {/* Basic Info Section */}
           <motion.div
             variants={itemVariants}
-            className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-5"
+            className="bg-bg-surface border border-border-subtle rounded-lg p-6 shadow-card space-y-5"
           >
             <div className="flex items-center gap-3 pb-4 border-b border-border-subtle">
               <div className="h-9 w-9 rounded-lg bg-accent-muted flex items-center justify-center">
@@ -200,7 +200,7 @@ export default function PostJob() {
                       key={type}
                       type="button"
                       onClick={() => update('job_type', type)}
-                      className={`min-h-11 md:min-h-0 px-3 py-2 rounded-2xl text-xs font-medium border transition-all duration-150 ${
+                      className={`min-h-11 md:min-h-0 px-3 py-2 rounded-lg text-xs font-medium border transition-all duration-150 ${
                         formData.job_type === type
                           ? 'bg-accent-muted border-accent-primary text-accent-primary shadow-active'
                           : 'bg-bg-base border-border-subtle text-text-secondary hover:border-border-active hover:text-text-primary'
@@ -240,7 +240,7 @@ export default function PostJob() {
           {/* Description Section */}
           <motion.div
             variants={itemVariants}
-            className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-5"
+            className="bg-bg-surface border border-border-subtle rounded-lg p-6 shadow-card space-y-5"
           >
             <div className="flex items-center gap-3 pb-4 border-b border-border-subtle">
               <div className="h-9 w-9 rounded-lg bg-accent-muted flex items-center justify-center">
@@ -262,7 +262,7 @@ export default function PostJob() {
                 </span>
               </div>
               <textarea
-                className="w-full min-h-[180px] rounded-2xl border border-border-subtle bg-bg-base p-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-border-active resize-y transition-colors"
+                className="w-full min-h-[180px] rounded-lg border border-border-subtle bg-bg-base p-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-border-active resize-y transition-colors"
                 value={formData.description}
                 onChange={(e) => update('description', e.target.value)}
                 placeholder="Describe the role, what the candidate will be working on, the team culture, growth opportunities, and what you're looking for in an ideal candidate..."
@@ -276,7 +276,7 @@ export default function PostJob() {
           {isWalkin && (
             <motion.div
               variants={itemVariants}
-              className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-5"
+              className="bg-bg-surface border border-border-subtle rounded-lg p-6 shadow-card space-y-5"
             >
               <div className="flex items-center gap-3 pb-4 border-b border-border-subtle">
                 <div className="h-9 w-9 rounded-lg bg-accent-muted flex items-center justify-center">
@@ -347,7 +347,7 @@ export default function PostJob() {
           {/* Requirements Section */}
           <motion.div
             variants={itemVariants}
-            className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-5"
+            className="bg-bg-surface border border-border-subtle rounded-lg p-6 shadow-card space-y-5"
           >
             <div className="flex items-center gap-3 pb-4 border-b border-border-subtle">
               <div className="h-9 w-9 rounded-lg bg-accent-muted flex items-center justify-center">
@@ -377,7 +377,7 @@ export default function PostJob() {
           {!isWalkin && (
           <motion.div
             variants={itemVariants}
-            className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-5"
+            className="bg-bg-surface border border-border-subtle rounded-lg p-6 shadow-card space-y-5"
           >
             <div className="flex items-center gap-3 pb-4 border-b border-border-subtle">
               <div className="h-9 w-9 rounded-lg bg-accent-muted flex items-center justify-center">
@@ -417,15 +417,15 @@ export default function PostJob() {
                 </div>
               </div>
 
-              <div className="mt-4 p-4 rounded-2xl bg-bg-elevated border border-border-subtle">
+              <div className="mt-4 p-4 rounded-lg bg-bg-elevated border border-border-subtle">
                 <p className="text-sm text-text-secondary">
                   Candidates with an AI resume match score{' '}
                   <span className="text-accent-primary font-semibold">above {formData.ats_threshold}</span>{' '}
                   will automatically be invited to the AI interview stage.
                   {formData.ats_threshold >= 80
-                    ? ' This is a high bar — only top candidates will proceed.'
+                    ? ' This is a high bar, so only top candidates will proceed.'
                     : formData.ats_threshold <= 55
-                    ? ' This is lenient — most candidates will reach the interview stage.'
+                    ? ' This is lenient, so most candidates will reach the interview stage.'
                     : ' This is a balanced threshold.'}
                 </p>
               </div>

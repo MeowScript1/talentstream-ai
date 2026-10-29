@@ -89,7 +89,7 @@ export default function InterviewRoom() {
     <div className="flex h-[calc(100dvh-4rem)] bg-bg-base overflow-hidden">
       {/* Video Feed Area (Mock for now, but UI is there) */}
       <div className="hidden lg:flex w-1/3 flex-col border-r border-border-subtle bg-bg-surface p-4">
-        <div className="flex-1 rounded-2xl bg-bg-base border border-border-subtle overflow-hidden relative group">
+        <div className="flex-1 rounded-lg bg-bg-base border border-border-subtle overflow-hidden relative group">
           <div className="absolute inset-0 flex items-center justify-center">
             {cameraEnabled ? (
               <div className="text-text-muted text-center">
@@ -104,16 +104,16 @@ export default function InterviewRoom() {
             )}
           </div>
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
-            <Button size="icon" variant={micEnabled ? 'secondary' : 'danger'} className="rounded-full shadow-lg" onClick={() => setMicEnabled(!micEnabled)}>
+            <Button size="icon" variant={micEnabled ? 'secondary' : 'danger'} className="rounded-md shadow-lg" onClick={() => setMicEnabled(!micEnabled)}>
               {micEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
             </Button>
-            <Button size="icon" variant={cameraEnabled ? 'secondary' : 'danger'} className="rounded-full shadow-lg" onClick={() => setCameraEnabled(!cameraEnabled)}>
+            <Button size="icon" variant={cameraEnabled ? 'secondary' : 'danger'} className="rounded-md shadow-lg" onClick={() => setCameraEnabled(!cameraEnabled)}>
               {cameraEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
             </Button>
           </div>
         </div>
         
-        <div className="mt-4 p-4 rounded-2xl border border-border-subtle bg-bg-elevated text-sm text-text-secondary">
+        <div className="mt-4 p-4 rounded-lg border border-border-subtle bg-bg-elevated text-sm text-text-secondary">
           <h3 className="font-medium text-text-primary mb-1">Interview Tips</h3>
           <ul className="list-disc pl-4 space-y-1">
             <li>Speak clearly and directly to the camera</li>
@@ -158,7 +158,7 @@ export default function InterviewRoom() {
                 }`}>
                   {msg.role === 'ai' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
                 </div>
-                <div className={`min-w-0 p-3 sm:p-4 rounded-2xl ${
+                <div className={`min-w-0 p-3 sm:p-4 rounded-lg ${
                   msg.role === 'ai' 
                     ? 'bg-bg-elevated border border-border-subtle text-text-primary rounded-tl-none' 
                     : 'bg-accent-primary text-bg-base rounded-tr-none'
@@ -178,13 +178,13 @@ export default function InterviewRoom() {
               onChange={(e) => setInput(e.target.value)}
               placeholder={isCompleted ? "Interview completed" : "Type your answer..."}
               disabled={isCompleted || !isConnected}
-              className="min-w-0 flex-1 rounded-2xl shadow-none"
+              className="min-w-0 flex-1 rounded-lg shadow-none"
             />
             <Button 
               type="submit" 
               disabled={!input.trim() || isCompleted || !isConnected}
               aria-label="Send"
-              className="rounded-2xl px-5 sm:px-6"
+              className="rounded-lg px-5 sm:px-6"
             >
               <Send className="h-4 w-4" />
             </Button>

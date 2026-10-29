@@ -70,7 +70,7 @@ export function PostJobModal() {
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1.5">Description</label>
             <textarea
-              className="w-full min-h-[120px] rounded-2xl border border-border-subtle bg-bg-base p-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-border-active resize-y"
+              className="w-full min-h-[120px] rounded-lg border border-border-subtle bg-bg-base p-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-border-active resize-y"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Describe the role, responsibilities, and what you're looking for..."
@@ -112,7 +112,7 @@ export function PostJobModal() {
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1.5">Job Type</label>
               <select
-                className="w-full h-12 rounded-2xl border border-border-subtle bg-bg-base px-4 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-border-active appearance-none"
+                className="w-full h-12 rounded-lg border border-border-subtle bg-bg-base px-4 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-border-active appearance-none"
                 value={formData.job_type}
                 onChange={(e) => setFormData({ ...formData, job_type: e.target.value as JobCreate['job_type'] })}
               >
@@ -133,7 +133,7 @@ export function PostJobModal() {
                 value={formData.ats_threshold}
                 onChange={(e) => setFormData({ ...formData, ats_threshold: parseInt(e.target.value) })}
               />
-              <p className="text-xs text-text-muted -mt-2">Minimum AI score to unlock interview.</p>
+              <p className="text-xs text-text-muted -mt-2">Minimum resume score to invite a candidate to the interview.</p>
             </div>
           </div>
 

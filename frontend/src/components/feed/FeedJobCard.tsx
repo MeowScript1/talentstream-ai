@@ -35,12 +35,12 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
   };
 
   return (
-    <article className="rounded-3xl border border-white/[0.07] bg-bg-surface/80 p-4 shadow-card backdrop-blur-xl sm:p-5">
+    <article className="rounded-xl border border-white/[0.07] bg-bg-surface/80 p-4 shadow-card  sm:p-5">
       <div className="flex gap-4">
         {walkin && (
-          <div className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-2xl bg-accent-primary text-bg-base shadow-pop">
+          <div className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-accent-primary text-bg-base ">
             <span className="text-[10px] font-bold uppercase leading-none">{walkin.weekday}</span>
-            <span className="font-display text-2xl font-extrabold leading-none">{walkin.day}</span>
+            <span className="font-display text-2xl font-semibold leading-none">{walkin.day}</span>
             <span className="text-[10px] font-bold uppercase leading-none">{walkin.month}</span>
           </div>
         )}
@@ -63,28 +63,28 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
 
           <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
             {job.remote && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-cyan/10 px-2 py-0.5 font-bold text-cyan">
+              <span className="inline-flex items-center gap-1 rounded-md bg-cyan/10 px-2 py-0.5 font-bold text-cyan">
                 <Globe className="h-3 w-3" /> Remote
               </span>
             )}
             {job.salary_text && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 font-bold text-success">
+              <span className="inline-flex items-center gap-1 rounded-md bg-success/10 px-2 py-0.5 font-bold text-success">
                 <Wallet className="h-3 w-3" /> {job.salary_text}
               </span>
             )}
             {job.native ? (
-              <span className="rounded-full border border-accent-primary/40 bg-accent-muted px-2 py-0.5 font-bold text-accent-primary">
+              <span className="rounded-md border border-accent-primary/40 bg-accent-muted px-2 py-0.5 font-bold text-accent-primary">
                 Posted on TalentStream
               </span>
             ) : (
-              <span className="rounded-full border border-white/10 px-2 py-0.5 text-text-muted">via {job.source_label}</span>
+              <span className="rounded-md border border-white/10 px-2 py-0.5 text-text-muted">via {job.source_label}</span>
             )}
           </div>
         </div>
       </div>
 
       {walkin && (job.walkin_time || job.venue || job.notes) && (
-        <div className="mt-3 rounded-2xl border border-accent-primary/30 bg-accent-muted p-3 text-sm">
+        <div className="mt-3 rounded-lg border border-accent-primary/30 bg-accent-muted p-3 text-sm">
           {lastDay && (
             <p className="text-text-primary">
               <span className="font-bold">Runs until:</span> {lastDay.weekday} {lastDay.day} {lastDay.month}

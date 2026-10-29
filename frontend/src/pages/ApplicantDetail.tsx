@@ -53,12 +53,12 @@ export default function ApplicantDetail() {
         const appRes = await api.get(`/applications/${id}`);
         setApplicant(appRes.data);
 
-        // Try to fetch interview — it may not exist yet
+        // Try to fetch the interview, which may not exist yet
         try {
           const intRes = await api.get(`/interviews/${id}`);
           setInterview(intRes.data);
         } catch {
-          // Interview may not have started yet — that's fine
+          // The interview may not have started yet
           setInterview(null);
         }
       } catch (error) {
@@ -92,7 +92,7 @@ export default function ApplicantDetail() {
     try {
       await api.post(`/applications/${applicant.id}/rescore`);
       setApplicant((prev) => prev ? { ...prev, ats_score: null, ats_summary: null } : null);
-      toast.success('Re-scoring started — results will update shortly');
+      toast.success('Re-scoring started. Results will update shortly');
       // Poll for updated score after a short delay
       setTimeout(async () => {
         try {
@@ -179,7 +179,7 @@ export default function ApplicantDetail() {
               href={applicant.resume_url} 
               target="_blank" 
               rel="noreferrer"
-              className="mt-6 flex items-center justify-center gap-2 w-full text-sm font-medium text-accent-primary bg-accent-muted px-4 py-3 rounded-2xl hover:bg-accent-primary hover:text-bg-base transition-colors border border-accent-primary/20"
+              className="mt-6 flex items-center justify-center gap-2 w-full text-sm font-medium text-accent-primary bg-accent-muted px-4 py-3 rounded-lg hover:bg-accent-primary hover:text-bg-base transition-colors border border-accent-primary/20"
             >
               <FileText className="h-4 w-4" /> View Original Resume
             </a>
@@ -227,7 +227,7 @@ export default function ApplicantDetail() {
           {(applicant.status === 'shortlisted' || applicant.status === 'rejected') && (
             <div className="text-center py-3">
               <Badge variant={applicant.status} className="text-base px-4 py-2">
-                {applicant.status === 'shortlisted' ? '✓ Shortlisted' : '✗ Rejected'}
+                {applicant.status === 'shortlisted' ? 'Shortlisted' : 'Rejected'}
               </Badge>
             </div>
           )}
@@ -250,7 +250,7 @@ export default function ApplicantDetail() {
               </Badge>
             </div>
 
-            <div className="flex-1 bg-bg-base rounded-2xl border border-border-subtle overflow-hidden min-h-[300px]">
+            <div className="flex-1 bg-bg-base rounded-lg border border-border-subtle overflow-hidden min-h-[300px]">
               {interview ? (
                 <TranscriptView transcript={interview.transcript || []} />
               ) : (

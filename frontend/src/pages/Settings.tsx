@@ -119,7 +119,7 @@ export default function Settings() {
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary">Settings</h1>
         <p className="text-text-secondary mt-1">Manage your account, company profile and preferences.</p>
       </motion.div>
 
@@ -297,7 +297,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => toggleNotification(key)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors before:absolute before:inset-x-0 before:-inset-y-3 before:content-[''] ${
+                    className={`relative inline-flex h-6 w-11 items-center rounded-md transition-colors before:absolute before:inset-x-0 before:-inset-y-3 before:content-[''] ${
                       notifications[key] ? 'bg-accent-primary' : 'bg-bg-elevated border border-border-subtle'
                     }`}
                   >
@@ -315,7 +315,7 @@ export default function Settings() {
 
         {/* Danger Zone */}
         <motion.div variants={itemVariants}>
-          <div className="rounded-2xl border border-danger/30 bg-danger/5 p-6">
+          <div className="rounded-lg border border-danger/30 bg-danger/5 p-6">
             <SectionHeader
               icon={ShieldAlert}
               title="Danger Zone"

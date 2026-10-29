@@ -40,7 +40,7 @@ export function JobFeedCard({ job, status = null, onApply, onInterview, applyTri
           </Button>
         );
       case 'shortlisted':
-        return <Badge variant="shortlisted">Shortlisted! 🎉</Badge>;
+        return <Badge variant="shortlisted">Shortlisted</Badge>;
       case 'rejected':
         return <Badge variant="rejected">Not Selected</Badge>;
     }

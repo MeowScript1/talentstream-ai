@@ -52,7 +52,7 @@ export default function InterviewLanding() {
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">Interview Room</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary">Interview Room</h1>
         <p className="text-text-secondary mt-1">
           Enter your scheduled AI interviews below. Take a moment to prepare before you start.
         </p>
@@ -73,13 +73,13 @@ export default function InterviewLanding() {
 
           {isLoading ? (
             <div className="space-y-4">
-              {[1, 2].map((i) => <Skeleton key={i} className="h-36 w-full rounded-2xl" />)}
+              {[1, 2].map((i) => <Skeleton key={i} className="h-36 w-full rounded-lg" />)}
             </div>
           ) : pendingInterviews.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center py-20 border border-dashed border-border-subtle rounded-2xl bg-bg-surface text-center"
+              className="flex flex-col items-center justify-center py-20 border border-dashed border-border-subtle rounded-lg bg-bg-surface text-center"
             >
               <div className="h-16 w-16 rounded-full bg-bg-elevated border border-border-subtle flex items-center justify-center mb-4">
                 <Video className="h-8 w-8 text-text-muted opacity-50" />
@@ -100,14 +100,13 @@ export default function InterviewLanding() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.07 }}
-                  className="bg-bg-surface border border-accent-primary/30 rounded-2xl p-6 shadow-glow relative overflow-hidden"
+                  className="bg-bg-surface border border-accent-primary/30 rounded-lg p-6 shadow-glow relative overflow-hidden"
                 >
                   {/* Glow accent */}
-                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-accent-primary to-transparent" />
 
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex min-w-0 items-start gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-accent-muted border border-accent-primary/30 flex items-center justify-center flex-shrink-0">
+                      <div className="h-12 w-12 rounded-lg bg-accent-muted border border-accent-primary/30 flex items-center justify-center flex-shrink-0">
                         <Bot className="h-6 w-6 text-accent-primary" />
                       </div>
                       <div>
@@ -118,12 +117,12 @@ export default function InterviewLanding() {
                         </div>
 
                         <div className="mt-3 flex items-center gap-2">
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-accent-primary bg-accent-muted px-2.5 py-1 rounded-full border border-accent-primary/20">
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-accent-primary bg-accent-muted px-2.5 py-1 rounded-md border border-accent-primary/20">
                             <div className="h-1.5 w-1.5 rounded-full bg-accent-primary animate-pulse" />
                             Interview Ready
                           </div>
                           {app.ats_score != null && (
-                            <div className="text-xs text-text-muted bg-bg-elevated px-2.5 py-1 rounded-full border border-border-subtle">
+                            <div className="text-xs text-text-muted bg-bg-elevated px-2.5 py-1 rounded-md border border-border-subtle">
                               ATS Score: <span className="font-semibold text-text-primary">{app.ats_score}/100</span>
                             </div>
                           )}
@@ -163,7 +162,7 @@ export default function InterviewLanding() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-bg-surface border border-border-subtle rounded-2xl p-5 shadow-card"
+            className="bg-bg-surface border border-border-subtle rounded-lg p-5 shadow-card"
           >
             <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
               <Wifi className="h-4 w-4 text-accent-primary" />
@@ -184,7 +183,7 @@ export default function InterviewLanding() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-bg-surface border border-border-subtle rounded-2xl p-5 shadow-card"
+            className="bg-bg-surface border border-border-subtle rounded-lg p-5 shadow-card"
           >
             <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-accent-primary" />

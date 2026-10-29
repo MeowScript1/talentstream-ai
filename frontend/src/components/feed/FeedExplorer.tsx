@@ -36,14 +36,14 @@ function Tab({ active, onClick, icon: Icon, label, count }: TabProps) {
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full px-4 text-sm font-bold transition-all',
-        active ? 'bg-accent-primary text-bg-base shadow-pop' : 'text-text-secondary hover:text-text-primary'
+        'flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold transition-all',
+        active ? 'bg-accent-primary text-bg-base ' : 'text-text-secondary hover:text-text-primary'
       )}
     >
       <Icon className="h-4 w-4" />
       {label}
       {count !== undefined && (
-        <span className={cn('rounded-full px-1.5 text-xs', active ? 'bg-bg-base/15' : 'bg-white/10')}>{count}</span>
+        <span className={cn('rounded-md px-1.5 text-xs', active ? 'bg-bg-base/15' : 'bg-white/10')}>{count}</span>
       )}
     </button>
   );
@@ -124,7 +124,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
 
   return (
     <div className="space-y-4">
-      <div className="glass flex gap-1 rounded-full p-1">
+      <div className="glass flex gap-1 rounded-md p-1">
         <Tab active={kind === 'apply'} onClick={() => setKind('apply')} icon={Briefcase} label="Apply online" count={stats?.apply_jobs} />
         <Tab
           active={kind === 'walkin'}
@@ -156,7 +156,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
               onClick={() => setPlace(on ? '' : city)}
               aria-pressed={on}
               className={cn(
-                'inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1',
+                'inline-flex min-h-11 shrink-0 items-center rounded-md border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1',
                 on ? 'border-accent-primary bg-accent-primary text-bg-base' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
               )}
             >
@@ -173,7 +173,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
             onClick={() => setRemoteOnly((v) => !v)}
             aria-pressed={remoteOnly}
             className={cn(
-              'inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1.5',
+              'inline-flex min-h-11 items-center gap-1.5 rounded-md border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1.5',
               remoteOnly ? 'border-accent-primary bg-accent-primary text-bg-base' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
             )}
           >
@@ -199,11 +199,11 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-44 w-full rounded-3xl" />
+            <Skeleton key={i} className="h-44 w-full rounded-xl" />
           ))}
         </div>
       ) : error ? (
-        <div className="rounded-3xl border border-danger/30 bg-danger/10 p-6 text-center">
+        <div className="rounded-xl border border-danger/30 bg-danger/10 p-6 text-center">
           <p className="font-bold text-text-primary">Couldn't load jobs</p>
           <p className="mt-1 text-sm text-text-secondary">The server may be waking up. Give it a few seconds.</p>
           <Button className="mt-3" size="sm" onClick={() => load(1)}>
@@ -211,7 +211,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
           </Button>
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-3xl border-2 border-dashed border-white/15 bg-white/[0.02] p-8 text-center">
+        <div className="rounded-xl border-2 border-dashed border-white/15 bg-white/[0.02] p-8 text-center">
           {meta?.syncing ? (
             <>
               <Loader2 className="mx-auto h-6 w-6 animate-spin text-accent-primary" />

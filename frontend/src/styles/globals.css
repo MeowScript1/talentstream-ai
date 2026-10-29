@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,30 +6,30 @@
 
 @layer base {
   :root {
-    /* Midnight grape surfaces */
-    --bg-base: #0A0A12;
-    --bg-surface: #12121F;
-    --bg-elevated: #1B1B2E;
+    /* Neutral dark surfaces with one calm accent */
+    --bg-base: #0C0E11;
+    --bg-surface: #13161B;
+    --bg-elevated: #1B1F26;
 
-    /* Acid lime is the hero colour; violet / pink / cyan are the supporting cast */
-    --accent-primary: #C6FF3D;
-    --accent-hover: #DAFF78;
-    --accent-muted: rgba(198, 255, 61, 0.12);
-    --accent-shadow: #7FA312;
-    --violet: #8B5CF6;
-    --pink: #FF4FA3;
-    --cyan: #38E8FF;
+    --accent-primary: #6EE7B7;
+    --accent-hover: #9BF0CD;
+    --accent-muted: rgba(110, 231, 183, 0.10);
+    --accent-shadow: #3FB488;
+    /* Supporting colours are muted and used only for status */
+    --violet: #94A3B8;
+    --pink: #F59E9E;
+    --cyan: #7DB8E8;
 
-    --text-primary: #F7F5FF;
-    --text-secondary: #ABA8C8;
-    --text-muted: #6B688F;
+    --text-primary: #F1F3F5;
+    --text-secondary: #A1A8B3;
+    --text-muted: #6E7683;
 
-    --border-subtle: #28263F;
-    --border-active: rgba(198, 255, 61, 0.45);
+    --border-subtle: #262B33;
+    --border-active: rgba(110, 231, 183, 0.45);
 
-    --danger: #FF5C7A;
-    --success: #3DF5A0;
-    --warning: #FFC857;
+    --danger: #F26D7D;
+    --success: #5AD39A;
+    --warning: #E8B64C;
   }
 
   html {
@@ -47,30 +47,6 @@
     min-height: 100dvh; /* the visible height, not the height behind a phone's collapsing address bar */
     overflow-x: clip;   /* one stray wide element must never make the whole page scroll sideways */
     -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Aurora glow behind everything */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background:
-      radial-gradient(60rem 40rem at 8% -10%, rgba(139, 92, 246, 0.28), transparent 60%),
-      radial-gradient(50rem 36rem at 105% 10%, rgba(255, 79, 163, 0.18), transparent 60%),
-      radial-gradient(46rem 30rem at 50% 115%, rgba(198, 255, 61, 0.10), transparent 60%);
-  }
-
-  /* Fine grain so the gradients don't look plasticky */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.05;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 
   h1, h2, h3, h4 {
@@ -99,34 +75,15 @@
 }
 
 @layer components {
-  /* Lime → cyan gradient for hero words and big numbers */
-  .text-gradient {
-    background-image: linear-gradient(95deg, var(--accent-primary) 0%, var(--cyan) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Pink → violet variant for variety */
+  /* Kept as plain styles so existing markup stays flat: no gradient text, no frosted blur */
+  .text-gradient,
   .text-gradient-hot {
-    background-image: linear-gradient(95deg, var(--pink) 0%, var(--violet) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--accent-primary);
   }
 
-  /* Frosted panel */
   .glass {
-    background: rgba(18, 18, 31, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  /* Slightly tilted sticker chip */
-  .sticker {
-    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold;
-    transform: rotate(-2deg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
   }
 }
 

@@ -29,7 +29,7 @@ export function TranscriptView({ transcript }: { transcript: TranscriptItem[] })
             <span className={`text-xs font-medium mb-1 block ${msg.role === 'user' ? 'text-right text-text-secondary' : 'text-accent-primary'}`}>
               {msg.role === 'ai' ? 'AI Interviewer' : 'Candidate'}
             </span>
-            <div className={`p-4 rounded-2xl ${
+            <div className={`p-4 rounded-lg ${
               msg.role === 'ai' 
                 ? 'bg-bg-surface border border-border-subtle text-text-primary rounded-tl-none' 
                 : 'bg-bg-elevated border border-border-subtle text-text-primary rounded-tr-none'

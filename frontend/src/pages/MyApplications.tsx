@@ -54,7 +54,7 @@ function ApplicationCard({ app }: { app: Application }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
-      className={`bg-bg-surface border rounded-2xl p-5 shadow-card transition-all duration-200 ${
+      className={`bg-bg-surface border rounded-lg p-5 shadow-card transition-all duration-200 ${
         isInterviewing
           ? 'border-accent-primary/40 shadow-glow'
           : isShortlisted
@@ -68,7 +68,7 @@ function ApplicationCard({ app }: { app: Application }) {
         <div className="flex items-start gap-4 flex-1 min-w-0">
           {/* Company initial avatar */}
           <div
-            className={`h-11 w-11 rounded-2xl flex items-center justify-center flex-shrink-0 text-base font-bold ${
+            className={`h-11 w-11 rounded-lg flex items-center justify-center flex-shrink-0 text-base font-bold ${
               isInterviewing
                 ? 'bg-accent-muted text-accent-primary border border-accent-primary/30'
                 : 'bg-bg-elevated border border-border-subtle text-text-secondary'
@@ -130,7 +130,7 @@ function ApplicationCard({ app }: { app: Application }) {
           ) : isShortlisted ? (
             <div className="flex items-center gap-1.5 text-success text-sm font-semibold">
               <CheckCircle2 className="h-4 w-4" />
-              You're in! 🎉
+              Shortlisted
             </div>
           ) : null}
         </div>
@@ -172,7 +172,7 @@ export default function MyApplications() {
     <div className="space-y-8 max-w-3xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">My Applications</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary">My Applications</h1>
         <p className="text-text-secondary mt-1">Track the status of every job you've applied to.</p>
       </div>
 
@@ -192,7 +192,7 @@ export default function MyApplications() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className={`rounded-2xl px-4 py-3 border border-border-subtle ${stat.bg} text-center`}
+              className={`rounded-lg px-4 py-3 border border-border-subtle ${stat.bg} text-center`}
             >
               <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
               <div className="text-xs text-text-muted mt-0.5">{stat.label}</div>
@@ -208,7 +208,7 @@ export default function MyApplications() {
             <button
               key={key}
               onClick={() => setActiveFilter(key)}
-              className={`px-4 py-3 md:py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-3 md:py-1.5 rounded-md text-sm font-medium transition-colors ${
                 activeFilter === key
                   ? 'bg-accent-primary text-bg-base'
                   : 'bg-bg-surface text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-active'
@@ -229,13 +229,13 @@ export default function MyApplications() {
       <div className="space-y-4">
         {isLoading ? (
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-36 w-full rounded-2xl" />)}
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-36 w-full rounded-lg" />)}
           </div>
         ) : myApplications.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center py-24 border border-dashed border-border-subtle rounded-2xl bg-bg-surface text-center"
+            className="flex flex-col items-center justify-center py-24 border border-dashed border-border-subtle rounded-lg bg-bg-surface text-center"
           >
             <div className="h-16 w-16 rounded-full bg-accent-muted flex items-center justify-center mb-4">
               <BriefcaseBusiness className="h-8 w-8 text-accent-primary" />

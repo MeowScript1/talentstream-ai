@@ -27,7 +27,7 @@ export function TrustBadge({ label, score, reasons }: TrustBadgeProps) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold', style.chip)}
+        className={cn('inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-bold', style.chip)}
       >
         <Icon className="h-3.5 w-3.5" />
         {style.label}
@@ -36,7 +36,7 @@ export function TrustBadge({ label, score, reasons }: TrustBadgeProps) {
       </button>
 
       {open && (
-        <div className="mt-2 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+        <div className="mt-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
           <p className="mb-2 text-xs text-text-muted">
             Why this rating? An automatic check of the listing. It can miss things, so always verify before sharing
             personal details or paying anything.
