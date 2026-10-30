@@ -6,5 +6,6 @@ from app.models.external_job import ExternalJob, FeedSync, JobReport
 from app.models.interview import Interview
 from app.models.job import Job
 from app.models.user import User
+from app.models.video_interview import VideoInterview
 
-__all__ = ["Application", "Base", "ExternalJob", "FeedSync", "Interview", "Job", "JobReport", "User", "WalkinAlert"]
+__all__ = ["Application", "Base", "ExternalJob", "FeedSync", "Interview", "Job", "JobReport", "User", "VideoInterview", "WalkinAlert"]

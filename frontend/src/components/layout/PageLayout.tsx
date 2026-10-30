@@ -4,7 +4,7 @@ import { Sidebar } from './Sidebar';
 
 export function PageLayout() {
   // The live interview fills the screen edge to edge (no padding, no bottom tab bar)
-  const inInterviewRoom = /^\/interview\/[^/]+/.test(useLocation().pathname);
+  const inInterviewRoom = /^\/interview\/(?!practice$)[^/]+/.test(useLocation().pathname);
 
   return (
     <div className="min-h-dvh">

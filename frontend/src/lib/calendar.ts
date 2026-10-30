@@ -49,3 +49,34 @@ export function downloadWalkinCalendar(job: FeedJob): void {
   link.click();
   URL.revokeObjectURL(url);
 }
+
+const utcStamp = (d: Date) =>
+  `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+
+/** Download an .ics file for a scheduled video interview (30 minutes unless the employer says otherwise in the notes). */
+export function downloadVideoInterviewCalendar(args: { id: string; title: string; company: string; start: string; url: string; notes?: string | null }): void {
+  const start = new Date(args.start);
+  const end = new Date(start.getTime() + 30 * 60 * 1000);
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//TalentStream//Video interview//EN',
+    'BEGIN:VEVENT',
+    `UID:${args.id}@talentstream`,
+    `DTSTAMP:${utcStamp(new Date())}`,
+    `DTSTART:${utcStamp(start)}`,
+    `DTEND:${utcStamp(end)}`,
+    `SUMMARY:${esc(`Video interview: ${args.title} at ${args.company}`)}`,
+    `LOCATION:${esc(args.url)}`,
+    `DESCRIPTION:${esc(`Join: ${args.url}${args.notes ? `\n${args.notes}` : ''}`)}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ];
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'video-interview.ics';
+  link.click();
+  URL.revokeObjectURL(url);
+}

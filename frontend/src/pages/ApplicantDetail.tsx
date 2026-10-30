@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApplicationStore } from '@/store/applicationStore';
 import { TranscriptView } from '@/components/recruiter/TranscriptView';
+import { ScheduleVideoCard } from '@/components/recruiter/ScheduleVideoCard';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -203,6 +204,10 @@ export default function ApplicantDetail() {
                 {interview.ai_feedback}
               </p>
             </Card>
+          )}
+
+          {applicant.status !== 'rejected' && (
+            <ScheduleVideoCard applicationId={applicant.id} candidateName={applicant.candidate_name} />
           )}
 
           {applicant.status !== 'rejected' && applicant.status !== 'shortlisted' && (

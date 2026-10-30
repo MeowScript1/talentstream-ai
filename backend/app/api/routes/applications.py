@@ -11,6 +11,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -22,7 +23,10 @@ from app.core.dependencies import get_current_user, require_role
 from app.models.application import Application
 from app.models.job import Job
 from app.models.user import User
+from app.models.video_interview import VideoInterview
 from app.schemas.application import ApplicationResponse
+from app.schemas.types import text
+from app.services.meeting_links import validate_meeting_url
 from app.services.resume import read_resume
 from app.services.storage import StorageError, upload_application_resume
 
@@ -121,6 +125,83 @@ async def submit_application(
         
     return new_app
 
+def _video_out(video: VideoInterview | None) -> dict | None:
+    if video is None:
+        return None
+    return {"scheduled_at": video.scheduled_at, "meeting_url": video.meeting_url, "notes": video.notes}
+
+
+class VideoInterviewIn(BaseModel):
+    scheduled_at: datetime
+    meeting_url: text(500, min_length=1)
+    notes: text(500) | None = None
+
+
+async def _owned_application(app_id: uuid.UUID, db: AsyncSession, user: User) -> Application:
+    """The application, if this user is the candidate or the employer who owns the job."""
+    app = (
+        await db.execute(select(Application).where(Application.id == app_id).options(selectinload(Application.job)))
+    ).scalar_one_or_none()
+    if app is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    if user.role == "candidate" and app.candidate_id != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    if user.role == "employer" and app.job.employer_id != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return app
+
+
+@router.get("/{app_id}/video-interview")
+async def get_video_interview(
+    app_id: uuid.UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
+):
+    app = await _owned_application(app_id, db, current_user)
+    video = (await db.execute(select(VideoInterview).where(VideoInterview.application_id == app.id))).scalar_one_or_none()
+    return _video_out(video)
+
+
+@router.put("/{app_id}/video-interview")
+async def schedule_video_interview(
+    app_id: uuid.UUID,
+    body: VideoInterviewIn,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("employer")),
+):
+    """Set (or change) the time and meeting link of a live video interview."""
+    app = await _owned_application(app_id, db, current_user)
+    if app.status == "rejected":
+        raise HTTPException(status_code=400, detail="This application was rejected, so a video interview can't be scheduled")
+    when = body.scheduled_at if body.scheduled_at.tzinfo else body.scheduled_at.replace(tzinfo=timezone.utc)
+    if when <= datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Pick a time in the future")
+    try:
+        url = validate_meeting_url(body.meeting_url)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from None
+
+    video = (await db.execute(select(VideoInterview).where(VideoInterview.application_id == app.id))).scalar_one_or_none()
+    if video is None:
+        video = VideoInterview(application_id=app.id, scheduled_at=when, meeting_url=url, notes=body.notes or None)
+        db.add(video)
+    else:
+        video.scheduled_at, video.meeting_url, video.notes = when, url, body.notes or None
+    if app.decided_at is None:
+        app.decided_at = datetime.now(timezone.utc)  # setting up a meeting is an answer to the candidate
+    await db.commit()
+    return _video_out(video)
+
+
+@router.delete("/{app_id}/video-interview", status_code=204)
+async def cancel_video_interview(
+    app_id: uuid.UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_role("employer"))
+):
+    app = await _owned_application(app_id, db, current_user)
+    video = (await db.execute(select(VideoInterview).where(VideoInterview.application_id == app.id))).scalar_one_or_none()
+    if video is not None:
+        await db.delete(video)
+        await db.commit()
+
+
 @router.get("/mine")
 async def get_my_applications(
     db: AsyncSession = Depends(get_db),
@@ -130,6 +211,13 @@ async def get_my_applications(
     result = await db.execute(query)
     apps = result.scalars().all()
     
+    videos = {
+        v.application_id: v
+        for v in (
+            await db.execute(select(VideoInterview).where(VideoInterview.application_id.in_([a.id for a in apps])))
+        ).scalars().all()
+    } if apps else {}
+
     # Need custom formatting to include job title easily
     response = []
     for app in apps:
@@ -140,7 +228,8 @@ async def get_my_applications(
             "employer_name": app.job.employer.company_name or app.job.employer.full_name,
             "status": app.status,
             "ats_score": app.ats_score,
-            "created_at": app.created_at
+            "created_at": app.created_at,
+            "video_interview": _video_out(videos.get(app.id)),
         })
     return response
 

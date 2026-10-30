@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Clock, Lightbulb, MessageSquare, Video } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, CalendarPlus, CheckCircle2, Clock, ExternalLink, Lightbulb, MessageSquare, Sparkles, Video } from 'lucide-react';
 import { useApplicationStore } from '@/store/applicationStore';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { downloadVideoInterviewCalendar } from '@/lib/calendar';
+import { providerName } from '@/services/video';
 
 const TIPS = [
   'Answer in full sentences. The AI scores what you write: relevance, specifics and clarity.',
@@ -18,6 +20,23 @@ const FACTS = [
   { icon: Clock, text: 'One attempt. When the interview ends it cannot be repeated, so start when you can focus.' },
 ];
 
+const MEETING_WINDOW_MS = 2 * 60 * 60 * 1000; // a meeting stays listed for two hours after it starts
+
+function describeTime(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' });
+}
+
+function startsIn(iso: string): string {
+  const diff = new Date(iso).getTime() - Date.now();
+  if (diff <= 0) return 'Happening now';
+  const minutes = Math.round(diff / 60000);
+  if (minutes < 60) return `Starts in ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Starts in ${hours} h ${minutes % 60} min`;
+  const days = Math.round(hours / 24);
+  return `Starts in ${days} ${days === 1 ? 'day' : 'days'}`;
+}
+
 export default function InterviewLanding() {
   const navigate = useNavigate();
   const { myApplications, isLoading, fetchMyApplications } = useApplicationStore();
@@ -31,18 +50,77 @@ export default function InterviewLanding() {
     [myApplications]
   );
 
+  const videoInterviews = useMemo(
+    () =>
+      myApplications
+        .filter((a) => a.video_interview && new Date(a.video_interview.scheduled_at).getTime() + MEETING_WINDOW_MS > Date.now())
+        .sort((a, b) => new Date(a.video_interview!.scheduled_at).getTime() - new Date(b.video_interview!.scheduled_at).getTime()),
+    [myApplications]
+  );
+
   return (
     <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-text-primary sm:text-3xl">Interview room</h1>
-        <p className="mt-1 text-sm text-text-secondary sm:text-base">Interviews you have been invited to. Read how it works before you start.</p>
+        <p className="mt-1 text-sm text-text-secondary sm:text-base">Your scheduled video interviews, AI interview invitations, and a place to practise.</p>
       </div>
+
+      {videoInterviews.length > 0 && (
+        <section className="space-y-3" aria-label="Video interviews">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-text-primary">
+            <Video className="h-5 w-5 text-secondary" />
+            Video interviews
+          </h2>
+          {videoInterviews.map((app) => {
+            const v = app.video_interview!;
+            const provider = providerName(v.meeting_url);
+            return (
+              <article key={app.id} className="space-y-3 rounded-xl border border-success/40 bg-bg-surface p-4 shadow-sm">
+                <div>
+                  <p className="text-sm text-text-secondary">{app.employer_name || 'Company'}</p>
+                  <h3 className="text-base font-semibold leading-snug text-text-primary">{app.job_title}</h3>
+                </div>
+                <div className="rounded-lg bg-bg-elevated px-3 py-2 text-sm">
+                  <p className="font-semibold text-text-primary">{describeTime(v.scheduled_at)}</p>
+                  <p className="text-success">{startsIn(v.scheduled_at)}</p>
+                  {v.notes && <p className="mt-1 text-text-secondary">{v.notes}</p>}
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <a href={v.meeting_url} target="_blank" rel="noopener noreferrer" className="flex-1">
+                    <Button className="w-full">
+                      Join {provider}
+                      <ExternalLink className="ml-1.5 h-4 w-4" />
+                    </Button>
+                  </a>
+                  <Button
+                    variant="ghost"
+                    className="flex-1"
+                    onClick={() =>
+                      downloadVideoInterviewCalendar({
+                        id: app.id,
+                        title: app.job_title,
+                        company: app.employer_name || 'Company',
+                        start: v.scheduled_at,
+                        url: v.meeting_url,
+                        notes: v.notes,
+                      })
+                    }
+                  >
+                    <CalendarPlus className="mr-1.5 h-4 w-4" />
+                    Add to calendar
+                  </Button>
+                </div>
+              </article>
+            );
+          })}
+        </section>
+      )}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-base font-semibold text-text-primary">
-            <Video className="h-5 w-5 text-secondary" />
-            Invitations
+            <MessageSquare className="h-5 w-5 text-secondary" />
+            AI interview invitations
           </h2>
           {!isLoading && <span className="text-sm text-text-secondary">{pendingInterviews.length} waiting</span>}
         </div>
@@ -93,8 +171,20 @@ export default function InterviewLanding() {
         )}
       </section>
 
+      <Link
+        to="/interview/practice"
+        className="flex items-start gap-3 rounded-xl border border-border-subtle bg-bg-surface p-4 shadow-sm hover:border-border-active"
+      >
+        <Sparkles className="mt-0.5 h-5 w-5 flex-shrink-0 text-secondary" />
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-semibold text-text-primary">Practice with AI</h2>
+          <p className="mt-0.5 text-sm text-text-secondary">See the kind of questions that usually come up for a role, practise your answers and get feedback. Nothing is saved.</p>
+        </div>
+        <ArrowRight className="mt-1 h-4 w-4 flex-shrink-0 text-text-muted" />
+      </Link>
+
       <section className="rounded-xl border border-border-subtle bg-bg-surface p-4 shadow-sm">
-        <h2 className="mb-3 text-base font-semibold text-text-primary">How it works</h2>
+        <h2 className="mb-3 text-base font-semibold text-text-primary">How the AI interview works</h2>
         <ul className="space-y-3">
           {FACTS.map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-start gap-3 text-sm text-text-secondary">

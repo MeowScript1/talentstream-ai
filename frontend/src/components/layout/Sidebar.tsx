@@ -13,7 +13,7 @@ export function Sidebar() {
   const navItems = navItemsFor(user.role);
   const isActive = (href: string) => location.pathname.startsWith(href);
   // Inside a live interview the chat needs the whole screen, so the tab bar steps aside
-  const inInterviewRoom = /^\/interview\/[^/]+/.test(location.pathname);
+  const inInterviewRoom = /^\/interview\/(?!practice$)[^/]+/.test(location.pathname);
 
   return (
     <>

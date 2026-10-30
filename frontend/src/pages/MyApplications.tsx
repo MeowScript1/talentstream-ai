@@ -5,6 +5,7 @@ import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import { useApplicationStore, Application } from '@/store/applicationStore';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { providerName } from '@/services/video';
 
 type StatusFilter = 'all' | 'applied' | 'screening' | 'interviewing' | 'shortlisted' | 'rejected';
 
@@ -70,6 +71,22 @@ function ApplicationCard({ app }: { app: Application }) {
         <div className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm">
           <p className="font-semibold text-text-primary">You are invited to an AI interview</p>
           <p className="mt-0.5 text-text-secondary">A short text chat with up to 5 questions. You can start whenever you are ready.</p>
+        </div>
+      )}
+
+      {app.video_interview && new Date(app.video_interview.scheduled_at).getTime() > Date.now() - 2 * 60 * 60 * 1000 && (
+        <div className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm">
+          <p className="font-semibold text-text-primary">
+            Video interview: {new Date(app.video_interview.scheduled_at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
+          </p>
+          <a
+            href={app.video_interview.meeting_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-0.5 inline-block py-1 font-semibold text-accent-primary hover:underline"
+          >
+            Join {providerName(app.video_interview.meeting_url)}
+          </a>
         </div>
       )}
 

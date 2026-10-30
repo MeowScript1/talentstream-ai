@@ -439,7 +439,7 @@ async def company_check(
                 .where(Job.employer_id == employer_id, Application.created_at <= cutoff)
             )
         ).all()
-        decided_rows = [r for r in old if r.status in ("shortlisted", "rejected", "hired")]
+        decided_rows = [r for r in old if r.status in ("shortlisted", "rejected", "hired") or r.decided_at is not None]
         days = [(r.decided_at - r.created_at).total_seconds() / 86400 for r in decided_rows if r.decided_at]
         entry = out.setdefault(
             company_name.strip().lower(), {"name": company_name, "listings": None, "on_talentstream": None}
