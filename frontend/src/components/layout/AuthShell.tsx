@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { ShieldCheck } from 'lucide-react';
 
 interface AuthShellProps {
   headline: ReactNode;
@@ -13,11 +14,9 @@ export function AuthShell({ headline, subline, children }: AuthShellProps) {
       {/* Hero, desktop only */}
       <div className="relative hidden w-1/2 overflow-hidden border-r border-white/[0.07] lg:flex lg:flex-col lg:justify-center lg:px-16">
         <Link to="/" className="absolute left-10 top-8 flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-primary font-display text-lg font-bold text-on-accent">
-            T
-          </span>
+          <ShieldCheck className="h-7 w-7 text-secondary" strokeWidth={2.25} aria-hidden="true" />
           <span className="font-display text-xl font-semibold tracking-tight">
-            Talent<span className="text-gradient">Stream</span>
+            TalentStream
           </span>
         </Link>
 
@@ -34,11 +33,9 @@ export function AuthShell({ headline, subline, children }: AuthShellProps) {
         {/* Brand + one-liner for phones, where the hero is hidden */}
         <div className="mb-8 text-center lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-primary font-display text-lg font-bold text-on-accent">
-              T
-            </span>
+            <ShieldCheck className="h-7 w-7 text-secondary" strokeWidth={2.25} aria-hidden="true" />
             <span className="font-display text-2xl font-semibold tracking-tight">
-              Talent<span className="text-gradient">Stream</span>
+              TalentStream
             </span>
           </Link>
           <p className="mt-3 text-sm text-text-secondary">{subline}</p>

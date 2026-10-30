@@ -18,7 +18,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop: floating glass rail */}
-      <aside className="fixed left-4 top-20 z-30 hidden h-[calc(100vh-6.5rem)] w-60 md:block">
+      <aside className="fixed left-4 top-[4.5rem] z-30 hidden h-[calc(100vh-6rem)] w-60 md:block">
         <nav className="glass flex h-full flex-col gap-1.5 rounded-xl p-3">
           {navItems.map((item) => {
             const active = isActive(item.href);
@@ -31,14 +31,14 @@ export function Sidebar() {
                 className={cn(
                   'relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-bold transition-colors duration-150',
                   active
-                    ? 'text-on-accent'
+                    ? 'text-on-secondary-container'
                     : 'text-text-secondary hover:bg-white/[0.06] hover:text-text-primary'
                 )}
               >
                 {active && (
                   <motion.div
                     layoutId="sidebar-indicator"
-                    className="absolute inset-0 rounded-lg bg-accent-primary shadow-glow"
+                    className="absolute inset-0 rounded-lg bg-secondary-container"
                     initial={false}
                     transition={{ type: 'spring', stiffness: 500, damping: 32 }}
                   />
@@ -55,8 +55,8 @@ export function Sidebar() {
       {!inInterviewRoom && (
         <nav
           aria-label="Main"
-          className="glass fixed inset-x-3 z-40 flex items-stretch justify-around rounded-xl p-1.5 md:hidden"
-          style={{ bottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+          className="fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-border-subtle bg-bg-surface px-2 pt-1.5 md:hidden"
+          style={{ paddingBottom: 'calc(0.375rem + env(safe-area-inset-bottom))' }}
         >
           {navItems.map((item) => {
             const active = isActive(item.href);
@@ -70,11 +70,11 @@ export function Sidebar() {
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 transition-all',
-                  active ? 'bg-accent-primary text-on-accent shadow-glow' : 'text-text-secondary active:bg-white/10'
+                  active ? 'bg-secondary-container text-on-secondary-container' : 'text-text-secondary active:bg-white/10'
                 )}
               >
                 <Icon className="h-5 w-5" strokeWidth={active ? 2.75 : 2} />
-                <span className="max-w-full truncate text-[11px] font-bold leading-none">{item.short}</span>
+                <span className="max-w-full truncate text-xs font-bold leading-none">{item.short}</span>
               </Link>
             );
           })}

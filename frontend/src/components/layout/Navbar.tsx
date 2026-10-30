@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, ShieldCheck, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -34,15 +34,11 @@ export function Navbar() {
   const items = user ? navItemsFor(user.role) : [];
 
   return (
-    <nav className="fixed top-0 z-40 w-full border-b border-white/25 bg-bg-base">
-      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+    <nav className="fixed top-0 z-40 w-full border-b border-border-subtle bg-bg-surface">
+      <div className="flex h-14 items-center justify-between px-4 sm:px-6">
         <Link to={home} className="flex min-h-11 items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-primary font-display text-lg font-bold text-on-accent">
-            T
-          </span>
-          <span className="font-display text-xl font-semibold tracking-tight text-text-primary">
-            Talent<span className="text-gradient">Stream</span>
-          </span>
+          <ShieldCheck className="h-6 w-6 text-secondary" strokeWidth={2.25} aria-hidden="true" />
+          <span className="font-display text-lg font-semibold tracking-tight text-text-primary">TalentStream</span>
         </Link>
 
         <div className="flex items-center gap-3">
@@ -90,7 +86,7 @@ export function Navbar() {
       </div>
 
       {user && menuOpen && (
-        <div id="mobile-menu" className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-white/25 bg-bg-base px-4 pb-4 pt-3 md:hidden">
+        <div id="mobile-menu" className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-border-subtle bg-bg-surface px-4 pb-4 pt-3 md:hidden">
           <div className="mb-2 px-1">
             <div className="text-sm font-bold text-text-primary">{user.full_name}</div>
             <div className="text-xs capitalize text-text-secondary">{user.role}</div>

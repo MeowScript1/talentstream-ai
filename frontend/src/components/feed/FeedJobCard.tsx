@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarPlus, ExternalLink, Flag, Globe, MapPin, Navigation, Wallet } from 'lucide-react';
+import { AlertTriangle, CalendarPlus, ExternalLink, Flag, Globe, MapPin, Navigation, Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
 import { downloadWalkinCalendar } from '@/lib/calendar';
@@ -21,6 +21,17 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
   const [reported, setReported] = useState(false);
   const walkin = job.kind === 'walkin' && job.walkin_date ? describeWalkinDate(job.walkin_date) : null;
   const lastDay = job.walkin_end_date ? describeWalkinDate(job.walkin_end_date) : null;
+  // What to carry, one item per line, from the free-text note
+  const bring = (job.notes ?? '')
+    .split(/[\n;]+|\.\s+/)
+    .map((t) => t.trim().replace(/\.$/, ''))
+    .filter(Boolean);
+  // The worst-scoring checks, shown up front on listings that are not clearly fine
+  const warnings =
+    job.trust_label === 'looks_good'
+      ? []
+      : [...job.trust_reasons].filter((r) => r.impact < 0).sort((a, b) => a.impact - b.impact).slice(0, 2);
+  const mapsUrl = job.venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.venue)}` : null;
 
   const handleReport = async () => {
     if (!confirm('Report this job as fake or misleading? Enough reports hide it for everyone.')) return;
@@ -35,13 +46,13 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
   };
 
   return (
-    <article className="rounded-xl border border-text-primary bg-bg-surface p-4 shadow-card  sm:p-5">
+    <article className="rounded-xl border border-border-subtle bg-bg-surface shadow-sm p-4 shadow-card  sm:p-5">
       <div className="flex gap-4">
         {walkin && (
           <div className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-accent-primary text-on-accent ">
-            <span className="text-[10px] font-bold uppercase leading-none">{walkin.weekday}</span>
+            <span className="text-xs font-bold uppercase leading-none">{walkin.weekday}</span>
             <span className="font-display text-2xl font-semibold leading-none">{walkin.day}</span>
-            <span className="text-[10px] font-bold uppercase leading-none">{walkin.month}</span>
+            <span className="text-xs font-bold uppercase leading-none">{walkin.month}</span>
           </div>
         )}
 
@@ -84,27 +95,47 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
       </div>
 
       {walkin && (job.walkin_time || job.venue || job.notes) && (
-        <div className="mt-3 rounded-lg border border-accent-primary/30 bg-accent-muted p-3 text-sm">
-          {lastDay && (
-            <p className="text-text-primary">
-              <span className="font-bold">Runs until:</span> {lastDay.weekday} {lastDay.day} {lastDay.month}
-            </p>
-          )}
-          {job.walkin_time && (
-            <p className="text-text-primary">
-              <span className="font-bold">Time:</span> {job.walkin_time}
+        <div className="mt-3 rounded-lg border border-border-subtle bg-bg-elevated p-3 text-sm">
+          {(walkin.relative || job.walkin_time) && (
+            <p className="font-semibold text-text-primary">
+              {[walkin.relative, job.walkin_time].filter(Boolean).join(', ')}
+              {lastDay && <span className="font-normal text-text-secondary"> (runs until {lastDay.weekday} {lastDay.day} {lastDay.month})</span>}
             </p>
           )}
           {job.venue && (
-            <p className="text-text-primary">
-              <span className="font-bold">Venue:</span> {job.venue}
+            <p className="mt-1 flex items-start gap-1.5 text-text-primary">
+              <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              {job.venue}
             </p>
           )}
-          {job.notes && (
-            <p className="text-text-primary">
-              <span className="font-bold">Bring / ask for:</span> {job.notes}
-            </p>
+          {bring.length > 0 && (
+            <div className="mt-2 border-t border-border-subtle pt-2">
+              <p className="text-xs font-bold uppercase tracking-wide text-text-secondary">Bring</p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5 text-text-primary">
+                {bring.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
           )}
+        </div>
+      )}
+
+      {warnings.length > 0 && (
+        <div
+          className={`mt-3 flex gap-2 rounded-lg border p-3 text-sm ${
+            job.trust_label === 'likely_scam' ? 'border-danger/50 bg-danger/10 text-danger' : 'border-warning/50 bg-warning/10 text-warning'
+          }`}
+        >
+          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <div>
+            <p className="font-semibold">{job.trust_label === 'likely_scam' ? 'Likely fake' : 'Be careful'}</p>
+            <ul className="mt-0.5 space-y-0.5 text-text-primary">
+              {warnings.map((r) => (
+                <li key={r.code}>{r.text}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 
@@ -152,7 +183,15 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
               </a>
             </>
           ) : (
-          // A normal followed link to the source, as the sources' terms require
+          <>
+          {walkin && mapsUrl && (
+            <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+              <Button type="button" size="sm" variant="ghost" className="gap-1.5">
+                <Navigation className="h-3.5 w-3.5" /> Get directions
+              </Button>
+            </a>
+          )}
+          {/* A normal followed link to the source, as the sources' terms require */}
           <a href={job.url} target="_blank" rel="noopener noreferrer">
             {job.trust_label === 'likely_scam' ? (
               // Don't invite people to apply to something that looks fake
@@ -165,6 +204,7 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
               </Button>
             )}
           </a>
+          </>
           )}
         </div>
       </div>

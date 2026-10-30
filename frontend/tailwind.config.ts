@@ -8,12 +8,15 @@ const config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['Fraunces', 'Georgia', 'serif'],
+        sans: ['"Hanken Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Hanken Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
-      borderRadius: { md: '3px', lg: '4px', xl: '6px', '2xl': '8px' },
+      borderRadius: { md: '4px', lg: '6px', xl: '8px', '2xl': '12px' },
       colors: {
         'stamp': 'var(--stamp)',
+        'secondary': 'var(--secondary)',
+        'secondary-container': 'var(--secondary-container)',
+        'on-secondary-container': 'var(--on-secondary-container)',
         // "white" is the ink colour, so every white/10 border and white/[0.03] tint works on a light page
         'white': 'rgb(var(--ink-rgb) / <alpha-value>)',
         'on-accent': 'var(--on-accent)',

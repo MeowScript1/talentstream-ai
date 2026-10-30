@@ -140,18 +140,18 @@ export default function Profile() {
   }, [user]);
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-2xl mx-auto space-y-4 sm:space-y-8">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary">My Profile</h1>
+        <h1 className="text-xl sm:text-3xl font-semibold tracking-tight text-text-primary">My profile</h1>
         <p className="text-text-secondary mt-1">Manage your personal information and account security.</p>
       </motion.div>
 
-      <motion.div className="space-y-6" variants={containerVariants} initial="hidden" animate="show">
+      <motion.div className="space-y-4 sm:space-y-6" variants={containerVariants} initial="hidden" animate="show">
 
         {/* Profile Card with Avatar & Stats */}
         <motion.div variants={itemVariants}>
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="flex items-center gap-5 mb-6">
               {/* Avatar */}
               <div className={`h-20 w-20 rounded-lg ${avatarColor} flex items-center justify-center flex-shrink-0 text-3xl font-bold text-[#fff]`}>
@@ -191,7 +191,7 @@ export default function Profile() {
 
         {/* Personal Info */}
         <motion.div variants={itemVariants}>
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <SectionHeader
               icon={User}
               title="Personal Information"
@@ -228,7 +228,7 @@ export default function Profile() {
 
         {/* Change Password */}
         <motion.div variants={itemVariants}>
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <SectionHeader
               icon={Lock}
               title="Change Password"

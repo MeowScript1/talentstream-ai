@@ -7,7 +7,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
   ({ className, variant = 'applied', ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center gap-1 rounded-md px-3 py-1 text-[11px] font-semibold uppercase tracking-wider';
+    const baseStyles = 'inline-flex items-center gap-1 rounded-md px-3 py-1 text-xs font-semibold uppercase tracking-wider';
     
     const variants = {
       applied: 'bg-white/10 text-text-primary border border-white/10',

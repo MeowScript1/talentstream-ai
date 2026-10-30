@@ -10,8 +10,8 @@ export function Toaster() {
         style: {
           background: theme.colors.bgSurface,
           color: theme.colors.textPrimary,
-          border: `1px solid ${theme.colors.textPrimary}`,
-          borderRadius: '4px',
+          border: `1px solid ${theme.colors.borderSubtle}`,
+          borderRadius: '8px',
           padding: '10px 18px',
           fontSize: '14px',
           fontWeight: 600,

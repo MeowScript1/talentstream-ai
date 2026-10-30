@@ -13,8 +13,8 @@ export function PageLayout() {
       <main
         className={
           inInterviewRoom
-            ? 'md:ml-64 pt-16'
-            : 'md:ml-64 mt-16 p-5 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:p-8 md:pb-8 min-h-[calc(100dvh-64px)]'
+            ? 'md:ml-64 pt-14'
+            : 'md:ml-64 mt-14 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-8 md:pb-8 min-h-[calc(100dvh-56px)]'
         }
       >
         <Outlet />

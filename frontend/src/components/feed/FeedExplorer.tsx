@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Loader2, MapPin, Search, ShieldAlert, SlidersHorizontal, Wifi } from 'lucide-react';
+import { Briefcase, Loader2, MapPin, Search, ShieldCheck, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -37,13 +37,13 @@ function Tab({ active, onClick, icon: Icon, label, count }: TabProps) {
       aria-pressed={active}
       className={cn(
         'flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-2 text-sm font-bold transition-all sm:gap-2 sm:px-4',
-        active ? 'bg-accent-primary text-on-accent ' : 'text-text-secondary hover:text-text-primary'
+        active ? 'bg-bg-surface text-text-primary shadow-sm' : 'text-text-secondary hover:text-text-primary'
       )}
     >
       <Icon className="h-4 w-4" />
       {label}
       {count !== undefined && (
-        <span className={cn('rounded-md px-1.5 text-xs', active ? 'bg-bg-base/15' : 'bg-white/10')}>{count}</span>
+        <span className={cn('rounded-md px-1.5 text-xs font-semibold', active ? 'bg-secondary-container text-on-secondary-container' : 'bg-white/10')}>{count}</span>
       )}
     </button>
   );
@@ -56,9 +56,6 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
   const [place, setPlace] = useState('');
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [includeRisky, setIncludeRisky] = useState(false);
-  // On a phone the city and Remote filters fold away so the first jobs show without scrolling
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const activeFilters = (place.trim() ? 1 : 0) + (remoteOnly ? 1 : 0);
   const debouncedQuery = useDebounced(query, 350);
   const debouncedPlace = useDebounced(place, 350);
 
@@ -127,7 +124,7 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
 
   return (
     <div className="space-y-4">
-      <div className="glass flex gap-1 rounded-md p-1">
+      <div className="flex gap-1 rounded-lg border border-border-subtle bg-bg-elevated p-1">
         <Tab active={kind === 'apply'} onClick={() => setKind('apply')} icon={Briefcase} label="Apply online" count={stats?.apply_jobs} />
         <Tab
           active={kind === 'walkin'}
@@ -147,79 +144,94 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
         <div className="flex gap-2">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-text-secondary" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search jobs, companies" className="pl-11" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search jobs" className="pl-11" />
           </div>
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((v) => !v)}
-            aria-expanded={filtersOpen}
-            aria-controls="feed-filters"
-            className="inline-flex h-12 shrink-0 items-center gap-1.5 rounded-md border border-border-subtle bg-bg-surface px-3 text-sm font-semibold text-text-primary sm:hidden"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Filters{activeFilters > 0 && ` (${activeFilters})`}
-          </button>
+          {/* Phones pick a city from a short list; wider screens type one and use the buttons below */}
+          <div className="relative w-32 shrink-0 sm:hidden">
+            <MapPin className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+            <select
+              value={place}
+              onChange={(e) => setPlace(e.target.value)}
+              aria-label="City"
+              className="h-12 w-full appearance-none rounded-md border border-white/10 bg-white/[0.04] pl-9 pr-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/60"
+            >
+              <option value="">All cities</option>
+              {place.trim() && !CITIES.some((c) => c.toLowerCase() === place.trim().toLowerCase()) && (
+                <option value={place}>{place}</option>
+              )}
+              {CITIES.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div id="feed-filters" className={cn('relative', !filtersOpen && 'hidden sm:block')}>
+        <div className="relative hidden sm:block">
           <MapPin className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-text-secondary" />
           <Input value={place} onChange={(e) => setPlace(e.target.value)} placeholder="City or country" className="pl-11" />
         </div>
       </div>
 
-      <div className={cn('space-y-3', !filtersOpen && 'hidden sm:block')}>
-        <div className="flex flex-wrap gap-2" aria-label="Popular cities">
-          {CITIES.map((city) => {
-            const on = place.trim().toLowerCase() === city.toLowerCase();
-            return (
-              <button
-                key={city}
-                type="button"
-                onClick={() => setPlace(on ? '' : city)}
-                aria-pressed={on}
-                className={cn(
-                  'inline-flex min-h-11 items-center rounded-md border px-3 text-sm font-medium transition-colors md:min-h-0 md:py-1',
-                  on ? 'border-accent-primary bg-accent-primary text-on-accent' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
-                )}
-              >
-                {city}
-              </button>
-            );
-          })}
-        </div>
+      <div className="hidden flex-wrap gap-2 sm:flex" aria-label="Popular cities">
+        {CITIES.map((city) => {
+          const on = place.trim().toLowerCase() === city.toLowerCase();
+          return (
+            <button
+              key={city}
+              type="button"
+              onClick={() => setPlace(on ? '' : city)}
+              aria-pressed={on}
+              className={cn(
+                'inline-flex items-center rounded-md border px-3 text-sm font-medium transition-colors md:py-1',
+                on ? 'border-accent-primary bg-accent-primary text-on-accent' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
+              )}
+            >
+              {city}
+            </button>
+          );
+        })}
+      </div>
 
-        {kind === 'apply' && (
+      {kind === 'apply' && (
+        <div>
           <button
             type="button"
             onClick={() => setRemoteOnly((v) => !v)}
             aria-pressed={remoteOnly}
             className={cn(
-              'inline-flex min-h-11 items-center gap-1.5 rounded-md border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1.5 sm:mt-3',
+              'inline-flex min-h-11 items-center gap-1.5 rounded-md border px-4 text-sm font-medium transition-colors md:min-h-0 md:py-1.5',
               remoteOnly ? 'border-accent-primary bg-accent-primary text-on-accent' : 'border-border-subtle bg-bg-surface text-text-secondary hover:text-text-primary'
             )}
           >
             <Wifi className="h-3.5 w-3.5" /> Remote only
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
-      {((meta?.hidden_risky ?? 0) > 0 && !includeRisky) || includeRisky ? (
-        <div className="flex flex-wrap items-center gap-2">
-          {(meta?.hidden_risky ?? 0) > 0 && !includeRisky && (
-            <span className="inline-flex flex-wrap items-center gap-x-2 text-xs text-text-muted">
-              <ShieldAlert className="h-3.5 w-3.5 text-warning" />
-              {meta?.hidden_risky} suspicious {meta?.hidden_risky === 1 ? 'listing' : 'listings'} hidden.
-              <button type="button" onClick={() => setIncludeRisky(true)} className="py-2 font-bold text-accent-primary hover:underline md:py-0">
-                Show anyway
-              </button>
-            </span>
+      {meta && !loading && !error && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-border-subtle bg-bg-surface px-3 py-2 text-sm">
+          <ShieldCheck className="h-4 w-4 flex-shrink-0 text-success" />
+          <span className="min-w-0 flex-1 text-text-secondary">
+            <span className="font-semibold text-text-primary">Scam check on.</span>{' '}
+            {includeRisky
+              ? 'Showing suspicious listings too.'
+              : meta.hidden_risky > 0
+                ? `${meta.hidden_risky} suspicious ${meta.hidden_risky === 1 ? 'listing' : 'listings'} hidden.`
+                : 'No suspicious listings hidden here.'}
+          </span>
+          {!includeRisky && meta.hidden_risky > 0 && (
+            <button type="button" onClick={() => setIncludeRisky(true)} className="py-2 font-bold text-accent-primary hover:underline md:py-0">
+              Show them
+            </button>
           )}
           {includeRisky && (
-            <button type="button" onClick={() => setIncludeRisky(false)} className="py-2 text-xs font-bold text-accent-primary hover:underline md:py-0">
-              Hide suspicious listings again
+            <button type="button" onClick={() => setIncludeRisky(false)} className="py-2 font-bold text-accent-primary hover:underline md:py-0">
+              Hide again
             </button>
           )}
         </div>
-      ) : null}
+      )}
 
       {loading ? (
         <div className="space-y-3">

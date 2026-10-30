@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 import type { TrustLabel, TrustReason } from '@/types/feed';
 
 const STYLES: Record<TrustLabel, { label: string; icon: typeof ShieldCheck; chip: string }> = {
-  looks_good: { label: 'Looks genuine', icon: ShieldCheck, chip: 'border-success text-success -rotate-1' },
-  be_careful: { label: 'Be careful', icon: ShieldAlert, chip: 'border-warning text-warning -rotate-1' },
-  likely_scam: { label: 'Likely fake', icon: ShieldX, chip: 'border-danger text-danger -rotate-1' },
+  looks_good: { label: 'Looks genuine', icon: ShieldCheck, chip: 'border-success/30 bg-success/10 text-success' },
+  be_careful: { label: 'Be careful', icon: ShieldAlert, chip: 'border-warning/30 bg-warning/10 text-warning' },
+  likely_scam: { label: 'Likely fake', icon: ShieldX, chip: 'border-danger/30 bg-danger/10 text-danger' },
 };
 
 interface TrustBadgeProps {
@@ -27,7 +27,7 @@ export function TrustBadge({ label, score, reasons }: TrustBadgeProps) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className={cn('inline-flex items-center gap-1.5 rounded-sm border-2 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider', style.chip)}
+        className={cn('inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold', style.chip)}
       >
         <Icon className="h-3.5 w-3.5" />
         {style.label}
