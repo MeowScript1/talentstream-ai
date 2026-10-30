@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import (
     APIRouter,
@@ -232,6 +233,8 @@ async def update_application_status(
         raise HTTPException(status_code=403, detail="Not authorized")
         
     app.status = new_status
+    if app.decided_at is None:
+        app.decided_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(app)
     return {"status": app.status}

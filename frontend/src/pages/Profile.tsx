@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { ResumeCard } from '@/components/candidate/ResumeCard';
+import { ReportsCard } from '@/components/candidate/ReportsCard';
 import toast from 'react-hot-toast';
 import { getApiError } from '@/lib/utils';
 
@@ -187,6 +188,10 @@ export default function Profile() {
         {/* Resume */}
         <motion.div variants={itemVariants}>
           <ResumeCard />
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <ReportsCard />
         </motion.div>
 
         {/* Personal Info */}

@@ -28,6 +28,8 @@ class Application(Base):
     ats_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(application_status_enum, default='applied')
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # When the employer shortlisted or rejected (null while undecided, and for decisions made before this was recorded)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     __table_args__ = (
         UniqueConstraint('job_id', 'candidate_id', name='uq_application'),

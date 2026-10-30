@@ -6,12 +6,12 @@ and every job links back to where it came from.
 
 import secrets
 import uuid
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 from urllib.parse import quote_plus
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import case, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -24,10 +24,17 @@ from app.jobfeed.places import location_variants
 from app.jobfeed.sources import SOURCE_INFO, enabled_sources
 from app.jobfeed.trust import assess
 from app.jobfeed.types import RawJob
+from app.models.application import Application
 from app.models.external_job import ExternalJob, FeedSync, JobReport
 from app.models.job import Job
 from app.models.user import User
 from app.schemas.types import text
+from app.services.trust_stats import (
+    POINTS_PER_CONFIRMED_REPORT,
+    RESPONSE_WINDOW_DAYS,
+    rank_for,
+    response_summary,
+)
 
 router = APIRouter(prefix="/feed", tags=["job feed"])
 
@@ -341,6 +348,106 @@ async def report_job(
     await db.commit()
     await db.refresh(job)
     return {"reported": True, "hidden": job.report_count >= settings.FEED_MAX_REPORTS}
+
+
+@router.get("/my-reports")
+async def my_reports(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """How many listings this user reported, and how many of those the community also agreed were fake.
+
+    A report only earns points when enough candidates reported the same listing and it was hidden, so
+    reporting at random earns nothing.
+    """
+    sent = await db.scalar(select(func.count()).select_from(JobReport).where(JobReport.user_id == current_user.id)) or 0
+    confirmed = (
+        await db.scalar(
+            select(func.count())
+            .select_from(JobReport)
+            .join(ExternalJob, ExternalJob.id == JobReport.job_id)
+            .where(JobReport.user_id == current_user.id, ExternalJob.report_count >= settings.FEED_MAX_REPORTS)
+        )
+        or 0
+    )
+    points = confirmed * POINTS_PER_CONFIRMED_REPORT
+    return {
+        "reports_sent": sent,
+        "confirmed": confirmed,
+        "points": points,
+        "points_per_confirmed": POINTS_PER_CONFIRMED_REPORT,
+        "reports_needed_to_hide": settings.FEED_MAX_REPORTS,
+        **rank_for(points),
+    }
+
+
+@router.get("/companies")
+async def company_check(
+    q: str = Query(..., min_length=2, max_length=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """Look a company up before applying: what we have collected about it, and how employers here treat applicants."""
+    like = f"%{q.strip()}%"
+    out: dict[str, dict] = {}
+
+    # Listings collected from other platforms
+    ext = (
+        await db.execute(
+            select(
+                func.min(ExternalJob.company),
+                func.count(),
+                func.avg(ExternalJob.trust_score),
+                func.sum(case((ExternalJob.trust_label == "looks_good", 1), else_=0)),
+                func.sum(case((ExternalJob.trust_label == "be_careful", 1), else_=0)),
+                func.sum(case((ExternalJob.trust_label == "likely_scam", 1), else_=0)),
+                func.sum(ExternalJob.report_count),
+                func.array_agg(func.distinct(ExternalJob.source)),
+            )
+            .where(ExternalJob.is_active.is_(True), ExternalJob.company.is_not(None), ExternalJob.company.ilike(like))
+            .group_by(func.lower(ExternalJob.company))
+            .order_by(func.count().desc())
+            .limit(10)
+        )
+    ).all()
+    for name, total, avg, good, careful, scam, reports, sources in ext:
+        out[name.strip().lower()] = {
+            "name": name,
+            "listings": {
+                "total": total,
+                "average_trust": round(float(avg or 0)),
+                "looks_genuine": int(good or 0),
+                "be_careful": int(careful or 0),
+                "likely_fake": int(scam or 0),
+                "reports": int(reports or 0),
+                "sources": sorted(_label(src) for src in sources),
+            },
+            "on_talentstream": None,
+        }
+
+    # Employers who post on TalentStream
+    employers = (
+        await db.execute(
+            select(User.id, User.company_name).where(User.role == "employer", User.company_name.is_not(None), User.company_name.ilike(like)).limit(10)
+        )
+    ).all()
+    cutoff = datetime.now(timezone.utc) - timedelta(days=RESPONSE_WINDOW_DAYS)
+    for employer_id, company_name in employers:
+        posted = await db.scalar(select(func.count()).select_from(Job).where(Job.employer_id == employer_id)) or 0
+        if posted == 0:
+            continue
+        old = (
+            await db.execute(
+                select(Application.status, Application.created_at, Application.decided_at)
+                .join(Job, Job.id == Application.job_id)
+                .where(Job.employer_id == employer_id, Application.created_at <= cutoff)
+            )
+        ).all()
+        decided_rows = [r for r in old if r.status in ("shortlisted", "rejected", "hired")]
+        days = [(r.decided_at - r.created_at).total_seconds() / 86400 for r in decided_rows if r.decided_at]
+        entry = out.setdefault(
+            company_name.strip().lower(), {"name": company_name, "listings": None, "on_talentstream": None}
+        )
+        entry["on_talentstream"] = {"jobs_posted": posted, **response_summary(len(old), len(decided_rows), days)}
+
+    results = sorted(out.values(), key=lambda c: (c["listings"] or {}).get("total", 0), reverse=True)
+    return {"query": q.strip(), "results": results[:10]}
 
 
 @router.post("/refresh")

@@ -129,7 +129,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-from app.api.routes import applications, auth, feed, interviews, jobs, users  # noqa: E402
+from app.api.routes import alerts, applications, auth, feed, interviews, jobs, users  # noqa: E402
 from app.api.routes.health import router as health_router  # noqa: E402
 from app.api.websockets import interview  # noqa: E402
 
@@ -143,3 +143,4 @@ app.include_router(interviews.router, prefix="/api/v1")
 app.include_router(interview.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(feed.router, prefix="/api/v1")
+app.include_router(alerts.router, prefix="/api/v1")

@@ -26,3 +26,48 @@ export async function fetchFeedStats(): Promise<FeedStats> {
   const response = await api.get<FeedStats>('/feed/stats');
   return response.data;
 }
+
+export interface CompanyListings {
+  total: number;
+  average_trust: number;
+  looks_genuine: number;
+  be_careful: number;
+  likely_fake: number;
+  reports: number;
+  sources: string[];
+}
+
+export interface CompanyOnTalentStream {
+  jobs_posted: number;
+  /** applications at least a week old */
+  applications: number;
+  decided: number;
+  response_rate: number | null;
+  median_days_to_decision: number | null;
+}
+
+export interface CompanyResult {
+  name: string;
+  listings: CompanyListings | null;
+  on_talentstream: CompanyOnTalentStream | null;
+}
+
+export async function searchCompanies(q: string): Promise<CompanyResult[]> {
+  const response = await api.get<{ results: CompanyResult[] }>('/feed/companies', { params: { q } });
+  return response.data.results;
+}
+
+export interface MyReports {
+  reports_sent: number;
+  confirmed: number;
+  points: number;
+  points_per_confirmed: number;
+  reports_needed_to_hide: number;
+  rank: string;
+  next_rank_at: number | null;
+}
+
+export async function fetchMyReports(): Promise<MyReports> {
+  const response = await api.get<MyReports>('/feed/my-reports');
+  return response.data;
+}

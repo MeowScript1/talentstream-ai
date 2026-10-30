@@ -7,6 +7,7 @@ import {
   FileText,
   Video,
   UserRound,
+  ShieldCheck,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -28,6 +29,7 @@ const candidateNav: NavItem[] = [
   { name: 'Find Jobs', short: 'Jobs', href: '/dashboard/candidate', icon: Search },
   { name: 'My Applications', short: 'Applied', href: '/applications', icon: FileText },
   { name: 'Interview Room', short: 'Interview', href: '/interview', icon: Video },
+  { name: 'Company check', short: 'Check', href: '/companies', icon: ShieldCheck },
   { name: 'Profile', short: 'Profile', href: '/profile', icon: UserRound },
 ];
 

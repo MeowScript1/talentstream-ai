@@ -38,7 +38,7 @@ export function FeedJobCard({ job, onReported }: FeedJobCardProps) {
     try {
       const res = await reportFeedJob(job.id);
       setReported(true);
-      toast.success('Thanks, we recorded your report');
+      toast.success(res.hidden ? 'Thanks. Enough candidates reported this, so it is now hidden for everyone' : 'Thanks, we recorded your report');
       onReported?.(job.id, res.hidden);
     } catch (error) {
       toast.error(getApiError(error, 'Could not send your report'));

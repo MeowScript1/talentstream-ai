@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Loader2, MapPin, Search, ShieldCheck, Wifi } from 'lucide-react';
+import { Bell, Briefcase, Loader2, MapPin, Search, ShieldCheck, Wifi, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils';
+import { addAlert, fetchAlerts, fetchNewDrives, markAlertsSeen, removeAlert, type NewDrives, type WalkinAlert } from '@/services/alerts';
 import { fetchFeed, fetchFeedStats, type FeedStats } from '@/services/feed';
 import type { FeedJob, FeedKind, FeedPage } from '@/types/feed';
 import { FeedJobCard } from './FeedJobCard';
@@ -67,6 +69,43 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
   const [error, setError] = useState(false);
   const latest = useRef(0); // ignore responses from searches that were replaced
 
+  // Walk-in alerts: cities the candidate follows, and drives that appeared since they last looked
+  const [alerts, setAlerts] = useState<WalkinAlert[]>([]);
+  const [newDrives, setNewDrives] = useState<NewDrives | null>(null);
+  useEffect(() => {
+    fetchAlerts().then(setAlerts).catch(() => undefined);
+    fetchNewDrives().then(setNewDrives).catch(() => undefined);
+  }, []);
+
+  const seeNewDrives = () => {
+    const first = newDrives?.cities[0]?.city;
+    setKind('walkin');
+    if (first) setPlace(first);
+    setNewDrives(null);
+    markAlertsSeen().catch(() => undefined);
+  };
+  const dismissNewDrives = () => {
+    setNewDrives(null);
+    markAlertsSeen().catch(() => undefined);
+  };
+  const followCity = async (city: string) => {
+    try {
+      setAlerts(await addAlert(city));
+      toast.success(`Following walk-ins in ${city}`);
+    } catch {
+      toast.error('Could not follow this city. You can follow up to 5.');
+    }
+  };
+  const unfollowCity = async (alert: WalkinAlert) => {
+    try {
+      await removeAlert(alert.id);
+      setAlerts((prev) => prev.filter((a) => a.id !== alert.id));
+    } catch {
+      toast.error('Could not remove this alert');
+    }
+  };
+  const followingPlace = alerts.some((a) => a.city.toLowerCase() === place.trim().toLowerCase());
+
   const load = useCallback(
     async (page: number) => {
       const id = ++latest.current;
@@ -124,6 +163,24 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
 
   return (
     <div className="space-y-4">
+      {newDrives && newDrives.total_new > 0 && (
+        <div role="status" className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm">
+          <Bell className="h-4 w-4 flex-shrink-0 text-success" />
+          <span className="min-w-0 flex-1 text-text-primary">
+            <span className="font-semibold">
+              {newDrives.total_new} new walk-in {newDrives.total_new === 1 ? 'drive' : 'drives'}
+            </span>{' '}
+            in {newDrives.cities.map((c) => c.city).join(', ')} since you last looked.
+          </span>
+          <button type="button" onClick={seeNewDrives} className="py-2 font-bold text-accent-primary hover:underline md:py-0">
+            See them
+          </button>
+          <button type="button" onClick={dismissNewDrives} className="py-2 text-text-secondary hover:underline md:py-0">
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <div className="flex gap-1 rounded-lg border border-border-subtle bg-bg-elevated p-1">
         <Tab active={kind === 'apply'} onClick={() => setKind('apply')} icon={Briefcase} label="Apply online" count={stats?.apply_jobs} />
         <Tab
@@ -192,6 +249,42 @@ export function FeedExplorer({ initialKind = 'apply' }: { initialKind?: FeedKind
           );
         })}
       </div>
+
+      {kind === 'walkin' && (
+        <div className="space-y-2 rounded-lg border border-border-subtle bg-bg-surface p-3 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <Bell className="h-4 w-4 flex-shrink-0 text-secondary" />
+            <span className="min-w-0 flex-1 font-semibold text-text-primary">Walk-in alerts</span>
+            {place.trim() && !followingPlace && (
+              <button
+                type="button"
+                onClick={() => followCity(place.trim())}
+                className="min-h-10 rounded-md border border-border-subtle px-3 font-semibold text-text-primary hover:border-border-active"
+              >
+                Follow {place.trim()}
+              </button>
+            )}
+          </div>
+          {alerts.length > 0 && (
+            <ul className="flex flex-wrap gap-2" aria-label="Cities you follow">
+              {alerts.map((a) => (
+                <li key={a.id} className="inline-flex items-center gap-1 rounded-md border border-border-subtle bg-bg-elevated py-1 pl-3 pr-1 text-text-primary">
+                  {a.city}
+                  <button type="button" onClick={() => unfollowCity(a)} aria-label={`Stop following ${a.city}`} className="flex h-8 w-8 items-center justify-center rounded text-text-secondary hover:text-danger">
+                    <X className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="text-xs text-text-secondary">
+            {alerts.length === 0 && !place.trim()
+              ? 'Pick a city above, then follow it to hear about new drives there. '
+              : ''}
+            New drives show up here when you open TalentStream. We don't send emails or notifications yet.
+          </p>
+        </div>
+      )}
 
       {kind === 'apply' && (
         <div>

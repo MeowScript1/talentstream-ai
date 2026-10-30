@@ -38,3 +38,10 @@ def location_variants(text: str) -> list[str]:
     if group:
         variants += [name for name in group if name.lower() != text.lower()]
     return variants
+
+
+def canonical_city(text: str) -> str:
+    """The name we store for a city: the main name of its group (Bangalore -> Bengaluru), else what was typed."""
+    text = text.strip()
+    group = _BY_NAME.get(text.lower())
+    return group[0] if group else text.title()
