@@ -204,3 +204,56 @@ def test_one_employer_login_can_run_separate_interviews_at_the_same_time(server)
         asyncio.run(run())
     finally:
         requests.delete(f"{API}/jobs/{job['id']}/close", headers=employer.headers)
+
+
+# ---- overlap warning --------------------------------------------------------
+
+def _conflicts(employer, app_id, minutes):
+    r = requests.get(f"{API}/applications/{app_id}/video-interview/conflicts", headers=employer.headers, params={"scheduled_at": _in(minutes)})
+    assert r.status_code == 200, r.text
+    return r.json()["conflicts"]
+
+
+def test_overlapping_interviews_are_flagged_but_still_allowed(server):
+    employer = register("employer", company_name=f"Over{uuid.uuid4().hex[:6]} Co")
+    job = post_job(employer.headers, "Role")
+    apps = []
+    for _ in range(3):
+        candidate = register("candidate")
+        apps.append(
+            requests.post(
+                f"{API}/applications", headers=candidate.headers, data={"job_id": job["id"]}, files={"resume": ("cv.pdf", make_pdf(), "application/pdf")}
+            ).json()["id"]
+        )
+    try:
+        first, second, third = apps
+        assert _conflicts(employer, first, 120) == []  # nothing booked yet
+        assert requests.put(f"{API}/applications/{first}/video-interview", headers=employer.headers, json={"scheduled_at": _in(120)}).status_code == 200
+
+        near = _conflicts(employer, second, 140)  # 20 minutes later: overlaps
+        assert len(near) == 1 and near[0]["candidate_name"] == "Test candidate" and near[0]["job_title"] == "Role"
+        assert _conflicts(employer, second, 160) == []  # 40 minutes later: fine
+        assert _conflicts(employer, first, 120) == []  # an interview never conflicts with itself
+
+        # it is only a warning: the overlapping time can still be booked
+        assert requests.put(f"{API}/applications/{second}/video-interview", headers=employer.headers, json={"scheduled_at": _in(140)}).status_code == 200
+        assert len(_conflicts(employer, third, 130)) == 2
+    finally:
+        requests.delete(f"{API}/jobs/{job['id']}/close", headers=employer.headers)
+
+
+def test_other_companies_interviews_do_not_count_and_candidates_cannot_ask(interview):
+    employer, candidate, app_id = interview  # one interview already booked 5 minutes from now
+    stranger = register("employer", company_name=f"Else{uuid.uuid4().hex[:6]} Co")
+    other_job = post_job(stranger.headers, "Role")
+    other_candidate = register("candidate")
+    other_app = requests.post(
+        f"{API}/applications", headers=other_candidate.headers, data={"job_id": other_job["id"]}, files={"resume": ("cv.pdf", make_pdf(), "application/pdf")}
+    ).json()["id"]
+    try:
+        assert _conflicts(stranger, other_app, 5) == []  # the first company's booking is not visible to this one
+        bad = requests.get(f"{API}/applications/{app_id}/video-interview/conflicts", headers=candidate.headers, params={"scheduled_at": _in(5)})
+        assert bad.status_code == 403
+        assert requests.get(f"{API}/applications/{app_id}/video-interview/conflicts", headers=stranger.headers, params={"scheduled_at": _in(5)}).status_code == 403
+    finally:
+        requests.delete(f"{API}/jobs/{other_job['id']}/close", headers=stranger.headers)

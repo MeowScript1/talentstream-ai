@@ -29,6 +29,20 @@ export async function cancelVideoInterview(applicationId: string): Promise<void>
   await api.delete(`/applications/${applicationId}/video-interview`);
 }
 
+export interface VideoConflict {
+  candidate_name: string;
+  job_title: string;
+  scheduled_at: string;
+}
+
+/** Other interviews of the same company that would overlap this time (a warning only). */
+export async function fetchVideoConflicts(applicationId: string, scheduledAtIso: string): Promise<VideoConflict[]> {
+  const response = await api.get<{ conflicts: VideoConflict[] }>(`/applications/${applicationId}/video-interview/conflicts`, {
+    params: { scheduled_at: scheduledAtIso },
+  });
+  return response.data.conflicts;
+}
+
 export async function fetchMeeting(applicationId: string): Promise<MeetingDetails> {
   return (await api.get<MeetingDetails>(`/meetings/${applicationId}`)).data;
 }

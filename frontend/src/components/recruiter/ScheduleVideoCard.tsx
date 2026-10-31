@@ -6,7 +6,15 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { getApiError } from '@/lib/utils';
-import { cancelVideoInterview, fetchVideoInterview, meetingPath, scheduleVideoInterview, type VideoInterview } from '@/services/video';
+import {
+  cancelVideoInterview,
+  fetchVideoConflicts,
+  fetchVideoInterview,
+  meetingPath,
+  scheduleVideoInterview,
+  type VideoConflict,
+  type VideoInterview,
+} from '@/services/video';
 
 /** "2026-11-03T10:30" for a datetime-local box, in the viewer's own time zone. */
 function toLocalInput(iso: string): string {
@@ -27,6 +35,7 @@ export function ScheduleVideoCard({ applicationId, candidateName }: { applicatio
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [conflicts, setConflicts] = useState<VideoConflict[]>([]);
 
   useEffect(() => {
     fetchVideoInterview(applicationId)
@@ -40,6 +49,25 @@ export function ScheduleVideoCard({ applicationId, candidateName }: { applicatio
       .catch(() => undefined)
       .finally(() => setLoaded(true));
   }, [applicationId]);
+
+  // While a time is being chosen, warn if it overlaps another interview of this company (booking is still allowed)
+  useEffect(() => {
+    const start = when ? new Date(when) : null;
+    if (!start || Number.isNaN(start.getTime()) || start.getTime() <= Date.now()) {
+      setConflicts([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      fetchVideoConflicts(applicationId, start.toISOString())
+        .then((c) => !cancelled && setConflicts(c))
+        .catch(() => !cancelled && setConflicts([]));
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [when, applicationId]);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,6 +148,19 @@ export function ScheduleVideoCard({ applicationId, candidateName }: { applicatio
             <span className="mb-1 block font-semibold text-text-secondary">Note for the candidate (optional)</span>
             <Input value={notes} maxLength={500} onChange={(e) => setNotes(e.target.value)} placeholder="For example: have your portfolio ready" />
           </label>
+          {conflicts.length > 0 && (
+            <div role="status" className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-text-primary">
+              <p className="font-semibold">This overlaps with another interview</p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                {conflicts.map((c) => (
+                  <li key={`${c.candidate_name}-${c.scheduled_at}`}>
+                    {c.candidate_name} ({c.job_title}) at {describe(c.scheduled_at)}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 text-text-secondary">You can still schedule it, for example if another recruiter will take one of them.</p>
+            </div>
+          )}
           {error && (
             <p role="alert" className="text-danger">
               {error}

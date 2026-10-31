@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import (
     APIRouter,
@@ -160,6 +160,41 @@ async def get_video_interview(
     app = await _owned_application(app_id, db, current_user)
     video = (await db.execute(select(VideoInterview).where(VideoInterview.application_id == app.id))).scalar_one_or_none()
     return _video_out(video)
+
+
+# Interviews are assumed to take about half an hour when checking whether two of them overlap
+OVERLAP_MINUTES = 30
+
+
+@router.get("/{app_id}/video-interview/conflicts")
+async def video_interview_conflicts(
+    app_id: uuid.UUID,
+    scheduled_at: datetime,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("employer")),
+):
+    """Other interviews of this employer that would overlap a proposed time. Only a warning: scheduling is still allowed."""
+    app = await _owned_application(app_id, db, current_user)
+    when = scheduled_at if scheduled_at.tzinfo else scheduled_at.replace(tzinfo=timezone.utc)
+    gap = timedelta(minutes=OVERLAP_MINUTES)
+    rows = (
+        await db.execute(
+            select(VideoInterview, Job.title, User.full_name)
+            .join(Application, Application.id == VideoInterview.application_id)
+            .join(Job, Job.id == Application.job_id)
+            .join(User, User.id == Application.candidate_id)
+            .where(
+                Job.employer_id == current_user.id,
+                VideoInterview.application_id != app.id,
+                VideoInterview.scheduled_at > when - gap,
+                VideoInterview.scheduled_at < when + gap,
+            )
+            .order_by(VideoInterview.scheduled_at)
+        )
+    ).all()
+    return {
+        "conflicts": [{"candidate_name": name, "job_title": title, "scheduled_at": video.scheduled_at} for video, title, name in rows]
+    }
 
 
 @router.put("/{app_id}/video-interview")
