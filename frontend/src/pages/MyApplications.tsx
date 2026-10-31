@@ -5,6 +5,7 @@ import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import { useApplicationStore, Application } from '@/store/applicationStore';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { missedMessage } from '@/lib/missed';
 import { meetingPath } from '@/services/video';
 
 type StatusFilter = 'all' | 'applied' | 'screening' | 'interviewing' | 'shortlisted' | 'rejected';
@@ -74,7 +75,14 @@ function ApplicationCard({ app }: { app: Application }) {
         </div>
       )}
 
-      {app.video_interview && new Date(app.video_interview.scheduled_at).getTime() > Date.now() - 2 * 60 * 60 * 1000 && (
+      {app.video_interview?.state === 'missed' && (
+        <div className="rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm">
+          <p className="font-semibold text-text-primary">Video interview missed</p>
+          <p className="text-text-secondary">{missedMessage('candidate', app.video_interview.absent, app.employer_name || 'The employer')}</p>
+        </div>
+      )}
+
+      {app.video_interview?.state === 'upcoming' && (
         <div className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm">
           <p className="font-semibold text-text-primary">
             Video interview: {new Date(app.video_interview.scheduled_at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}

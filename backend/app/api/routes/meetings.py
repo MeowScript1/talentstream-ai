@@ -13,7 +13,7 @@ from app.core.dependencies import get_current_user
 from app.models.application import Application
 from app.models.user import User
 from app.models.video_interview import VideoInterview
-from app.services.meetings import can_join, ice_servers, join_window
+from app.services.meetings import attendance_state, can_join, ice_servers, join_window
 
 router = APIRouter(prefix="/meetings", tags=["video meetings"])
 
@@ -40,6 +40,7 @@ async def load_meeting(db: AsyncSession, application_id: uuid.UUID, user: User) 
 async def meeting_details(application_id: uuid.UUID, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
     app, video = await load_meeting(db, application_id, user)
     opens, closes = join_window(video.scheduled_at)
+    attendance = attendance_state(video.scheduled_at, video.candidate_joined_at, video.employer_joined_at)
     is_candidate = app.candidate_id == user.id
     employer = await db.get(User, app.job.employer_id)
     other_name = (employer.company_name or employer.full_name) if is_candidate else app.candidate.full_name
@@ -51,6 +52,7 @@ async def meeting_details(application_id: uuid.UUID, db: AsyncSession = Depends(
         "notes": video.notes,
         "opens_at": opens,
         "closes_at": closes,
-        "can_join_now": can_join(video.scheduled_at, datetime.now(timezone.utc)),
+        "can_join_now": can_join(video.scheduled_at, datetime.now(timezone.utc), attendance["state"]),
+        **attendance,
         "ice_servers": ice_servers(),
     }

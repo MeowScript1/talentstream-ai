@@ -4,6 +4,7 @@ import { ArrowLeft, Mic, MicOff, PhoneOff, Video, VideoOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { buildWsUrl } from '@/services/websocket';
+import { missedMessage, missedNextStep } from '@/lib/missed';
 import { fetchMeeting, type MeetingDetails } from '@/services/video';
 import { useAuthStore } from '@/store/authStore';
 
@@ -51,22 +52,6 @@ export default function MeetingRoom() {
 
   const backPath = details?.role === 'employer' ? `/applicant/${applicationId}` : '/interview';
 
-  // Load the meeting, and check again every 30 seconds while the room is still closed
-  useEffect(() => {
-    if (!applicationId) return;
-    let cancelled = false;
-    const load = () =>
-      fetchMeeting(applicationId)
-        .then((d) => !cancelled && setDetails(d))
-        .catch(() => !cancelled && setLoadError('We could not find this meeting. It may have been cancelled, or it belongs to someone else.'));
-    load();
-    const timer = setInterval(() => !joined && load(), 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
-  }, [applicationId, joined]);
-
   const teardown = useCallback(() => {
     leaving.current = true;
     wsRef.current?.close();
@@ -77,6 +62,31 @@ export default function MeetingRoom() {
   }, []);
 
   useEffect(() => teardown, [teardown]); // leaving the page ends the call
+
+  // Load the meeting and check it again every 30 seconds: the room may open, or the interview may turn out to be missed
+  useEffect(() => {
+    if (!applicationId) return;
+    let cancelled = false;
+    const load = () =>
+      fetchMeeting(applicationId)
+        .then((d) => {
+          if (cancelled) return;
+          setDetails(d);
+          if (d.state === 'missed' && wsRef.current) {
+            // someone was waiting alone and the grace time ran out
+            teardown();
+            setJoined(false);
+          }
+        })
+        .catch(() => !cancelled && setLoadError('We could not find this meeting. It may have been cancelled, or it belongs to someone else.'));
+    load();
+    const timer = setInterval(load, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [applicationId, teardown]);
+
 
   const send = (type: string, data?: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) wsRef.current.send(JSON.stringify({ type, data }));
@@ -241,6 +251,26 @@ export default function MeetingRoom() {
     );
   }
   if (!details) return <Skeleton className="mx-auto h-64 w-full max-w-lg rounded-xl" />;
+
+  if (details.state === 'missed' && !joined) {
+    return (
+      <div className="mx-auto max-w-lg space-y-4">
+        <Link to={backPath} className="inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-text-secondary hover:text-text-primary">
+          <ArrowLeft className="h-4 w-4" /> Back
+        </Link>
+        <div className="space-y-3 rounded-xl border border-danger/40 bg-bg-surface p-4 shadow-sm sm:p-6" role="status">
+          <h1 className="text-xl font-semibold text-text-primary">Interview missed</h1>
+          <p className="text-sm text-text-secondary">
+            {details.job_title} with {details.other_name}, {when(details.scheduled_at)}.
+          </p>
+          <p className="rounded-lg bg-bg-elevated p-3 text-sm text-text-primary">
+            {missedMessage(details.role, details.absent, details.other_name)} The room closes 15 minutes after the start if someone has not joined.
+          </p>
+          <p className="text-sm text-text-secondary">{missedNextStep(details.role)}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!joined) {
     return (

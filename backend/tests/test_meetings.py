@@ -257,3 +257,106 @@ def test_other_companies_interviews_do_not_count_and_candidates_cannot_ask(inter
         assert requests.get(f"{API}/applications/{app_id}/video-interview/conflicts", headers=stranger.headers, params={"scheduled_at": _in(5)}).status_code == 403
     finally:
         requests.delete(f"{API}/jobs/{other_job['id']}/close", headers=stranger.headers)
+
+
+# ---- no-shows ---------------------------------------------------------------
+
+from sqlalchemy import select, update  # noqa: E402
+
+from app.models.video_interview import VideoInterview  # noqa: E402
+from tests.test_jobfeed import _run_db  # noqa: E402
+
+NOW = datetime(2026, 11, 3, 10, 0, tzinfo=timezone.utc)
+
+
+def test_a_meeting_is_missed_fifteen_minutes_after_the_start_if_anyone_never_joined():
+    joined = NOW
+    assert meetings.attendance_state(NOW, None, None, NOW + timedelta(minutes=14))["state"] == "upcoming"
+    assert meetings.attendance_state(NOW, None, None, NOW + timedelta(minutes=15)) == {"state": "missed", "absent": ["candidate", "employer"]}
+    assert meetings.attendance_state(NOW, joined, None, NOW + timedelta(minutes=20)) == {"state": "missed", "absent": ["employer"]}
+    assert meetings.attendance_state(NOW, None, joined, NOW + timedelta(minutes=20)) == {"state": "missed", "absent": ["candidate"]}
+    assert meetings.attendance_state(NOW, joined, joined, NOW + timedelta(minutes=20))["state"] == "completed"
+
+
+def test_a_missed_meeting_cannot_be_joined():
+    assert not meetings.can_join(NOW, NOW + timedelta(minutes=1), "missed")
+    assert meetings.can_join(NOW, NOW + timedelta(minutes=1), "upcoming")
+
+
+def _move(app_id, minutes_from_now, candidate_joined=False, employer_joined=False):
+    """Pretend the interview started this many minutes ago/ahead, and that these people joined."""
+    async def go(db):
+        now = datetime.now(timezone.utc)
+        await db.execute(
+            update(VideoInterview)
+            .where(VideoInterview.application_id == uuid.UUID(app_id))
+            .values(
+                scheduled_at=now + timedelta(minutes=minutes_from_now),
+                candidate_joined_at=now if candidate_joined else None,
+                employer_joined_at=now if employer_joined else None,
+            )
+        )
+        await db.commit()
+
+    _run_db(go)
+
+
+def _state(user, app_id):
+    return requests.get(f"{API}/meetings/{app_id}", headers=user.headers).json()
+
+
+def test_who_joined_is_recorded(interview):
+    employer, candidate, app_id = interview
+
+    async def join():
+        async with websockets.connect(f"{WS}/{app_id}?token={_token(candidate)}") as ws:
+            assert json.loads(await ws.recv())["type"] == "waiting"
+
+    asyncio.run(join())
+
+    async def read(db):
+        row = await db.scalar(select(VideoInterview).where(VideoInterview.application_id == uuid.UUID(app_id)))
+        return row.candidate_joined_at, row.employer_joined_at
+
+    candidate_at, employer_at = _run_db(read)
+    assert candidate_at is not None and employer_at is None
+
+
+def test_both_screens_show_who_missed_and_the_room_is_closed(interview):
+    employer, candidate, app_id = interview
+    _move(app_id, -20, employer_joined=True)  # the employer came, the candidate did not
+    for user in (employer, candidate):
+        info = _state(user, app_id)
+        assert info["state"] == "missed" and info["absent"] == ["candidate"] and info["can_join_now"] is False
+    mine = requests.get(f"{API}/applications/mine", headers=candidate.headers).json()
+    assert next(a for a in mine if a["id"] == app_id)["video_interview"]["state"] == "missed"
+
+    async def refused():
+        with pytest.raises(websockets.exceptions.InvalidStatus):
+            async with websockets.connect(f"{WS}/{app_id}?token={_token(candidate)}") as ws:
+                await ws.recv()
+
+    asyncio.run(refused())
+
+
+def test_an_employer_no_show_is_not_counted_against_the_candidate(interview):
+    employer, candidate, app_id = interview
+    _move(app_id, -20, candidate_joined=True)
+    assert _state(candidate, app_id)["absent"] == ["employer"]
+    status = next(a for a in requests.get(f"{API}/applications/mine", headers=candidate.headers).json() if a["id"] == app_id)["status"]
+    assert status != "rejected"  # nothing is rejected automatically
+
+
+def test_rescheduling_a_missed_interview_starts_fresh(interview):
+    employer, candidate, app_id = interview
+    _move(app_id, -20)
+    assert _state(candidate, app_id)["state"] == "missed"
+    assert requests.put(f"{API}/applications/{app_id}/video-interview", headers=employer.headers, json={"scheduled_at": _in(5)}).status_code == 200
+    info = _state(candidate, app_id)
+    assert info["state"] == "upcoming" and info["can_join_now"] is True
+
+
+def test_an_interview_both_attended_is_completed_not_missed(interview):
+    employer, candidate, app_id = interview
+    _move(app_id, -20, candidate_joined=True, employer_joined=True)
+    assert _state(employer, app_id)["state"] == "completed"

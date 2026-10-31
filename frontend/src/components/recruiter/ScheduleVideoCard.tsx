@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { getApiError } from '@/lib/utils';
+import { missedMessage, missedNextStep } from '@/lib/missed';
 import {
   cancelVideoInterview,
   fetchVideoConflicts,
@@ -119,14 +120,26 @@ export function ScheduleVideoCard({ applicationId, candidateName }: { applicatio
           <p className="text-text-primary">
             <span className="font-semibold">{describe(current.scheduled_at)}</span>
           </p>
-          <p className="text-text-secondary">The meeting room is on TalentStream. It opens for both of you 10 minutes before the start.</p>
+          {current.state === 'missed' ? (
+            <div className="rounded-lg border border-danger/30 bg-danger/10 p-3" role="status">
+              <p className="font-semibold text-danger">Interview missed</p>
+              <p className="text-text-primary">{missedMessage('employer', current.absent, candidateName)}</p>
+              <p className="mt-1 text-text-secondary">{missedNextStep('employer')}</p>
+            </div>
+          ) : current.state === 'completed' ? (
+            <p className="text-success">Both of you joined this interview.</p>
+          ) : (
+            <p className="text-text-secondary">The meeting room is on TalentStream. It opens for both of you 10 minutes before the start.</p>
+          )}
           {current.notes && <p className="text-text-secondary">{current.notes}</p>}
           <div className="flex flex-wrap gap-2">
-            <Link to={meetingPath(applicationId)}>
-              <Button size="sm">Open meeting room</Button>
-            </Link>
-            <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
-              Change
+            {current.state === 'upcoming' && (
+              <Link to={meetingPath(applicationId)}>
+                <Button size="sm">Open meeting room</Button>
+              </Link>
+            )}
+            <Button size="sm" variant={current.state === 'missed' ? 'primary' : 'ghost'} onClick={() => setEditing(true)}>
+              {current.state === 'missed' ? 'Set a new time' : 'Change'}
             </Button>
             <Button size="sm" variant="outline" onClick={cancel}>
               Cancel interview

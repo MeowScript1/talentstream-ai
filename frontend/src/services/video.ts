@@ -3,6 +3,9 @@ import api from '@/services/api';
 export interface VideoInterview {
   scheduled_at: string;
   notes: string | null;
+  /** upcoming = still time to join, completed = both came, missed = someone never joined */
+  state: 'upcoming' | 'completed' | 'missed';
+  absent: ('candidate' | 'employer')[];
 }
 
 export interface MeetingDetails {
@@ -14,6 +17,8 @@ export interface MeetingDetails {
   opens_at: string;
   closes_at: string;
   can_join_now: boolean;
+  state: 'upcoming' | 'completed' | 'missed';
+  absent: ('candidate' | 'employer')[];
   ice_servers: RTCIceServer[];
 }
 

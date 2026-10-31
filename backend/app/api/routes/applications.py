@@ -26,6 +26,7 @@ from app.models.user import User
 from app.models.video_interview import VideoInterview
 from app.schemas.application import ApplicationResponse
 from app.schemas.types import text
+from app.services.meetings import attendance_state
 from app.services.resume import read_resume
 from app.services.storage import StorageError, upload_application_resume
 
@@ -131,7 +132,11 @@ async def submit_application(
 def _video_out(video: VideoInterview | None) -> dict | None:
     if video is None:
         return None
-    return {"scheduled_at": video.scheduled_at, "notes": video.notes}
+    return {
+        "scheduled_at": video.scheduled_at,
+        "notes": video.notes,
+        **attendance_state(video.scheduled_at, video.candidate_joined_at, video.employer_joined_at),
+    }
 
 
 class VideoInterviewIn(BaseModel):
@@ -218,6 +223,7 @@ async def schedule_video_interview(
         db.add(video)
     else:
         video.scheduled_at, video.notes = when, body.notes or None
+        video.candidate_joined_at = video.employer_joined_at = None  # a new time is a fresh start, e.g. after a missed interview
     if app.decided_at is None:
         app.decided_at = datetime.now(timezone.utc)  # setting up a meeting is an answer to the candidate
     await db.commit()

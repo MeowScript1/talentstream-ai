@@ -19,4 +19,7 @@ class VideoInterview(Base):
     )
     scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # When each person first entered the room (null = has not joined). A missing one after the grace time means Missed.
+    candidate_joined_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    employer_joined_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

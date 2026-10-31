@@ -13,7 +13,12 @@ export interface Application {
   ats_summary?: string | null;
   status: 'applied' | 'screening' | 'interviewing' | 'shortlisted' | 'rejected';
   created_at: string;
-  video_interview?: { scheduled_at: string; notes: string | null } | null;
+  video_interview?: {
+    scheduled_at: string;
+    notes: string | null;
+    state: 'upcoming' | 'completed' | 'missed';
+    absent: ('candidate' | 'employer')[];
+  } | null;
 }
 
 interface ApplicationState {

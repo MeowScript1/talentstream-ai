@@ -6,6 +6,8 @@ from app.core.config import settings
 
 JOIN_EARLY = timedelta(minutes=10)
 JOIN_LATE = timedelta(hours=3)
+# Anyone who has still not joined this long after the start has missed the interview
+NO_SHOW_AFTER = timedelta(minutes=15)
 
 
 def join_window(scheduled_at: datetime) -> tuple[datetime, datetime]:
@@ -13,9 +15,24 @@ def join_window(scheduled_at: datetime) -> tuple[datetime, datetime]:
     return scheduled_at - JOIN_EARLY, scheduled_at + JOIN_LATE
 
 
-def can_join(scheduled_at: datetime, now: datetime | None = None) -> bool:
+def attendance_state(
+    scheduled_at: datetime,
+    candidate_joined_at: datetime | None,
+    employer_joined_at: datetime | None,
+    now: datetime | None = None,
+) -> dict:
+    """upcoming (still time to join), completed (both came), or missed (someone never joined) and who was absent."""
+    now = now or datetime.now(timezone.utc)
+    if now < scheduled_at + NO_SHOW_AFTER:
+        return {"state": "upcoming", "absent": []}
+    absent = [who for who, joined in (("candidate", candidate_joined_at), ("employer", employer_joined_at)) if joined is None]
+    return {"state": "missed", "absent": absent} if absent else {"state": "completed", "absent": []}
+
+
+def can_join(scheduled_at: datetime, now: datetime | None = None, state: str = "upcoming") -> bool:
+    """The room is open in its time window, unless the interview was already missed."""
     opens, closes = join_window(scheduled_at)
-    return opens <= (now or datetime.now(timezone.utc)) <= closes
+    return state != "missed" and opens <= (now or datetime.now(timezone.utc)) <= closes
 
 
 def ice_servers() -> list[dict]:

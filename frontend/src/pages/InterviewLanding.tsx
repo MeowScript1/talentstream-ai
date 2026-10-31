@@ -5,6 +5,7 @@ import { useApplicationStore } from '@/store/applicationStore';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { downloadVideoInterviewCalendar } from '@/lib/calendar';
+import { missedMessage, missedNextStep } from '@/lib/missed';
 import { meetingPath } from '@/services/video';
 
 const TIPS = [
@@ -20,7 +21,7 @@ const FACTS = [
   { icon: Clock, text: 'One attempt. When the interview ends it cannot be repeated, so start when you can focus.' },
 ];
 
-const MEETING_WINDOW_MS = 2 * 60 * 60 * 1000; // a meeting stays listed for two hours after it starts
+const MISSED_VISIBLE_MS = 3 * 24 * 60 * 60 * 1000; // a missed interview stays listed for three days
 
 function describeTime(iso: string): string {
   return new Date(iso).toLocaleString(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' });
@@ -53,7 +54,12 @@ export default function InterviewLanding() {
   const videoInterviews = useMemo(
     () =>
       myApplications
-        .filter((a) => a.video_interview && new Date(a.video_interview.scheduled_at).getTime() + MEETING_WINDOW_MS > Date.now())
+        .filter((a) => {
+          const v = a.video_interview;
+          if (!v || v.state === 'completed') return false;
+          // a missed one stays visible for three days so the person can see what happened
+          return v.state === 'missed' ? new Date(v.scheduled_at).getTime() + MISSED_VISIBLE_MS > Date.now() : true;
+        })
         .sort((a, b) => new Date(a.video_interview!.scheduled_at).getTime() - new Date(b.video_interview!.scheduled_at).getTime()),
     [myApplications]
   );
@@ -73,6 +79,19 @@ export default function InterviewLanding() {
           </h2>
           {videoInterviews.map((app) => {
             const v = app.video_interview!;
+            if (v.state === 'missed') {
+              return (
+                <article key={app.id} className="space-y-2 rounded-xl border border-danger/40 bg-bg-surface p-4 shadow-sm">
+                  <div>
+                    <p className="text-sm text-text-secondary">{app.employer_name || 'Company'}</p>
+                    <h3 className="text-base font-semibold leading-snug text-text-primary">{app.job_title}</h3>
+                  </div>
+                  <p className="font-semibold text-danger">Interview missed</p>
+                  <p className="text-sm text-text-primary">{missedMessage('candidate', v.absent, app.employer_name || 'The employer')}</p>
+                  <p className="text-sm text-text-secondary">{missedNextStep('candidate')}</p>
+                </article>
+              );
+            }
             const opensAt = new Date(new Date(v.scheduled_at).getTime() - 10 * 60 * 1000);
             const open = Date.now() >= opensAt.getTime();
             return (
