@@ -163,3 +163,44 @@ def test_no_key_means_unscored_not_a_made_up_fifty(monkeypatch):
 
 def test_the_model_name_comes_from_settings():
     assert ats.settings.GEMINI_MODEL and "2.5" not in ats.settings.GEMINI_MODEL
+
+
+# ---- one company login, several candidates at once --------------------------
+
+def test_one_employer_login_can_run_separate_interviews_at_the_same_time(server):
+    employer = register("employer", company_name=f"Busy{uuid.uuid4().hex[:6]} Co")
+    job = post_job(employer.headers, "Role")
+    pairs = []
+    for _ in range(2):
+        candidate = register("candidate")
+        app_id = requests.post(
+            f"{API}/applications", headers=candidate.headers, data={"job_id": job["id"]}, files={"resume": ("cv.pdf", make_pdf(), "application/pdf")}
+        ).json()["id"]
+        assert requests.put(f"{API}/applications/{app_id}/video-interview", headers=employer.headers, json={"scheduled_at": _in(5)}).status_code == 200
+        pairs.append((candidate, app_id))
+
+    async def run():
+        (c1, a1), (c2, a2) = pairs
+        async with (
+            websockets.connect(f"{WS}/{a1}?token={_token(employer)}") as host1,
+            websockets.connect(f"{WS}/{a2}?token={_token(employer)}") as host2,  # the same login, a second room
+        ):
+            assert json.loads(await host1.recv())["type"] == "waiting"
+            assert json.loads(await host2.recv())["type"] == "waiting"  # joining room 2 did not kick the employer out of room 1
+            async with (
+                websockets.connect(f"{WS}/{a1}?token={_token(c1)}") as guest1,
+                websockets.connect(f"{WS}/{a2}?token={_token(c2)}") as guest2,
+            ):
+                assert json.loads(await guest1.recv())["type"] == "peer-present"
+                assert json.loads(await guest2.recv())["type"] == "peer-present"
+                assert json.loads(await host1.recv())["type"] == "peer-joined"
+                assert json.loads(await host2.recv())["type"] == "peer-joined"
+                await host1.send(json.dumps({"type": "offer", "data": {"sdp": "for-candidate-1"}}))
+                await host2.send(json.dumps({"type": "offer", "data": {"sdp": "for-candidate-2"}}))
+                assert json.loads(await guest1.recv())["data"]["sdp"] == "for-candidate-1"  # each message reaches only its own candidate
+                assert json.loads(await guest2.recv())["data"]["sdp"] == "for-candidate-2"
+
+    try:
+        asyncio.run(run())
+    finally:
+        requests.delete(f"{API}/jobs/{job['id']}/close", headers=employer.headers)
