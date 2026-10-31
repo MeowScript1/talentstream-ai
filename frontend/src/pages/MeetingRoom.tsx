@@ -13,6 +13,17 @@ function when(iso: string): string {
   return new Date(iso).toLocaleString(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' });
 }
 
+/** Why the browser would not give us the camera or microphone, in words a person can act on. */
+function mediaProblem(err: unknown): string {
+  if (!navigator.mediaDevices?.getUserMedia) return 'This browser cannot use the camera here. Open TalentStream in Chrome or Safari.';
+  const name = err instanceof DOMException ? err.name : '';
+  if (name === 'NotAllowedError' || name === 'SecurityError')
+    return 'Camera and microphone are blocked. Tap the lock icon next to the address, choose Permissions, allow Camera and Microphone, then try again.';
+  if (name === 'NotFoundError' || name === 'OverconstrainedError') return 'No camera or microphone was found on this device.';
+  if (name === 'NotReadableError') return 'Another app is using your camera or microphone. Close it, then try again.';
+  return 'The camera or microphone could not be started.';
+}
+
 /** A one-to-one video call that runs inside TalentStream. The server only passes setup messages; the video goes directly between the two browsers. */
 export default function MeetingRoom() {
   const { applicationId } = useParams();
@@ -166,14 +177,15 @@ export default function MeetingRoom() {
 
     // Camera and microphone if allowed, then microphone only, then neither (the person can still watch and listen)
     let stream: MediaStream | null = null;
+    setMediaNote('');
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { facingMode: 'user' } });
-    } catch {
+    } catch (cameraError) {
       try {
         stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        setMediaNote('Your camera is off or not allowed, so you are joining with audio only.');
-      } catch {
-        setMediaNote('Your camera and microphone are not available. You can still see and hear the other person, but they cannot see or hear you.');
+        setMediaNote(`${mediaProblem(cameraError)} You joined with audio only.`);
+      } catch (micError) {
+        setMediaNote(`${mediaProblem(micError)} You can still see and hear the other person, but they cannot see or hear you.`);
       }
     }
     streamRef.current = stream;
@@ -302,7 +314,23 @@ export default function MeetingRoom() {
         />
       </div>
 
-      {mediaNote && <p className="rounded-lg border border-border-subtle bg-bg-elevated p-3 text-sm text-text-secondary">{mediaNote}</p>}
+      {mediaNote && (
+        <div className="space-y-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-text-primary" role="alert">
+          <p>{mediaNote}</p>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              teardown();
+              setJoined(false);
+              setConnected(false);
+              setStatus('');
+            }}
+          >
+            Fix it, then join again
+          </Button>
+        </div>
+      )}
       {connected && status && <p className="text-sm text-text-secondary">{status}</p>}
 
       <div className="flex items-center justify-center gap-3">
