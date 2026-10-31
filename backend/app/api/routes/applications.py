@@ -26,7 +26,6 @@ from app.models.user import User
 from app.models.video_interview import VideoInterview
 from app.schemas.application import ApplicationResponse
 from app.schemas.types import text
-from app.services.meeting_links import validate_meeting_url
 from app.services.resume import read_resume
 from app.services.storage import StorageError, upload_application_resume
 
@@ -49,10 +48,14 @@ async def run_ats_scoring(application_id: uuid.UUID):
             requirements=app.job.requirements
         )
         
-        app.ats_score = ats_result['score']
         app.ats_summary = ats_result['summary']
         app.status = 'screening'
-        
+        if ats_result.get('failed'):
+            app.ats_score = None  # unscored, not zero: a failure must not look like a bad candidate
+            await db.commit()
+            return
+
+        app.ats_score = ats_result['score']
         if app.ats_score >= app.job.ats_threshold:
             app.status = 'interviewing'
             
@@ -128,12 +131,11 @@ async def submit_application(
 def _video_out(video: VideoInterview | None) -> dict | None:
     if video is None:
         return None
-    return {"scheduled_at": video.scheduled_at, "meeting_url": video.meeting_url, "notes": video.notes}
+    return {"scheduled_at": video.scheduled_at, "notes": video.notes}
 
 
 class VideoInterviewIn(BaseModel):
     scheduled_at: datetime
-    meeting_url: text(500, min_length=1)
     notes: text(500) | None = None
 
 
@@ -167,24 +169,20 @@ async def schedule_video_interview(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("employer")),
 ):
-    """Set (or change) the time and meeting link of a live video interview."""
+    """Set (or change) the time of a live video interview. The room is inside TalentStream, so there is no link to paste."""
     app = await _owned_application(app_id, db, current_user)
     if app.status == "rejected":
         raise HTTPException(status_code=400, detail="This application was rejected, so a video interview can't be scheduled")
     when = body.scheduled_at if body.scheduled_at.tzinfo else body.scheduled_at.replace(tzinfo=timezone.utc)
     if when <= datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Pick a time in the future")
-    try:
-        url = validate_meeting_url(body.meeting_url)
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e)) from None
 
     video = (await db.execute(select(VideoInterview).where(VideoInterview.application_id == app.id))).scalar_one_or_none()
     if video is None:
-        video = VideoInterview(application_id=app.id, scheduled_at=when, meeting_url=url, notes=body.notes or None)
+        video = VideoInterview(application_id=app.id, scheduled_at=when, notes=body.notes or None)
         db.add(video)
     else:
-        video.scheduled_at, video.meeting_url, video.notes = when, url, body.notes or None
+        video.scheduled_at, video.notes = when, body.notes or None
     if app.decided_at is None:
         app.decided_at = datetime.now(timezone.utc)  # setting up a meeting is an answer to the candidate
     await db.commit()

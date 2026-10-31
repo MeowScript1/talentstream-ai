@@ -68,7 +68,7 @@ export function downloadVideoInterviewCalendar(args: { id: string; title: string
     `DTEND:${utcStamp(end)}`,
     `SUMMARY:${esc(`Video interview: ${args.title} at ${args.company}`)}`,
     `LOCATION:${esc(args.url)}`,
-    `DESCRIPTION:${esc(`Join: ${args.url}${args.notes ? `\n${args.notes}` : ''}`)}`,
+    `DESCRIPTION:${esc(`Join in TalentStream: ${args.url}${args.notes ? `\n${args.notes}` : ''}`)}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ];

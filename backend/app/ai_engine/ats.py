@@ -6,8 +6,6 @@ from google.genai import types
 from app.ai_engine.client import get_client
 from app.core.config import settings
 
-MODEL_ID = 'gemini-2.5-flash-lite'
-
 # A real resume is a few thousand characters. Anything beyond this is padding or an attack,
 # and it would be billed by the model on every score and re-score.
 MAX_RESUME_CHARS = 20_000
@@ -41,25 +39,25 @@ def parse_ats_json(text: str) -> dict:
         }
     except Exception as e:
         print(f"Failed to parse ATS response: {e}")
-        return {
-            "score": 0,
-            "skills_matched": [],
-            "skills_missing": [],
-            "summary": "Parsing error from AI response.",
-            "candidate_feedback": "We encountered an issue scoring your resume."
-        }
+        return _unavailable([])
+
+def _unavailable(requirements: list[str]) -> dict:
+    """The AI could not score this resume. No score is made up and no technical error text is shown."""
+    return {
+        "failed": True,
+        "score": None,
+        "skills_matched": [],
+        "skills_missing": requirements,
+        "summary": "Automatic scoring is not available right now. Use Re-score to try again later.",
+        "candidate_feedback": "Your resume could not be scored just now. The employer can still read it.",
+    }
+
 
 async def score_resume(resume_text: str, job_title: str, job_description: str, requirements: list[str]) -> dict:
     api_key = settings.GOOGLE_API_KEY
     if not api_key or api_key.startswith("your_") or len(api_key) < 10:
-        # Fallback if no valid API key is provided
-        return {
-            "score": 50,
-            "skills_matched": [],
-            "skills_missing": requirements,
-            "summary": "AI scoring disabled (No valid API Key configured). Add your GOOGLE_API_KEY to backend/.env",
-            "candidate_feedback": "AI scoring is not configured yet. Please ask the admin to add a Google Gemini API key."
-        }
+        # No valid API key: say so instead of inventing a score
+        return _unavailable(requirements)
     
     from app.ai_engine.prompts import ATS_SYSTEM_PROMPT, ATS_USER_PROMPT_TEMPLATE
         
@@ -72,7 +70,7 @@ async def score_resume(resume_text: str, job_title: str, job_description: str, r
     
     try:
         response = await get_client().aio.models.generate_content(
-            model=MODEL_ID,
+            model=settings.GEMINI_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=ATS_SYSTEM_PROMPT,
@@ -82,10 +80,4 @@ async def score_resume(resume_text: str, job_title: str, job_description: str, r
         return parse_ats_json(response.text)
     except Exception as e:
         print(f"ATS generation failed: {e}")
-        return {
-            "score": 0,
-            "skills_matched": [],
-            "skills_missing": requirements,
-            "summary": f"AI service error: {str(e)}",
-            "candidate_feedback": "We encountered an issue scoring your resume."
-        }
+        return _unavailable(requirements)

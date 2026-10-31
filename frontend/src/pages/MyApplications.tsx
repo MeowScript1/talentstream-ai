@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import { useApplicationStore, Application } from '@/store/applicationStore';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { providerName } from '@/services/video';
+import { meetingPath } from '@/services/video';
 
 type StatusFilter = 'all' | 'applied' | 'screening' | 'interviewing' | 'shortlisted' | 'rejected';
 
@@ -79,14 +79,9 @@ function ApplicationCard({ app }: { app: Application }) {
           <p className="font-semibold text-text-primary">
             Video interview: {new Date(app.video_interview.scheduled_at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
           </p>
-          <a
-            href={app.video_interview.meeting_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-0.5 inline-block py-1 font-semibold text-accent-primary hover:underline"
-          >
-            Join {providerName(app.video_interview.meeting_url)}
-          </a>
+          <Link to={meetingPath(app.id)} className="mt-0.5 inline-block py-1 font-semibold text-accent-primary hover:underline">
+            Open meeting page
+          </Link>
         </div>
       )}
 

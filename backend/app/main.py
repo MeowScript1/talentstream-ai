@@ -136,11 +136,12 @@ from app.api.routes import (  # noqa: E402
     feed,
     interviews,
     jobs,
+    meetings,
     practice,
     users,
 )
 from app.api.routes.health import router as health_router  # noqa: E402
-from app.api.websockets import interview  # noqa: E402
+from app.api.websockets import interview, meeting  # noqa: E402
 
 # Health endpoints at root (no /api/v1 prefix — Render probe hits /health)
 app.include_router(health_router)
@@ -150,7 +151,9 @@ app.include_router(jobs.router, prefix="/api/v1")
 app.include_router(applications.router, prefix="/api/v1")
 app.include_router(interviews.router, prefix="/api/v1")
 app.include_router(interview.router, prefix="/api/v1")
+app.include_router(meeting.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(feed.router, prefix="/api/v1")
 app.include_router(alerts.router, prefix="/api/v1")
 app.include_router(practice.router, prefix="/api/v1")
+app.include_router(meetings.router, prefix="/api/v1")

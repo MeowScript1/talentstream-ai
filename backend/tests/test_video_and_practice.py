@@ -9,11 +9,8 @@ import requests
 
 from app.ai_engine import practice
 from app.models.application import Application
-from app.services.meeting_links import validate_meeting_url
 from tests.helpers import API, make_pdf, post_job, register
 from tests.test_jobfeed import _run_db
-
-MEET = "https://meet.google.com/abc-defg-hij"
 
 
 def _in(hours):
@@ -34,27 +31,10 @@ def applied(server):
     requests.delete(f"{API}/jobs/{job['id']}/close", headers=employer.headers)
 
 
-# ---- meeting links ----------------------------------------------------------
-
-@pytest.mark.parametrize("url", [MEET, "https://us02web.zoom.us/j/123456", "https://teams.microsoft.com/l/meetup-join/x", "https://whereby.com/room"])
-def test_known_meeting_providers_are_accepted(url):
-    assert validate_meeting_url(f"  {url} ") == url
-
-
-@pytest.mark.parametrize(
-    "url",
-    ["http://meet.google.com/abc", "https://evil.example.com/meet.google.com", "https://meet.google.com.evil.io/x",
-     "https://user:pw@meet.google.com/x", "meet.google.com/abc", "javascript:alert(1)", "https://zoom.us.attacker.com/j/1"],
-)
-def test_other_links_are_refused(url):
-    with pytest.raises(ValueError):
-        validate_meeting_url(url)
-
-
 # ---- scheduling -------------------------------------------------------------
 
 def _put(headers, app_id, **body):
-    payload = {"scheduled_at": _in(26), "meeting_url": MEET, **body}
+    payload = {"scheduled_at": _in(26), **body}
     return requests.put(f"{API}/applications/{app_id}/video-interview", headers=headers, json=payload)
 
 
@@ -62,26 +42,25 @@ def test_employer_schedules_and_candidate_sees_it(applied):
     employer, candidate, app_id = applied
     r = _put(employer.headers, app_id, notes="Bring your portfolio")
     assert r.status_code == 200, r.text
-    assert r.json()["meeting_url"] == MEET and r.json()["notes"] == "Bring your portfolio"
+    assert r.json()["notes"] == "Bring your portfolio" and "meeting_url" not in r.json()
 
     mine = requests.get(f"{API}/applications/mine", headers=candidate.headers).json()
     video = next(a for a in mine if a["id"] == app_id)["video_interview"]
-    assert video["meeting_url"] == MEET
-    assert requests.get(f"{API}/applications/{app_id}/video-interview", headers=employer.headers).json()["meeting_url"] == MEET
+    assert video["notes"] == "Bring your portfolio"
+    assert requests.get(f"{API}/applications/{app_id}/video-interview", headers=employer.headers).json()["notes"] == "Bring your portfolio"
 
 
 def test_changing_the_time_replaces_it(applied):
     employer, candidate, app_id = applied
-    _put(employer.headers, app_id)
-    again = _put(employer.headers, app_id, meeting_url="https://zoom.us/j/999")
-    assert again.status_code == 200 and again.json()["meeting_url"] == "https://zoom.us/j/999"
+    first = _put(employer.headers, app_id, scheduled_at=_in(30))
+    again = _put(employer.headers, app_id, scheduled_at=_in(50), notes="Moved")
+    assert again.status_code == 200 and again.json()["scheduled_at"] != first.json()["scheduled_at"]
     mine = requests.get(f"{API}/applications/mine", headers=candidate.headers).json()
-    assert next(a for a in mine if a["id"] == app_id)["video_interview"]["meeting_url"] == "https://zoom.us/j/999"
+    assert next(a for a in mine if a["id"] == app_id)["video_interview"]["notes"] == "Moved"
 
 
 def test_scheduling_is_checked(applied):
     employer, candidate, app_id = applied
-    assert _put(employer.headers, app_id, meeting_url="https://evil.example.com/x").status_code == 422
     assert _put(employer.headers, app_id, scheduled_at=_in(-2)).status_code == 400
     assert _put(candidate.headers, app_id).status_code == 403  # candidates can't schedule
     assert _put(register("employer").headers, app_id).status_code == 403  # nor can another employer

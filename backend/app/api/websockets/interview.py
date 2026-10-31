@@ -10,14 +10,13 @@ from sqlalchemy.orm import selectinload
 
 from app.ai_engine.client import get_client
 from app.ai_engine.interview_eval import evaluate_interview
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_user_from_token
 from app.models.application import Application
 from app.models.interview import Interview
 
 router = APIRouter(prefix="/ws", tags=["websockets"])
-
-MODEL_ID = 'gemini-2.5-flash-lite'
 
 SYSTEM_PROMPT = """
 You are an expert AI recruiter conducting a technical interview for the position of {job_title}.
@@ -82,7 +81,7 @@ async def websocket_endpoint(websocket: WebSocket, application_id: uuid.UUID, to
     try:
         # Create an async chat session with the new SDK
         chat = get_client().aio.chats.create(
-            model=MODEL_ID,
+            model=settings.GEMINI_MODEL,
             config=types.GenerateContentConfig(
                 system_instruction=sys_prompt,
             )

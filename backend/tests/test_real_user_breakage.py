@@ -241,8 +241,8 @@ def test_giant_resume_is_truncated_before_it_reaches_the_ai(captured_prompt):
     [
         ('{"score": 1000000}', 100),
         ('{"score": -50}', 0),
-        ('{"score": "ninety"}', 0),
-        ("I cannot help with that.", 0),
+        ('{"score": "ninety"}', None),  # unusable replies leave the resume unscored instead of scoring it 0
+        ("I cannot help with that.", None),
         ('```json\n{"score": 88}\n```', 88),
     ],
 )

@@ -152,7 +152,7 @@ export default function ApplicantDetail() {
                 <span className="text-sm text-text-secondary">ATS Match Score</span>
                 <div className="flex items-center gap-2">
                   <Badge variant={applicant.ats_score && applicant.ats_score > 75 ? 'shortlisted' : 'screening'}>
-                    {applicant.ats_score != null ? `${applicant.ats_score}/100` : 'Processing...'}
+                    {applicant.ats_score != null ? `${applicant.ats_score}/100` : applicant.ats_summary ? 'Not scored' : 'Processing...'}
                   </Badge>
                   <button
                     onClick={handleRescore}

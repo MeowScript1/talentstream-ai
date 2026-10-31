@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 import { WebSocketService, buildWsUrl } from '@/services/websocket';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Send, Mic, Video, VideoOff, MicOff, Bot, User } from 'lucide-react';
+import { Send, Bot, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -22,8 +22,6 @@ export default function InterviewRoom() {
   const [input, setInput] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [micEnabled, setMicEnabled] = useState(true);
-  const [cameraEnabled, setCameraEnabled] = useState(true);
   
   const wsRef = useRef<WebSocketService | null>(null);
   // Mirrors isCompleted for the socket callbacks without making it an effect dependency:
@@ -87,38 +85,15 @@ export default function InterviewRoom() {
 
   return (
     <div className="flex h-[calc(100dvh-4rem)] bg-bg-base overflow-hidden">
-      {/* Video Feed Area (Mock for now, but UI is there) */}
-      <div className="hidden lg:flex w-1/3 flex-col border-r border-border-subtle bg-bg-surface p-4">
-        <div className="flex-1 rounded-lg bg-bg-base border border-border-subtle overflow-hidden relative group">
-          <div className="absolute inset-0 flex items-center justify-center">
-            {cameraEnabled ? (
-              <div className="text-text-muted text-center">
-                <User className="h-16 w-16 mx-auto mb-2 opacity-50" />
-                <p>Camera Active</p>
-              </div>
-            ) : (
-              <div className="text-text-muted text-center">
-                <VideoOff className="h-16 w-16 mx-auto mb-2 opacity-50" />
-                <p>Camera Disabled</p>
-              </div>
-            )}
-          </div>
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
-            <Button size="icon" variant={micEnabled ? 'secondary' : 'danger'} className="rounded-md shadow-lg" onClick={() => setMicEnabled(!micEnabled)}>
-              {micEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
-            </Button>
-            <Button size="icon" variant={cameraEnabled ? 'secondary' : 'danger'} className="rounded-md shadow-lg" onClick={() => setCameraEnabled(!cameraEnabled)}>
-              {cameraEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
-            </Button>
-          </div>
-        </div>
-        
-        <div className="mt-4 p-4 rounded-lg border border-border-subtle bg-bg-elevated text-sm text-text-secondary">
-          <h3 className="font-medium text-text-primary mb-1">Interview Tips</h3>
-          <ul className="list-disc pl-4 space-y-1">
-            <li>Speak clearly and directly to the camera</li>
-            <li>Take your time to formulate answers</li>
-            <li>You can type or speak your responses</li>
+      {/* How this interview works (it is a text chat: no camera or microphone is used) */}
+      <div className="hidden lg:flex w-1/3 flex-col gap-3 border-r border-border-subtle bg-bg-surface p-4">
+        <div className="rounded-lg border border-border-subtle bg-bg-elevated p-4 text-sm text-text-secondary">
+          <h3 className="mb-2 font-semibold text-text-primary">This interview is a text chat</h3>
+          <ul className="list-disc space-y-1 pl-4">
+            <li>No camera or microphone is used.</li>
+            <li>Up to 5 questions, one at a time.</li>
+            <li>Answer in full sentences. Be specific and give real examples.</li>
+            <li>It cannot be repeated once it ends, so take your time.</li>
           </ul>
         </div>
       </div>

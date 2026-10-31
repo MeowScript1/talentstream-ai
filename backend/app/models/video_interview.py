@@ -18,6 +18,5 @@ class VideoInterview(Base):
         UUID(as_uuid=True), ForeignKey("applications.id", ondelete="CASCADE"), unique=True, index=True
     )
     scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    meeting_url: Mapped[str] = mapped_column(Text, nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

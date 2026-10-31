@@ -14,7 +14,6 @@ from google.genai import types
 from app.ai_engine.client import get_client
 from app.core.config import settings
 
-MODEL_ID = 'gemini-2.5-flash-lite'
 TIMEOUT_SECONDS = 25
 DAILY_LIMIT = 30  # AI calls per person per day, so practice can't run up the bill
 
@@ -127,7 +126,7 @@ async def _ask(system: str, prompt: str) -> str:
     try:
         response = await asyncio.wait_for(
             get_client().aio.models.generate_content(
-                model=MODEL_ID, contents=prompt, config=types.GenerateContentConfig(system_instruction=system, temperature=0.4)
+                model=settings.GEMINI_MODEL, contents=prompt, config=types.GenerateContentConfig(system_instruction=system, temperature=0.4)
             ),
             timeout=TIMEOUT_SECONDS,
         )

@@ -1,11 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, CalendarPlus, CheckCircle2, Clock, ExternalLink, Lightbulb, MessageSquare, Sparkles, Video } from 'lucide-react';
+import { ArrowRight, CalendarPlus, CheckCircle2, Clock, Lightbulb, MessageSquare, Sparkles, Video } from 'lucide-react';
 import { useApplicationStore } from '@/store/applicationStore';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { downloadVideoInterviewCalendar } from '@/lib/calendar';
-import { providerName } from '@/services/video';
+import { meetingPath } from '@/services/video';
 
 const TIPS = [
   'Answer in full sentences. The AI scores what you write: relevance, specifics and clarity.',
@@ -73,7 +73,8 @@ export default function InterviewLanding() {
           </h2>
           {videoInterviews.map((app) => {
             const v = app.video_interview!;
-            const provider = providerName(v.meeting_url);
+            const opensAt = new Date(new Date(v.scheduled_at).getTime() - 10 * 60 * 1000);
+            const open = Date.now() >= opensAt.getTime();
             return (
               <article key={app.id} className="space-y-3 rounded-xl border border-success/40 bg-bg-surface p-4 shadow-sm">
                 <div>
@@ -83,15 +84,20 @@ export default function InterviewLanding() {
                 <div className="rounded-lg bg-bg-elevated px-3 py-2 text-sm">
                   <p className="font-semibold text-text-primary">{describeTime(v.scheduled_at)}</p>
                   <p className="text-success">{startsIn(v.scheduled_at)}</p>
+                  {!open && (
+                    <p className="text-text-secondary">
+                      The room opens at {opensAt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}, 10 minutes before.
+                    </p>
+                  )}
                   {v.notes && <p className="mt-1 text-text-secondary">{v.notes}</p>}
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row">
-                  <a href={v.meeting_url} target="_blank" rel="noopener noreferrer" className="flex-1">
+                  <Link to={meetingPath(app.id)} className="flex-1">
                     <Button className="w-full">
-                      Join {provider}
-                      <ExternalLink className="ml-1.5 h-4 w-4" />
+                      <Video className="mr-1.5 h-4 w-4" />
+                      {open ? 'Join video interview' : 'Open meeting page'}
                     </Button>
-                  </a>
+                  </Link>
                   <Button
                     variant="ghost"
                     className="flex-1"
@@ -101,7 +107,7 @@ export default function InterviewLanding() {
                         title: app.job_title,
                         company: app.employer_name || 'Company',
                         start: v.scheduled_at,
-                        url: v.meeting_url,
+                        url: `${window.location.origin}${meetingPath(app.id)}`,
                         notes: v.notes,
                       })
                     }

@@ -7,7 +7,6 @@ from google.genai import types
 from app.ai_engine.client import get_client
 from app.core.config import settings
 
-MODEL_ID = 'gemini-2.5-flash-lite'
 MAX_TRANSCRIPT_CHARS = 20_000
 EVAL_TIMEOUT_SECONDS = 25
 
@@ -60,7 +59,7 @@ async def evaluate_interview(job_title: str, transcript: list[dict]) -> tuple[in
     try:
         response = await asyncio.wait_for(
             get_client().aio.models.generate_content(
-                model=MODEL_ID,
+                model=settings.GEMINI_MODEL,
                 contents=prompt,
                 config=types.GenerateContentConfig(system_instruction=EVAL_SYSTEM_PROMPT, temperature=0.1),
             ),

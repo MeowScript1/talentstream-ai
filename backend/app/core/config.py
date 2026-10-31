@@ -51,6 +51,8 @@ class Settings(BaseSettings):
 
     # ── Google / Gemini ─────────────────────────────────────────────────────
     GOOGLE_API_KEY: str = ""
+    # Google retires model names over time; change this setting (no code change) if a model stops working
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
 
     # ── Supabase ────────────────────────────────────────────────────────────
     SUPABASE_URL: str = ""
@@ -66,6 +68,11 @@ class Settings(BaseSettings):
     ADZUNA_COUNTRY: str = "in"
     JOOBLE_API_KEY: str = ""                        # https://jooble.org/api/about (free)
     JOOBLE_COUNTRY_LOCATION: str = "India"
+    # Video meetings: the call goes directly between the two browsers. A TURN relay is optional and helps on
+    # networks that block direct calls (some mobile data). Comma-separated turn:/turns: URLs.
+    TURN_URLS: str = ""
+    TURN_USERNAME: str = ""
+    TURN_CREDENTIAL: str = ""
     FEED_TIMEZONE: str = "Asia/Kolkata"             # decides what "the next 7 days" means for walk-ins
     FEED_REFRESH_HOURS: int = 6                     # per source; Remotive asks for at most ~4 calls a day
     FEED_MAX_REPORTS: int = 3                       # reports that hide a job

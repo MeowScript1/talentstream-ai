@@ -106,7 +106,7 @@ export default function Applicants() {
 
   const renderScore = (score: number | null | undefined) => {
     if (score == null)
-      return <span className="text-xs text-text-muted italic">Processing...</span>;
+      return <span className="text-xs text-text-muted italic">Not scored yet</span>;
     const color =
       score >= 80
         ? 'text-success bg-success/10 border-success/20'

@@ -22,6 +22,7 @@ import InterviewLanding from '@/pages/InterviewLanding';
 import Profile from '@/pages/Profile';
 import CompanyCheck from '@/pages/CompanyCheck';
 import InterviewPractice from '@/pages/InterviewPractice';
+import MeetingRoom from '@/pages/MeetingRoom';
 import { Spinner } from '@/components/ui/Spinner';
 
 /** Shown while the server wakes up after being idle; says so instead of spinning silently. */
@@ -98,6 +99,7 @@ function App() {
           <Route path="/applications" element={<MyApplications />} />
           <Route path="/interview" element={<InterviewLanding />} />
           <Route path="/interview/practice" element={<InterviewPractice />} />
+          <Route path="/meeting/:applicationId" element={<MeetingRoom />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/companies" element={<CompanyCheck />} />
 
